@@ -1,0 +1,54 @@
+@startuml
+package GeometryLibrary <<Folder>>
+{
+
+
+Class Fractures {
+  + IdFractures: vector<unsigned int>
+  + CoordinatesVertice: vector<MatrixXd>
+  + lenghtMaxEdges: vector<double>
+  + baricentro: vector<double>
+  + versoreNormalePiano: vector<array<double, 3>>
+  + numVertices: vector<unsigned int>
+  + TraceIdsxFracture: map<unsigned int, list<unsigned int>>
+  + Fractures()
+  + Fractures(IdFractures, CoordinatesVertice)
+  + vector<double> lenghtMax(CoordinatesVertice)
+  + vector<double> baricentro(CoordinatesVertice)
+.. Non member fuction ..  
+  + void importFractures(path, fractures)
+.. TEST on FRACTURES ..
+Test 1
+Test 2
+Test 3 ecc
+}
+Class Traces {
+ + numTraces: unsigned int
+ +  IdTraces: vector<unsigned int>
+ + CoordinatesEstremiTraces: vector<Matrix<double, 3, 2>>
+ + lengthTraces: vector<double>
+ + vectorTips: vector<bool>
+.. Methods ..
+.. TEST on TRACES ..
+Test 1
+Test 2
+Test 3 ecc
+}
+Class Polygons{
++ numPolygon: unsigned int 
++ Polygons(Vertices) 
+.. Methods ..
++ void gedimInterface(vector<vector<unsigned int >> &)   
+void ExportPolygons(…%)
+.. Non member fuction ..  
+.. TEST on POLYGONS ..
+Test 1
+Test 2
+Test 3 ecc
+}
+}
+Note "Gedim is an external library" as nomeNota
+Gedim -- Polygons : gedimInterface
+Traces "many" --o "1" Fractures  : contained within
+Polygons "many" --o "1" Fractures : is made up
+@enduml
