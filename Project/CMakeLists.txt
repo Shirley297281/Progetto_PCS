@@ -58,6 +58,27 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp
                 ${${CMAKE_PROJECT_NAME}_sources}
                 ${${CMAKE_PROJECT_NAME}_headers})
 
+
+#copia automaticamente i tre file nella cartella di Debug ma dalla cartella che ho rinominato come Mesh e non PolygonalMesh
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR3_data.txt
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR10_data.txt
+      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR50_data.txt
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR82_data.txt
+          DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR200_data.txt
+            DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR362_data.txt
+              DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
 target_link_libraries(${PROJECT_NAME} ${DFN_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${DFN_include})
 target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
