@@ -43,6 +43,25 @@ vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices){
     return barycenter_coord;
 }
 
+//funzione sfere
+bool check_sphere(const vector<double> bar1, const vector<double> bar2, const double l1, const double l2)
+{
+    //controlliamo la distanza tra i due baricentri
+    double distance_bar = 0.0;
+    distance_bar = sqrt(pow( bar1[0] - bar2[0],2) +
+                        pow( bar1[1] - bar2[1],2) +
+                        pow( bar1[2] - bar2[2],2));
+
+    double max_distance = 0.0;
+    max_distance = (l1 + l2) / 2.0;
+
+    if (distance_bar > max_distance){
+        return false; // le fratture non si intersecano
+    }
+
+    return true;
+}
+
 namespace GeometryLibrary
 {
 
@@ -70,6 +89,8 @@ bool ImportFR(const string &filename,
 
     getline(converter, token); // Utilizza converter invece di file per ottenere il token dalla stringa
     istringstream(token) >> num_fractures;
+
+    fracture.NumFractures = num_fractures;
 
     fracture.IdFractures.reserve(num_fractures);
     fracture.numVertices.reserve(num_fractures);
@@ -170,6 +191,26 @@ bool ImportFR(const string &filename,
 
 }
 
+
+
+void CalcoloTracce(Fractures& fracture, Traces& trace){
+
+    for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
+        for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
+            // richiamo funzione sfera
+            if ( !check_sphere( fracture.baricentro[i], fracture.baricentro[j], fracture.lenghtMaxEdges[i], fracture.lenghtMaxEdges[j]) )
+            {
+                //non c'è intersezione
+                continue;
+            }
+            else{
+                //lavorare con le tracce
+            }
+
+        }
+    }
+
+
 }
 
-
+}

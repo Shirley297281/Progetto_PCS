@@ -9,12 +9,11 @@ using namespace Eigen;
 
 namespace GeometryLibrary {
 
-bool ImportMesh(Fractures& mesh);
-
 
 bool ImportFR(const string &filename,
                    Fractures& fracture);
 
+void CalcoloTracce(Fractures& fracture, Traces& trace);
 
 }
 
@@ -23,5 +22,8 @@ double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices);
 
 // compute the barycenter of a fracture with "num_vertices" vertices
 vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices);
+
+// control
+bool check_sphere(const double bar1, const double bar2, const double l1, const double l2);
 
 #endif

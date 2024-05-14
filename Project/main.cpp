@@ -14,5 +14,9 @@ int main()
     if( !ImportFR(filename, fracture) )
         return 1;
 
+    // richiamo funzione calcola tracce
+    Traces trace;
+    CalcoloTracce(fracture, trace);
+
     return 0;
 }
