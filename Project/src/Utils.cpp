@@ -7,17 +7,27 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices){
 
-    vector<double> distance_vector(num_vertices, 0.0);
+    vector<double> distance_vector(num_vertices-1, 0.0);
     // itero sulle colonne
     for(unsigned int i = 0; i < num_vertices - 1; ++i){
         distance_vector[i] = sqrt(pow((m(0,i) - m(0,i+1)),2) + pow((m(1,i) - m(1,i+1)),2) + pow((m(2,i) - m(2,i+1)),2));
     }
+
+    distance_vector[num_vertices-1]=sqrt(pow((m(0,num_vertices-1) - m(0,0)),2) +
+                                             pow((m(1,num_vertices-1) - m(1,0)),2) +
+                                             pow((m(2,num_vertices-1) - m(2,0)),2));
+
     auto it_max_distance = max_element(distance_vector.begin(), distance_vector.end());
-    return *it_max_distance;
+    double max_distance = *it_max_distance;
+    it_max_distance = distance_vector.begin(); //per inizializzare correttamente ad ogni richiamo della funzione
+
+    return max_distance;
+
 }
 
 vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices){
@@ -63,6 +73,8 @@ bool ImportFR(const string &filename,
 
     fracture.IdFractures.reserve(num_fractures);
     fracture.numVertices.reserve(num_fractures);
+    fracture.lenghtMaxEdges.reserve(num_fractures);
+    fracture.baricentro.reserve(num_fractures);
 
     //introduco un count per far arrestare la lettura
     int count = 0;
@@ -115,13 +127,24 @@ bool ImportFR(const string &filename,
         }
 
         fracture.CoordinatesVertice.push_back(vertices);
-        count ++;
+
+        double length;
+        length = max_euclidean_distance(vertices, num_vertices);
+        fracture.lenghtMaxEdges.push_back(length);
+
+        vector <double> bary;
+        bary = barycenter(vertices, num_vertices);
+        fracture.baricentro.push_back(bary);
+
+
+
+        count ++;//frattura letta √
 
     }//eof
 
     file.close();
 
-
+    /*
     //controllo di quel che si ha memorizzato
 
     // /!\ FORSE CI CONVIENE CONTROLLARE CON L'OUTPUT QUALCOSA
@@ -134,6 +157,13 @@ bool ImportFR(const string &filename,
         cout << fracture.CoordinatesVertice[i] << endl;
         cout << endl;
     }
+    */
+    // display the vector elements using a for loop
+    for (int i = 0; i < num_fractures; i++) {
+        cout << "fracture[" << i << "] = " <<scientific<<setprecision(6)<< fracture.lenghtMaxEdges[i] << endl;
+        cout << "baricentro: (" << fracture.baricentro[i][0] << ", " << fracture.baricentro[i][1] << ", " << fracture.baricentro[i][2] << ")" << std::endl;
+    }
+
 
 
     return true;
