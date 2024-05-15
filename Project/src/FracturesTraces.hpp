@@ -16,7 +16,7 @@ struct Fractures{
     vector<unsigned int> IdFractures ; //vettore con Id fratture
     vector<MatrixXd> CoordinatesVertice ; // matrice con coordinate dei vertici (ogni colonna individua un vertice)
     vector<double> lenghtMaxEdges = {} ; // vettore di lunghezza massima per ogni frattura
-    vector<vector<double>> baricentro = {}; // vettore baricentro per ogni frattura
+    vector<array<double, 3>> baricentro = {}; // vettore baricentro per ogni frattura
     vector<array<double, 3>> vettoreNormalePiano = {}; // vettore di versori per ogni frattura (i,j,k)
     vector<unsigned int> numVertices = {}; //numero vertici per ogni poligono
     map<unsigned int, list<unsigned int>> TraceIdsPassxFracture = {}; //per ogni frattura elenco tracce passanti assegnate

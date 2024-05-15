@@ -32,10 +32,10 @@ double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
 }
 
 //baricentro
-vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices)
+array <double,3> barycenter(const MatrixXd& m, unsigned int num_vertices)
 {
 
-    vector<double> barycenter_coord(3, 0.0);
+    array<double,3> barycenter_coord ={};
 
     for(unsigned int i = 0; i < 3; ++i){
         for(unsigned int j = 0; j < num_vertices ; ++j){
@@ -47,7 +47,7 @@ vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices)
 }
 
 //funzione sfere
-bool check_sphere(const vector<double> bar1, const vector<double> bar2, const double l1, const double l2)
+bool check_sphere(const array<double,3> bar1, const array<double,3> bar2, const double l1, const double l2)
 {
     //controlliamo la distanza tra i due baricentri
     double distance_bar = 0.0;
@@ -56,7 +56,7 @@ bool check_sphere(const vector<double> bar1, const vector<double> bar2, const do
                         pow( bar1[2] - bar2[2],2));
 
     double max_distance = 0.0;
-    max_distance = (l1 + l2) / 2.0;
+    max_distance = (l1 + l2) * 0.5;
 
     if (distance_bar > max_distance){
         return false; // le fratture non si intersecano
@@ -182,7 +182,7 @@ bool ImportFR(const string &filename,
         length = max_euclidean_distance(vertices, num_vertices);
         fracture.lenghtMaxEdges.push_back(length);
 
-        vector <double> bary;
+        array <double,3> bary;
         bary = barycenter(vertices, num_vertices);
         fracture.baricentro.push_back(bary);
 
@@ -237,10 +237,18 @@ void CalcoloTracce(Fractures& fracture, Traces& trace){
                 escluse++;
                 continue;
             }
-            else{
-                //cout<<"\n\n Forse c'è intersezione tra la frattura  "<<i<< " e la frattura "<<j<<endl;
-                //lavorare con le tracce
-            }
+
+            // t è la tangente che inidividua la direzione della retta di intersezione
+            array <double,3> t = {};
+            t = vec_product(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j]);
+
+            //il nostro P0 è il baricentro (COMPUTATIONAL GEOMETRY 2, PROBLEMA 4)
+            Vector3d Point;
+            Point = system_solution(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j],
+                                    fracture.baricentro[i], fracture.baricentro[j],
+                                    t );
+            //tutto questo ci serve per trovare la retta di intersezione r(x_) = x_*t_ + Point;
+
 
         }
     }
