@@ -9,8 +9,9 @@
 #include <iostream>
 #include <iomanip>
 
-
-double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices){
+//distanza massima
+double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
+{
 
     vector<double> distance_vector(num_vertices-1, 0.0);
     // itero sulle colonne
@@ -30,7 +31,9 @@ double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices){
 
 }
 
-vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices){
+//baricentro
+vector <double> barycenter(const MatrixXd& m, unsigned int num_vertices)
+{
 
     vector<double> barycenter_coord(3, 0.0);
 
@@ -61,6 +64,34 @@ bool check_sphere(const vector<double> bar1, const vector<double> bar2, const do
 
     return true;
 }
+
+//normale al piano
+array<double, 3> normal_vector(const MatrixXd& m)
+{
+
+    array <double, 3> v1 = {}; // vettore1
+    array <double, 3> v2 = {}; // vettore2
+    array <double, 3> v = {};
+
+    v1[0] = m(0,1) - m(0,0);
+    v1[1] = m(1,1) - m(1,0);
+    v1[2] = m(2,1) - m(2,0);
+
+    v2[0] = m(0,1) - m(0,2);
+    v2[1] = m(1,1) - m(1,2);
+    v2[2] = m(2,1) - m(2,2);
+
+    // prodotto vettoriale
+    v[0] = v1[1]*v2[2] - v2[1]*v1[2];
+    v[1] = - v1[0]*v2[2] + v1[2]*v2[0];
+    v[2] = v1[0]*v2[1] - v2[0]*v1[1];
+
+    return v;
+
+}
+
+
+
 
 namespace GeometryLibrary
 {
@@ -157,6 +188,9 @@ bool ImportFR(const string &filename,
         bary = barycenter(vertices, num_vertices);
         fracture.baricentro.push_back(bary);
 
+        array <double, 3> v_normal;
+        v_normal = normal_vector(vertices);
+        fracture.vettoreNormalePiano.push_back(v_normal);
 
 
         count ++;//frattura letta √
@@ -165,7 +199,7 @@ bool ImportFR(const string &filename,
 
     file.close();
 
-    /*
+
     //controllo di quel che si ha memorizzato
 
     // /!\ FORSE CI CONVIENE CONTROLLARE CON L'OUTPUT QUALCOSA
@@ -178,11 +212,12 @@ bool ImportFR(const string &filename,
         cout << fracture.CoordinatesVertice[i] << endl;
         cout << endl;
     }
-    */
+
     // display the vector elements using a for loop
     for (int i = 0; i < num_fractures; i++) {
-        cout << "fracture[" << i << "] = " <<scientific<<setprecision(6)<< fracture.lenghtMaxEdges[i] << endl;
+        cout << "\nmax length of fracture[" << i << "] = " <<scientific<<setprecision(6)<< fracture.lenghtMaxEdges[i] << endl;
         cout << "baricentro: (" << fracture.baricentro[i][0] << ", " << fracture.baricentro[i][1] << ", " << fracture.baricentro[i][2] << ")" << std::endl;
+        cout << "vettore normale: (" << fracture.vettoreNormalePiano[i][0] << ", " << fracture.vettoreNormalePiano[i][1] << ", " << fracture.vettoreNormalePiano[i][2] << ")" << endl;
     }
 
 
@@ -194,23 +229,25 @@ bool ImportFR(const string &filename,
 
 
 void CalcoloTracce(Fractures& fracture, Traces& trace){
+    int escluse = 0;
 
     for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
         for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
             // richiamo funzione sfera
             if ( !check_sphere( fracture.baricentro[i], fracture.baricentro[j], fracture.lenghtMaxEdges[i], fracture.lenghtMaxEdges[j]) )
             {
-                //non c'è intersezione
+                escluse++;
                 continue;
             }
             else{
+                //cout<<"\n\n Forse c'è intersezione tra la frattura  "<<i<< " e la frattura "<<j<<endl;
                 //lavorare con le tracce
             }
 
         }
     }
 
-
+    cout << "\n\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
 }
 
 }
