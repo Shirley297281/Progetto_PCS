@@ -82,9 +82,7 @@ array<double, 3> normal_vector(const MatrixXd& m)
     v2[2] = m(2,1) - m(2,2);
 
     // prodotto vettoriale
-    v[0] = v1[1]*v2[2] - v2[1]*v1[2];
-    v[1] = - v1[0]*v2[2] + v1[2]*v2[0];
-    v[2] = v1[0]*v2[1] - v2[0]*v1[1];
+    v = vec_product(v1, v2);
 
     return v;
 
