@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <vector>
+#include <chrono> //for counting time
 
 //distanza massima
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
@@ -16,7 +18,14 @@ double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
     vector<double> distance_vector(num_vertices-1, 0.0);
     // itero sulle colonne
     for(unsigned int i = 0; i < num_vertices - 1; ++i){
+        distance_vector[i] = sqrt( (m(0,i) - m(0,i+1))*(m(0,i) - m(0,i+1)) +
+                                   (m(1,i) - m(1,i+1))*(m(1,i) - m(1,i+1)) +
+                                   (m(2,i) - m(2,i+1))*(m(2,i) - m(2,i+1)) );
+
+        cout <<"*: "<< distance_vector[i]<<endl;
         distance_vector[i] = sqrt(pow((m(0,i) - m(0,i+1)),2) + pow((m(1,i) - m(1,i+1)),2) + pow((m(2,i) - m(2,i+1)),2));
+        cout <<"^: "<< distance_vector[i]<<endl;
+
     }
 
     distance_vector[num_vertices-1]=sqrt(pow((m(0,num_vertices-1) - m(0,0)),2) +
@@ -89,8 +98,6 @@ array<double, 3> normal_vector(const MatrixXd& m)
 }
 
 
-
-
 namespace GeometryLibrary
 {
 
@@ -102,12 +109,13 @@ bool ImportFR(const string &filename,
     ifstream file;
     file.open(filename);
 
-    if (file.fail()) {
+    if (file.fail())
+    {
         cout << "Errore durante l'apertura del file." << endl;
         return false;
     }
 
-    cout << "File aperto correttamente." << endl;
+    cout << "File "<<filename<<" aperto correttamente." << endl;
 
     string line;
     getline(file,line); //ignora prima riga
@@ -202,8 +210,8 @@ bool ImportFR(const string &filename,
 
     // /!\ FORSE CI CONVIENE CONTROLLARE CON L'OUTPUT QUALCOSA
     //     DI SIGNIFICATIVO SULLO STILE DEI MERKER DELL'ESERCITAZIONE 5
-    cout << "Dati delle fratture memorizzati:" << endl;
-    for (size_t i = 0; i < fracture.IdFractures.size(); ++i) {
+    cout << "Dati delle fratture memorizzati correttamente." << endl;
+    /*for (size_t i = 0; i < fracture.IdFractures.size(); ++i) {
         cout << "--- Frattura " << fracture.IdFractures[i] << " ---" << endl;
         cout << "Numero vertici: " << fracture.numVertices[i] << endl;
         cout << "Coordinate vertici:" << endl;
@@ -216,7 +224,7 @@ bool ImportFR(const string &filename,
         cout << "\nmax length of fracture[" << i << "] = " <<scientific<<setprecision(6)<< fracture.lenghtMaxEdges[i] << endl;
         cout << "baricentro: (" << fracture.baricentro[i][0] << ", " << fracture.baricentro[i][1] << ", " << fracture.baricentro[i][2] << ")" << std::endl;
         cout << "vettore normale: (" << fracture.vettoreNormalePiano[i][0] << ", " << fracture.vettoreNormalePiano[i][1] << ", " << fracture.vettoreNormalePiano[i][2] << ")" << endl;
-    }
+    }*/
 
 
 
@@ -226,8 +234,12 @@ bool ImportFR(const string &filename,
 
 
 
-void CalcoloTracce(Fractures& fracture, Traces& trace){
+void CalcoloTracce(Fractures& fracture, Traces& trace)
+{
     int escluse = 0;
+    int countinter = 0;
+
+    cout << "Ci sono "<<(fracture.NumFractures * (fracture.NumFractures - 1)) * 0.5 <<" possibili intersezioni"<<endl;
 
     for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
         for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
@@ -243,17 +255,73 @@ void CalcoloTracce(Fractures& fracture, Traces& trace){
             t = vec_product(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j]);
 
             //il nostro P0 è il baricentro (COMPUTATIONAL GEOMETRY 2, PROBLEMA 4)
-            Vector3d Point;
-            Point = system_solution(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j],
+            Vector3d Point = {};
+            bool ris = system_solution(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j],
                                     fracture.baricentro[i], fracture.baricentro[j],
-                                    t );
-            //tutto questo ci serve per trovare la retta di intersezione r(x_) = x_*t_ + Point;
+                                    t, Point);
+            //tutto questo ci serve per trovare la retta di intersezione r(x) = x*t_ + Point;
+
+            if (ris == 0){
+                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
+            }else{
+                //cout <<"possibile intersezione tra "<<i<<" e "<<j<<endl;
+            }
 
 
-        }
-    }
 
-    cout << "\n\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
+
+            MatrixXd matrixVerticesI = fracture.CoordinatesVertice[i];
+            unsigned int iterI = 0;
+            int numColonneI = matrixVerticesI.cols();
+            vector<double> vecI;
+            vecI.reserve(numColonneI);// RICORDARSI DI RESETTARLO ALLA FINE QUANDO NON SERVE PIu con .empty()
+            for (int z = 0; z < numColonneI; z++) {
+                Vector3d V1 = matrixVerticesI.col(z);
+                Vector3d V2;
+                if (z == numColonneI - 1) { // Accoppio l'ultimo vertice con il primo
+                    V2 = matrixVerticesI.col(0);
+                } else {
+                    V2 = matrixVerticesI.col(z + 1);
+                }
+            /// calcolo retta (GeometryComputational 1) dove giacciono i due vertici
+
+                Vector3d Punto0 = {};
+
+                bool a;
+                a = soluzione_sistema3x2(t,V1,V2,Point,Punto0);
+
+
+                /// calcolo intersezione tra retta di intersezione piani e retta dei due vertici
+                /// ... (= Vector3d Punto0 = X_punto0,Y_punto0,Z_punto0)
+                /// valuto Punto0, V1 e V2 nella retta dei due vertici e calcolo il valore che assume il parametro libero
+                double freeParP0 = Punto0[0];  // finire formula inversa usando
+                double freeParV1 = V1[0];   //finire formula inversa
+                double freeParV2 = V2[0];   //finire formula inversa
+                if ((freeParP0<=freeParV1 && freeParP0>=freeParV2)||(freeParP0<=freeParV2 && freeParP0>=freeParV1) )
+                {
+                    iterI = iterI + 1 ;
+                    //vecI.push_back(Punto0);
+                }
+            }
+            //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
+            if (iterI != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
+            {
+                continue;
+
+            }
+
+
+
+
+
+        }//end for j
+
+    }//end for i
+    cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
+
+
+
+
 }
 
 }

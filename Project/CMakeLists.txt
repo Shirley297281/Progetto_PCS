@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(DFN LANGUAGES CXX C VERSION 1.0.0)
 set(${CMAKE_PROJECT_NAME}_A a b)
+set(${CMAKE_PROJECT_NAME}_TEST_A a b)
 
 # Set C++ Standard
 ################################################################################
@@ -47,16 +48,23 @@ add_subdirectory(src)
 list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_includes})
-# list(APPEND DFN_SOURCES ${DFN_sources})
-# list(APPEND DFN_HEADERS ${DFN_headers})
-# list(APPEND DFN_INCLUDE ${DFN_includes})
-message(${${CMAKE_PROJECT_NAME}_sources})
+
+add_subdirectory(src_test)
+list(APPEND ${CMAKE_PROJECT_NAME}_TEST_sources ${src_test_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_TEST_headers ${src_test_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_TEST_includes ${src_test_includes})
+
 
 # Create executable
 ################################################################################
 add_executable(${CMAKE_PROJECT_NAME} main.cpp
                 ${${CMAKE_PROJECT_NAME}_sources}
                 ${${CMAKE_PROJECT_NAME}_headers})
+
+add_executable(${CMAKE_PROJECT_NAME}_TEST main_test.cpp
+    ${${CMAKE_PROJECT_NAME}_sources} ${${CMAKE_PROJECT_NAME}_headers}
+    ${${CMAKE_PROJECT_NAME}_TEST_headers} ${${CMAKE_PROJECT_NAME}_TEST_sources})
+
 
 
 #copia automaticamente i tre file nella cartella di Debug ma dalla cartella che ho rinominato come Mesh e non PolygonalMesh
@@ -82,3 +90,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR362_data.txt
 target_link_libraries(${PROJECT_NAME} ${DFN_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${DFN_include})
 target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
+
+
+target_include_directories(${CMAKE_PROJECT_NAME}_TEST PUBLIC ${${CMAKE_PROJECT_NAME}_includes} ${${CMAKE_PROJECT_NAME}_TEST_includes})
+target_link_libraries(${CMAKE_PROJECT_NAME}_TEST PUBLIC ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
+target_compile_options(${CMAKE_PROJECT_NAME}_TEST PUBLIC -fPIC)
