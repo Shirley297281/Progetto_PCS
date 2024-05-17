@@ -3,7 +3,7 @@
 #include <vector>
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
-#include <algorithm> // qui si trova std::max_element
+
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -11,34 +11,31 @@
 #include <vector>
 #include <chrono> //for counting time
 
-//distanza massima
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
 {
 
+
     vector<double> distance_vector(num_vertices-1, 0.0);
-    // itero sulle colonne
+    // Itero sulle colonne
     for(unsigned int i = 0; i < num_vertices - 1; ++i){
-        distance_vector[i] = sqrt( (m(0,i) - m(0,i+1))*(m(0,i) - m(0,i+1)) +
-                                   (m(1,i) - m(1,i+1))*(m(1,i) - m(1,i+1)) +
-                                   (m(2,i) - m(2,i+1))*(m(2,i) - m(2,i+1)) );
-
-        cout <<"*: "<< distance_vector[i]<<endl;
-        distance_vector[i] = sqrt(pow((m(0,i) - m(0,i+1)),2) + pow((m(1,i) - m(1,i+1)),2) + pow((m(2,i) - m(2,i+1)),2));
-        cout <<"^: "<< distance_vector[i]<<endl;
-
+        Vector3d point_a = m.col(i);
+        Vector3d point_b = m.col(i + 1);
+        distance_vector[i] = euclidean_distance(point_a, point_b);
     }
 
-    distance_vector[num_vertices-1]=sqrt(pow((m(0,num_vertices-1) - m(0,0)),2) +
-                                             pow((m(1,num_vertices-1) - m(1,0)),2) +
-                                             pow((m(2,num_vertices-1) - m(2,0)),2));
+    // Calcolo la distanza tra l'ultimo punto e il primo
+    Vector3d last_point = m.col(num_vertices - 1);
+    Vector3d first_point = m.col(0);
+    distance_vector[num_vertices - 1] = euclidean_distance(last_point, first_point);
 
+    // Trovo la distanza massima
     auto it_max_distance = max_element(distance_vector.begin(), distance_vector.end());
     double max_distance = *it_max_distance;
-    it_max_distance = distance_vector.begin(); //per inizializzare correttamente ad ogni richiamo della funzione
 
     return max_distance;
 
 }
+
 
 //baricentro
 array <double,3> barycenter(const MatrixXd& m, unsigned int num_vertices)
@@ -60,12 +57,12 @@ bool check_sphere(const array<double,3> bar1, const array<double,3> bar2, const 
 {
     //controlliamo la distanza tra i due baricentri
     double distance_bar = 0.0;
-    distance_bar = sqrt(pow( bar1[0] - bar2[0],2) +
-                        pow( bar1[1] - bar2[1],2) +
-                        pow( bar1[2] - bar2[2],2));
+    distance_bar = sqrt( (bar1[0] - bar2[0])*(bar1[0] - bar2[0]) +
+                         (bar1[1] - bar2[1])*(bar1[1] - bar2[1]) +
+                         (bar1[2] - bar2[2])*(bar1[2] - bar2[2]) );
 
     double max_distance = 0.0;
-    max_distance = (l1 + l2) * 0.5;
+    max_distance = (l1 + l2) ;///h
 
     if (distance_bar > max_distance){
         return false; // le fratture non si intersecano
@@ -275,6 +272,10 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             int numColonneI = matrixVerticesI.cols();
             vector<double> vecI;
             vecI.reserve(numColonneI);// RICORDARSI DI RESETTARLO ALLA FINE QUANDO NON SERVE PIu con .empty()
+
+            Vector3d Punto0 = {};
+            VectorXd freePar;
+
             for (int z = 0; z < numColonneI; z++) {
                 Vector3d V1 = matrixVerticesI.col(z);
                 Vector3d V2;
@@ -285,24 +286,29 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                 }
             /// calcolo retta (GeometryComputational 1) dove giacciono i due vertici
 
-                Vector3d Punto0 = {};
+
 
                 bool a;
                 a = soluzione_sistema3x2(t,V1,V2,Point,Punto0);
 
-
-                /// calcolo intersezione tra retta di intersezione piani e retta dei due vertici
-                /// ... (= Vector3d Punto0 = X_punto0,Y_punto0,Z_punto0)
-                /// valuto Punto0, V1 e V2 nella retta dei due vertici e calcolo il valore che assume il parametro libero
-                double freeParP0 = Punto0[0];  // finire formula inversa usando
-                double freeParV1 = V1[0];   //finire formula inversa
-                double freeParV2 = V2[0];   //finire formula inversa
-                if ((freeParP0<=freeParV1 && freeParP0>=freeParV2)||(freeParP0<=freeParV2 && freeParP0>=freeParV1) )
+                if (a) //se il sistema ha soluzione
                 {
-                    iterI = iterI + 1 ;
-                    //vecI.push_back(Punto0);
+
+                    /// valuto Punto0, V1 e V2 nella retta dei due vertici e calcolo il valore che assume il parametro libero
+                    double freeParP0 = Punto0[0];  // finire formula inversa usando
+                    double freeParV1 = V1[0];   //finire formula inversa
+                    double freeParV2 = V2[0];   //finire formula inversa
+                    if ((freeParP0<=freeParV1 && freeParP0>=freeParV2)||(freeParP0<=freeParV2 && freeParP0>=freeParV1) )
+                    {
+                        iterI = iterI + 1 ;
+                        //vecI.push_back(Punto0);
+                    }
                 }
+
+
             }
+            cout << endl<<endl;
+            cout << " il punto di intersezione tra il lato della frattura "<<i<<" e "<<j<<" è : "<< Punto0.transpose() <<endl;
             //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
             if (iterI != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
             {
@@ -313,15 +319,30 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
 
-
         }//end for j
+
+
 
     }//end for i
     cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
 
+//magari ancora qua dentro facciamo il primo file output
+
+
+}//Calcolo tracce
+
+
+void Controllo_tracce (Fractures& fracture, Traces& trace){
+    ///TRACCIA PASSANTE O NON PASSANTE CON IL METODO DELLE DISTANZE
+    ///
+    /// una volta definita la traccia e memorizzata nella struct a me serve sapere i due vertici che la definiscono, il suo id per dire se è passante o non passante
 
 
 
+
+
+    //alla fine fare il secondo file di output
 }
+
 
 }

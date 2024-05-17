@@ -2,6 +2,7 @@
 #define Utils_H
 #include "Eigen/Eigen"
 #include <iostream>
+#include <algorithm> // qui si trova std::max_element
 #include "FracturesTraces.hpp"
 
 using namespace std;
@@ -17,7 +18,10 @@ void CalcoloTracce(Fractures& fracture, Traces& trace);
 
 }
 
-// compute euclidean distance between two points 3-dimensional
+
+
+
+// compute the max eedge in fracture
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices);
 
 // compute the barycenter of a fracture with "num_vertices" vertices
@@ -28,6 +32,11 @@ bool check_sphere(const double bar1, const double bar2, const double l1, const d
 
 // calculate the normal vector of a fracture
 array <double, 3> normal_vector(const MatrixXd& m);
+
+
+
+
+
 
 // inline function to implement vectorial product
 inline array <double,3> vec_product(array <double, 3>& v1, array <double, 3>& v2){
@@ -133,7 +142,12 @@ inline bool soluzione_sistema3x2 (array <double, 3>& t,
             //double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
             //cout<<"\tother time: "<<duration<<" microseconds\n" <<endl;
 
-            cout << "Soluzione:\n" << sol << std::endl;
+            //ora abbiamo trovato i coeffieiente s e aplha
+
+            // Calcola il punto di intersezione Punto0
+            Punto0 = Point + sol[0] * t_eigen - sol[1] * vettoreDirezioneI;
+
+
         } else {
             std::cout << "Impossibile risolvere: il sistema è sottodeterminato." << std::endl;
         }
