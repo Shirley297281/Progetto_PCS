@@ -157,6 +157,13 @@ inline bool soluzione_sistema3x2 (array <double, 3>& t,
 
 }
 
+// Funzione per calcolare la distanza euclidea senza usare .norm()
+inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
+    return sqrt((a(0) - b(0)) * (a(0) - b(0)) +
+                (a(1) - b(1)) * (a(1) - b(1)) +
+                (a(2) - b(2)) * (a(2) - b(2)));
+}
+
 
 
 #endif
