@@ -17,7 +17,7 @@ struct Fractures{
     vector<MatrixXd> CoordinatesVertice ; // matrice con coordinate dei vertici (ogni colonna individua un vertice)
     vector<double> lenghtMaxEdges = {} ; // vettore di lunghezza massima per ogni frattura
     vector<array<double, 3>> baricentro = {}; // vettore baricentro per ogni frattura
-    vector<array<double, 3>> vettoreNormalePiano = {}; // vettore di versori per ogni frattura (i,j,k)
+    vector<Vector3d> vettoreNormalePiano = {}; // vettore di versori per ogni frattura (i,j,k)
     vector<unsigned int> numVertices = {}; //numero vertici per ogni poligono
     map<unsigned int, list<unsigned int>> TraceIdsPassxFracture = {}; //per ogni frattura elenco tracce passanti assegnate
     map<unsigned int, list<unsigned int>> TraceIdsNoPassxFracture = {};
@@ -41,6 +41,8 @@ struct Traces{
     // vector<vector<vector<unsigned int>>> TriangulatePolygons();
     // vector<double> computePolygonsArea();
 
+    Traces() = default;
+
 };
 
 // 2^PARTE
@@ -48,6 +50,8 @@ struct Polygons{
     //...
 };
 ///parentesi fine geometryNamespace
+//double tolDef=numeric_limits<double>::epsilon() * 100;
 }
+
 
 #endif
