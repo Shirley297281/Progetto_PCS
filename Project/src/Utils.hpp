@@ -18,6 +18,9 @@ void CalcoloTracce(Fractures& fracture, Traces& trace);
 
 bool Tips_Shy(const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ);
 
+int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
+                      const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j);
+
 }
 
 
