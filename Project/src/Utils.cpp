@@ -252,7 +252,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
         for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
 
-            cout << "Analisi coppia di fratture: " << i << " e " << j << endl;
+            cout << "\nAnalisi coppia di fratture: " << i << " e " << j << endl;
 
 
             // richiamo funzione sfera
@@ -298,8 +298,6 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             Vector3d Punto0 = {};
             VectorXd freePar;
 
-            bool sulLato_i;
-            bool sulLato_j;
 
             for (int z = 0; z < numColonneI; z++) {
                 Vector3d V1 = matrixVerticesI.col(z);
@@ -316,12 +314,14 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                 bool a;
                 a = soluzione_sistema3x2(t,V1,V2,Point,Punto0);
 
-                cout <<"punto intersezione tra retta int piani e retta tra due vertici: " << Punto0<<endl;
+
 
                 if (!a) //se il sistema non ha soluzione cambio lato
                 {
-                    cout << "\t sono parallele!!!"<<endl;
+                    //cout << "\t sono parallele!!!"<<endl;
                     continue;
+                }else{
+                    //cout <<"punto intersezione tra retta int piani e retta tra due vertici: " << Punto0<<endl;
                 }
 
                 double freeParP0;
@@ -333,9 +333,6 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                         break;
                     }
                 }
-                cout<<"    "<<endl;
-                cout <<"parametro libero di P0: " <<freeParP0<<endl;
-                cout<<"    "<<endl;
 
 
 
@@ -350,24 +347,20 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                     vecI.push_back(Punto0);
                 }
 
-                // lunghezza del segmento
-                double edgelength = euclidean_distance(V1, V2);
-                double distance1 = euclidean_distance(V1, Punto0);
-                double distance2 = euclidean_distance(V2, Punto0);
-                if (((distance1+distance2) - edgelength) > 1e-14 )
-                {
-                    sulLato_i = true;
-                }
 
-
-            }//fine for sui punti
+            }//fine for sui vertici della frattura
 
             //cout << " il punto di intersezione tra il lato della frattura "<<i<<" e "<<j<<" è : "<< Punto0.transpose() <<endl;
             //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
+
+            cout << "Frattura " << i << " ha " << iterI << " punti di intersezione." << endl;
+
             if (iterI != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
             {
                 vecI.clear();
+                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
+
             }
 
 
@@ -403,9 +396,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                         break;
                     }
                 }
-                cout<<"    "<<endl;
-                cout <<"parametro libero di P0: " <<freeParP0<<endl;
-                cout<<"    "<<endl;
+
 
 
 
@@ -418,13 +409,14 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             }
 
             // Stampa di debug per iterI e iterJ
-            cout << "Frattura " << i << " ha " << iterI << " punti di intersezione." << endl;
+
             cout << "Frattura " << j << " ha " << iterJ << " punti di intersezione." << endl;
 
             if (iterJ != 2 ) // la frattura non può avere traccia con l'altra frattura e passo ad altre due fratture
             {
                 // non so se sia necessario, chat dice che uscendo di scope si distrugge automaticamente
                 vecJ.clear();
+                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 cout << "non c'è traccia tra "<< i << " e "<< j << endl;
 
                 continue;
@@ -436,10 +428,10 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             trace.numTraces++;
             trace.IdTraces.push_back(trace.numTraces);
             //è sbagliato qui, da spostare dopo
-            Matrix<double, 3, 2> estremiTraccia;
+            /*Matrix<double, 3, 2> estremiTraccia;
             estremiTraccia.col(0) = vecI[0];
             estremiTraccia.col(1) = vecI[1];
-            trace.CoordinatesEstremiTraces.push_back(estremiTraccia);
+            trace.CoordinatesEstremiTraces.push_back(estremiTraccia);*/
             ///da modificare
             /* double lunghezzaTraccia = euclidean_distance(vecI[0], vecI[1]);
             trace.lengthTraces.push_back(lunghezzaTraccia);*/
@@ -453,7 +445,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             //cout << " - Lunghezza traccia: " << lunghezzaTraccia << endl;
 
 
-             int result = Controllo_tracce2(fracture,trace,vecI,vecJ,Point,t,i,j);
+            int result = Controllo_tracce2(fracture,trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
             {
                 cout<<"non ho intersezione perchè sono nel caso 1 e 2"<<endl;
@@ -465,14 +457,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                 continue;
             }
 
-/*
-            bool s;
-            s=Tips_Shy(vecI, vecJ);
 
 
-            cout << " - Passante: " << (s ? "Sì" : "No") << endl;
-            cout << endl;
-*/
 
         }//end for j
 
@@ -516,6 +502,23 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
     Vector2d Par2 = {freeParP3, freeParP4};
     sort(Par1.begin(), Par2.end());
     sort(Par1.begin(), Par2.end());  //finchè non ho bubble sort uso sort della libreria STL
+
+
+
+    ///SI INTROMETTE QUELLA FICCANASO DI SHY
+    ///
+    ///
+
+    Tips_Shy(fracture, trace, vecI, vecJ, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
+
+    ///
+    ///
+    /// fine
+
+
+
+
+
     /// i casi visionati di seguito coprono le varie possibilità e sono in ordine rispetto a quanto mostrato su file inviato su whatsapp scritto su tablet
     if (Par1[1]<=Par2[0] || Par1[0]>=Par2[1])     // caso 1 e 2
     {
@@ -572,32 +575,98 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
 }
 
 
-bool Tips_Shy(const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ) {
-    // Verifica se almeno un estremo di vecI tocca un lato di vecJ
-    for (const auto& pointI : vecI) {
-        for (size_t k = 0; k < vecJ.size(); ++k) {
-            size_t next = (k + 1) % vecJ.size();
-            double dist1 = euclidean_distance(pointI, vecJ[k]);
-            double dist2 = euclidean_distance(pointI, vecJ[next]);
-            double segmentLength = euclidean_distance(vecJ[k], vecJ[next]);
-            if (abs(dist1 + dist2 - segmentLength) < 1e-6) {
-                // L'estremo di vecI tocca il lato di vecJ
-                // Continua con la verifica dell'altro estremo di vecI
-                // e verifica se anche tocca un lato di vecJ
-                for (const auto& pointJ : vecJ) {
-                    dist1 = euclidean_distance(pointJ, vecJ[k]);
-                    dist2 = euclidean_distance(pointJ, vecJ[next]);
-                    segmentLength = euclidean_distance(vecJ[k], vecJ[next]);
-                    if (abs(dist1 + dist2 - segmentLength) < 1e-6) {
-                        // Entrambi gli estremi di vecI e vecJ toccano i lati l'uno dell'altro
-                        return true; // Traccia passante
-                    }
+bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
+              double freeParP1,
+              double freeParP2,
+              double freeParP3,
+              double freeParP4) {
+
+    //creo un vettore di 4 elementi da ordinare
+    vector<double> intersezioni= {freeParP1, freeParP2, freeParP3, freeParP4};
+
+    BubbleSort(intersezioni);
+
+    //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
+    Matrix<double, 3, 2> Estremi;
+
+    // Controllo che le chiavi esistano nel dizionario prima di accedervi
+    if (dizfreeParToVec.find(intersezioni[1]) != dizfreeParToVec.end() &&
+        dizfreeParToVec.find(intersezioni[2]) != dizfreeParToVec.end()) {
+
+        // Riempio la matrice con i punti dai valori del dizionario
+        Estremi.col(0) = dizfreeParToVec[intersezioni[1]];
+        Estremi.col(1) = dizfreeParToVec[intersezioni[2]];
+    } else {
+        std::cerr << "Chiavi non trovate nel dizionario!" << std::endl;
+        return false; // O gestisci l'errore in modo appropriato
+    }
+
+    trace.CoordinatesEstremiTraces.push_back(Estremi);
+
+    cout << " - Estremi traccia: (" << Estremi.col(0).transpose() << "), (" << Estremi.col(1).transpose() << ")" << endl;
+
+    trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
+
+
+    int touchCount = 0;
+    bool passa;
+
+    MatrixXd vertice = fracture.CoordinatesVertice[i];
+        for (int k = 0; k < vertice.cols(); ++k) {
+            Vector3d v1 = vertice.col(k);
+            Vector3d v2 = vertice.col((k + 1) % vertice.cols());;
+            double edgeLength = euclidean_distance(v1, v2);
+
+            for (int e = 0; e < 2; ++e) {
+                Vector3d extremity = Estremi.col(e);
+                if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-14) {
+                    touchCount++;
+                    break;
                 }
             }
         }
+
+    if (touchCount == 2){
+        //la traccia è passante
+        passa = true;
+
+    }else{
+        passa = false;
+
     }
-    // Nessun estremo di vecI tocca un lato di vecJ
-    return false; // Traccia non passante
+
+    cout << " - Passante per la frattura " <<i<< " : " << (passa ? "Sì" : "No") << endl;
+
+
+    touchCount = 0;
+    vertice = fracture.CoordinatesVertice[j];
+    for (int k = 0; k < vertice.cols(); ++k) {
+        Vector3d v1 = vertice.col(k);
+        Vector3d v2 = vertice.col((k + 1)% vertice.cols());
+        double edgeLength = euclidean_distance(v1, v2);
+
+        for (int e = 0; e < 2; ++e) {
+            Vector3d extremity = Estremi.col(e);
+            if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-14) {
+                touchCount++;
+                break;
+            }
+        }
+    }
+
+    if (touchCount == 2){
+        //la traccia è passante
+        passa = true;
+
+    }else{
+        passa = false;
+
+    }
+
+    cout << " - Passante per la frattura " <<j<< " : " << (passa ? "Sì" : "No") << endl;
+    cout << endl;
+
+
 }
 
 }

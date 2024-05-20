@@ -16,7 +16,11 @@ bool ImportFR(const string &filename,
 
 void CalcoloTracce(Fractures& fracture, Traces& trace);
 
-bool Tips_Shy(const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ);
+bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
+              double freeParP1,
+              double freeParP2,
+              double freeParP3,
+              double freeParP4);
 
 int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j);
@@ -156,6 +160,33 @@ inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
     return sqrt((a(0) - b(0)) * (a(0) - b(0)) +
                 (a(1) - b(1)) * (a(1) - b(1)) +
                 (a(2) - b(2)) * (a(2) - b(2)));
+}
+
+
+
+
+
+
+
+template<typename T>
+void BubbleSort(std::vector<T>& data)
+{
+    size_t rem_size = data.size();
+    size_t last_seen = rem_size;
+    bool swapped = true;
+
+    while (swapped) {
+        swapped = false;
+        for (size_t i = 1; i < rem_size; i++) {
+            if (data[i-1] > data[i]) {
+                std::swap(data[i-1], data[i]);
+                swapped = true;
+                last_seen = i;
+            }
+        }
+        //        rem_size = rem_size - 1;
+        rem_size = last_seen;
+    }
 }
 
 

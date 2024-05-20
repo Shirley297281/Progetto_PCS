@@ -38,6 +38,7 @@ struct Traces{
     vector<Matrix<double, 3, 2>> CoordinatesEstremiTraces = {}; // vettore con matrice((x,y,z), estremo1 x estremo2)
     vector<double> lengthTraces = {};  // vettore lunghezza tracce
     vector<bool> vectorTips = {} ;  // vettore di bool (se passante o no)
+    // forse vector <array<bool,2>> perchè passante per una ma non per l'altra ad esempio
     // vector<vector<vector<unsigned int>>> TriangulatePolygons();
     // vector<double> computePolygonsArea();
 
