@@ -23,10 +23,12 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
               double freeParP4);
 
 int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
-                      const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j);
+                      const Vector3d Point, Vector3d t, unsigned int i, unsigned int j);
 
 //calculate free parameter of points
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point,  int i, vector<Vector3d>& vecI, Fractures& fracture);
+
+void inserimento_map(double& idpar1, double& idpar2, Traces& trace);
 
 }
 
@@ -165,13 +167,28 @@ inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
 }
 
 
+inline void inserimento_map(double pass, unsigned int idpar, GeometryLibrary::Traces& trace) {
+    if (pass==0) {
 
+        // Inserisci nella mappa delle tracce passanti
+        auto ret = trace.TraceIdsPassxFracture.insert({idpar, {(trace.numTraces - 1)}});
+        if (!ret.second) {
+            ret.first->second.push_back(trace.numTraces - 1);
+        }
+    } else {
+        // Inserisci nella mappa delle tracce non passanti
+        auto ret = trace.TraceIdsNoPassxFracture.insert({idpar, {(trace.numTraces - 1)}});
+        if (!ret.second) {
+            ret.first->second.push_back(trace.numTraces - 1);
+        }
+    }
+}
 
 
 
 
 template<typename T>
-void BubbleSort(std::vector<T>& data)
+void BubbleSort(vector<array<T,2>>& data)
 {
     size_t rem_size = data.size();
     size_t last_seen = rem_size;
@@ -180,13 +197,13 @@ void BubbleSort(std::vector<T>& data)
     while (swapped) {
         swapped = false;
         for (size_t i = 1; i < rem_size; i++) {
-            if (data[i-1] > data[i]) {
+            if (data[i-1][1] > data[i][1]) {
                 std::swap(data[i-1], data[i]);
                 swapped = true;
                 last_seen = i;
             }
         }
-        //        rem_size = rem_size - 1;
+
         rem_size = last_seen;
     }
 }

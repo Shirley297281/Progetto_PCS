@@ -293,8 +293,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
     // TRACCE SI o NO?
-    /// controllo se possano esistere tracce per la frattura i
-    ///
+            /// controllo se possano esistere tracce per la frattura i
+            ///
             vector<Vector3d> vecI = {};  // contiene i punti di intersezione calcolati per la frattura i --> vertici della traccia
             unsigned int iterI = Calcolo_par(t, Point, i, vecI, fracture);
 
@@ -307,7 +307,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                 continue;
             }
 
-
+            /// controllo se possano esistere tracce per la frattura j
+            ///
             vector<Vector3d> vecJ = {};  // contiene i punti di intersezione calcolati per la frattura i --> vertici della traccia
             unsigned int iterJ = Calcolo_par(t, Point, j, vecJ, fracture);
 
@@ -321,27 +322,11 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
             }
 
+            const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
 
-            // Memorizzo i dati nella struttura Traces
-            trace.numTraces++;
-            trace.IdTraces.push_back((trace.numTraces)-1);
-            //è sbagliato qui, da spostare dopo
-            /*Matrix<double, 3, 2> estremiTraccia;
-            estremiTraccia.col(0) = vecI[0];
-            estremiTraccia.col(1) = vecI[1];
-            trace.CoordinatesEstremiTraces.push_back(estremiTraccia);*/
-            ///da modificare
-            /* double lunghezzaTraccia = euclidean_distance(vecI[0], vecI[1]);
-            trace.lengthTraces.push_back(lunghezzaTraccia);*/
-
-            // Visualizza i dati della traccia
-            cout << "\nTraccia " << trace.numTraces << ":" << endl;
-            cout << " - Frattura 1: " << i << endl;
-            cout << " - Frattura 2: " << j << endl;
-            //da spostare dopo
-            //cout << " - Estremi traccia: (" << vecI[0].transpose() << "), (" << vecI[1].transpose() << ")" << endl;
-            //cout << " - Lunghezza traccia: " << lunghezzaTraccia << endl;
-
+            // Reserving space for unordered_maps if applicable
+            //trace.TraceIdsPassxFracture.reserve(estimatedSize);
+            //trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
             int result = Controllo_tracce2(fracture,trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
@@ -362,14 +347,29 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
 
-    }//end for i
+    }
+
+    //end for i
+    for (const auto& pair : trace.TraceIdsPassxFracture) {
+        cout << "Fratture passanti " << pair.first << ": ";
+        for (const auto& trace_id : pair.second) {
+            cout << trace_id << " ";
+        }
+        cout << endl;
+    }
+    for (const auto& pair : trace.TraceIdsNoPassxFracture) {
+        cout << "Fratture non passanti " << pair.first << ": ";
+        for (const auto& trace_id : pair.second) {
+            cout << trace_id << " ";
+        }
+        cout << endl;
+    }
+
 
 
     cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
 
-//magari ancora qua dentro facciamo il primo file output
-
-
+    //magari ancora qua dentro facciamo il primo file output
 }//Calcolo tracce
 
 
@@ -439,13 +439,17 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 
 }
 
+
 int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
-                      const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j)
+                      const Vector3d Point, Vector3d t, unsigned int i, unsigned int j)
 {   // i e j solo per il cout
-    double freeParP1;
-    double freeParP2;
-    double freeParP3;
-    double freeParP4;
+    double freeParP1 = 0.0;
+    double freeParP2 = 0.0;
+    double freeParP3 = 0.0;
+    double freeParP4 = 0.0;
+
+    vector<array<double,2>> idpar = {}; //è un vector di arrai da 2 che contengono l'id della frattura e il parametro del punto
+
     for (unsigned int s=0; s<3; s++)
     {
         if (abs(t[s])>1e-15){ //mi baso sul fatto che esista almeno una coordinata di t diversa da zero altrimenti non saremmo arrivati qua
@@ -453,8 +457,19 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
             freeParP2=(vecI[1][s]-Point[s])/(t[s]);
             freeParP3=(vecJ[0][s]-Point[s])/(t[s]);
             freeParP4=(vecJ[1][s]-Point[s])/(t[s]);
+            break;
         }
     }
+
+    // Riempimento del vector di array
+    idpar.push_back({double(i), freeParP1});
+    idpar.push_back({double(i), freeParP2});
+    idpar.push_back({double(j), freeParP3});
+    idpar.push_back({double(j), freeParP4});
+
+    //ora lo devo ordinare rispetto a freeParP_
+    BubbleSort(idpar);
+
     // creo un dizionario per poter riottenere le informazioni sul punto sulla retta a partire dal parametro libero
     map<double, Vector3d> dizfreeParToVec;
     // popolo il dizionario (non mi interessa se ho una chiave che si ripete (quindi questa verrebbe sovrascritta) tanto il dizionario viene usato negli ultimi elseif)
@@ -462,12 +477,81 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
     dizfreeParToVec[freeParP2] = vecI[1];
     dizfreeParToVec[freeParP3] = vecJ[0];
     dizfreeParToVec[freeParP4] = vecJ[1];
-    /// in calcolo tracce (nel seguito non so se bisogna usare tolleranze o no.
-    // ordino i parametri liberi di ciascun vec
-    Vector2d Par1 = {freeParP1, freeParP2};
-    Vector2d Par2 = {freeParP3, freeParP4};
-    sort(Par1.begin(), Par2.end());
-    sort(Par1.begin(), Par2.end());  //finchè non ho bubble sort uso sort della libreria STL
+
+    //estraiamo gli estremi delle tracce
+    double id1 = idpar[0][0];
+    double id2 = idpar[1][0];
+
+    if (id1==id2){
+        return 1;
+    }
+    else if (id1 != id2){
+
+        // Memorizzo i dati nella struttura Traces
+        trace.numTraces++;
+        trace.IdTraces.push_back((trace.numTraces)-1);
+
+
+        // Visualizza i dati della traccia
+        cout << "\nTraccia " << trace.numTraces << ":" << endl;
+        cout << " - Frattura 1: " << i << endl;
+        cout << " - Frattura 2: " << j << endl;
+        //determino gli estremi
+
+        //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
+        Matrix<double, 3, 2> Estremi;
+
+        // Controllo che le chiavi esistano nel dizionario prima di accedervi
+        if (dizfreeParToVec.find(idpar[1][1]) != dizfreeParToVec.end() &&
+            dizfreeParToVec.find(idpar[2][1]) != dizfreeParToVec.end()) {
+
+            // Riempio la matrice con i punti dai valori del dizionario
+            Estremi.col(0) = dizfreeParToVec[idpar[1][1]];
+            Estremi.col(1) = dizfreeParToVec[idpar[2][1]];
+        } else {
+            cerr << "Chiavi non trovate nel dizionario!" << endl;
+            return false; // O gestisci l'errore in modo appropriato
+        }
+
+        trace.CoordinatesEstremiTraces.push_back(Estremi);
+        cout << " - Estremi traccia: (" << Estremi.col(0).transpose() << "), (" << Estremi.col(1).transpose() << ")" << endl;
+    }else
+    {
+        return 3; //controllo se ci sono casistiche non considerate
+    }
+
+
+    //controllo PASSANTO O NO?
+    //evitiamo cancellaione numerica con la sottrazione
+    if (idpar[0][1]< 1e-14+idpar[1][1] && idpar[2][1]< idpar[3][1] + 1e-14){
+        double pass = 0;
+        inserimento_map(pass,idpar[0][0], trace);
+        inserimento_map(pass,idpar[1][0], trace);
+
+    }else if (idpar[0][1] < 1e-14+idpar[1][1]){
+
+        double pass = 0;
+        inserimento_map(pass,idpar[2][0], trace);
+        pass = 1;
+        inserimento_map(pass,idpar[3][0], trace);
+    }
+    else if(idpar[2][1] < idpar[3][1] + 1e-14){
+
+        double pass = 0;
+        inserimento_map(pass,idpar[1][0], trace);
+        pass = 1;
+        inserimento_map(pass,idpar[0][0], trace);
+    }
+    else if (idpar[1][0]<idpar[2][0]+ 1e-14){
+        double pass = 0;
+        inserimento_map(pass,idpar[1][0], trace);
+        pass = 1;
+        inserimento_map(pass,idpar[0][0], trace);
+    }else{
+        double pass = 1;
+        inserimento_map(pass,idpar[1][0], trace);
+        inserimento_map(pass,idpar[0][0], trace);
+    }
 
 
 
@@ -484,61 +568,9 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
 
 
 
-
-    /// i casi visionati di seguito coprono le varie possibilità e sono in ordine rispetto a quanto mostrato su file inviato su whatsapp scritto su tablet
-    if (Par1[1]<=Par2[0] || Par1[0]>=Par2[1])     // caso 1 e 2
-    {
-        // devo scartare le tracce
-        return 1;
-    }
-    else if (Par1[0]==Par2[0] && Par2[1] == Par1[1]) // per entrambe le fratture la traccia è passante, caso 3
-    {
-        cout<<"traccia passante in "<<i<<" e "<<j<<endl;
-        //euclidean distance tra vecI[0] e vecI[1] per calcolare lunghezza traccia e inserirla in lenghtTraces
-        //inserire vecI[0] e vecI[1] in CoordinatesEstremiTraces
-        //numTraces ++
-        //inserire Id traccia (che coindice con il numtraces) in TraceIdsPassxFracture sia per i che per j (usare metodo insert visto in esercitazione 5
-        //in modo da gestire l'inserimento se la chiave = IdFrattura è già inserita)
-    }
-    else if (Par1[0]>= Par2[0] && Par1[1] <= Par2[1]) //solo per la frattura i la traccia è passante, caso 4 e 6
-    {
-        cout<<"traccia passante solo per "<<i<<" ma non per "<<j<<endl;
-        //euclidean distance tra vecI[0] e vecI[1]  per calcolare lunghezza traccia e inserirla in lenghtTraces
-        //inserire vecI[0] e vecI[1] in CoordinatesEstremiTraces
-        //numTraces ++
-        //inserire l'Id traccia (che coindice con il numtraces) in TraceIdsPassxFracture con chiave i
-        //inserire l'Id traccia (che coindice con il numtraces) in TraceIdsNoPassxFracture con chiave j
-    }
-    else if (Par2[0]>= Par1[0] && Par2[1] <= Par1[1]) //solo per la fratture j la traccia è passante, caso 4 e 6
-    {
-        cout<<"traccia passante solo per "<<j<<" ma non per "<<i<<endl;
-        //euclidean distance tra vecJ[0] e vecJ[1]  per calcolare lunghezza traccia e inserirla in lenghtTraces
-        //inserire vecJ[0] e vecJ[1] in CoordinatesEstremiTraces
-        //numTraces ++
-        //inserire l'Id traccia (che coindice con il numtraces) in TraceIdsPassxFracture con chiave j
-        //inserire l'Id traccia (che coindice con il numtraces) in TraceIdsNoPassxFracture con chiave i
-    }
-    else if (Par2[1] > Par1[0])  //non passante per entrambe, caso 5
-    {
-        cout<<"traccia non passante sia per "<<j<<" che per "<<i<<endl;
-        //euclidean distance tra dizfreeParToVecI[Par2[1]] e dizfreeParToVecI[Par1[1]]  per calcolare lunghezza traccia e inserirla in lenghtTraces
-        //inserire dizfreeParToVecI[Par2[1]]  e dizfreeParToVecI[Par1[1]] in CoordinatesEstremiTraces
-        //numTraces ++
-        //inserire Id traccia (che coindice con il numtraces) in TraceIdsNoPassxFracture sia per i che per j
-    }
-    else if ( Par1[1] > Par2[0])   //non passante per entrambe, caso 5
-    {
-        //euclidean distance tra dizfreeParToVecI[Par1[1]] e dizfreeParToVecI[Par2[0]]  per calcolare lunghezza traccia e inserirla in lenghtTraces
-        //inserire dizfreeParToVecI[Par1[1]]  e dizfreeParToVecI[Par2[0]] in CoordinatesEstremiTraces
-        //numTraces ++
-        //inserire Id traccia (che coindice con il numtraces) in TraceIdsNoPassxFracture sia per i che per j
-    }
-    else
-    {
-        return 3; //controllo se ci sono casistiche non considerate
-    }
     return 0;
 }
+
 
 
 bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
@@ -550,7 +582,7 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
     //creo un vettore di 4 elementi da ordinare
     vector<double> intersezioni= {freeParP1, freeParP2, freeParP3, freeParP4};
 
-    BubbleSort(intersezioni);
+    //BubbleSort(intersezioni);
 
     //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
     Matrix<double, 3, 2> Estremi;

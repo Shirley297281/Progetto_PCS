@@ -19,8 +19,7 @@ struct Fractures{
     vector<array<double, 3>> baricentro = {}; // vettore baricentro per ogni frattura
     vector<Vector3d> vettoreNormalePiano = {}; // vettore di versori per ogni frattura (i,j,k)
     vector<unsigned int> numVertices = {}; //numero vertici per ogni poligono
-    map<unsigned int, list<unsigned int>> TraceIdsPassxFracture = {}; //per ogni frattura elenco tracce passanti assegnate
-    map<unsigned int, list<unsigned int>> TraceIdsNoPassxFracture = {};
+
     // (list o vector dipende da cosa ci serve dopo)
     Fractures() = default; //DA CHIEDERE
     Fractures(const vector<unsigned int> IdFractures,
@@ -37,8 +36,8 @@ struct Traces{
     vector<unsigned int> IdTraces = {};  // vettore con Id tracce
     vector<Matrix<double, 3, 2>> CoordinatesEstremiTraces = {}; // vettore con matrice((x,y,z), estremo1 x estremo2)
     vector<double> lengthTraces = {};  // vettore lunghezza tracce
-    vector<bool> vectorTips = {} ;  // vettore di bool (se passante o no)
-    // forse vector <array<bool,2>> perchè passante per una ma non per l'altra ad esempio
+    map<unsigned int, list<unsigned int>> TraceIdsPassxFracture = {}; //per ogni frattura elenco tracce passanti assegnate
+    map<unsigned int, list<unsigned int>> TraceIdsNoPassxFracture = {};
     // vector<vector<vector<unsigned int>>> TriangulatePolygons();
     // vector<double> computePolygonsArea();
 
