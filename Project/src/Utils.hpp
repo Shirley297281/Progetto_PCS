@@ -28,7 +28,6 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
 //calculate free parameter of points
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point,  int i, vector<Vector3d>& vecI, Fractures& fracture);
 
-void inserimento_map(double& idpar1, double& idpar2, Traces& trace);
 
 }
 
