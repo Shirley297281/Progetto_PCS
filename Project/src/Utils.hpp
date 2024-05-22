@@ -25,6 +25,9 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
 int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j);
 
+//calculate free parameter of points
+unsigned int Calcolo_par(Vector3d& t, Vector3d& Point,  int i, vector<Vector3d>& vecI, Fractures& fracture);
+
 }
 
 
@@ -41,7 +44,6 @@ bool check_sphere(const array<double,3> bar1, const array<double,3> bar2, const 
 
 // calculate the normal vector of a fracture
 Vector3d normal_vector(const MatrixXd& m);
-
 
 
 

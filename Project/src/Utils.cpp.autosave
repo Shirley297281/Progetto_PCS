@@ -293,8 +293,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
     // TRACCE SI o NO?
-    /// controllo se possano esistere tracce per la frattura i
-    ///
+            /// controllo se possano esistere tracce per la frattura i
+            ///
             vector<Vector3d> vecI = {};  // contiene i punti di intersezione calcolati per la frattura i --> vertici della traccia
             unsigned int iterI = Calcolo_par(t, Point, i, vecI, fracture);
 
@@ -306,8 +306,9 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                 cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
             }
-
-
+            
+            /// controllo se possano esistere tracce per la frattura j
+            ///
             vector<Vector3d> vecJ = {};  // contiene i punti di intersezione calcolati per la frattura i --> vertici della traccia
             unsigned int iterJ = Calcolo_par(t, Point, j, vecJ, fracture);
 
@@ -325,14 +326,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             // Memorizzo i dati nella struttura Traces
             trace.numTraces++;
             trace.IdTraces.push_back((trace.numTraces)-1);
-            //è sbagliato qui, da spostare dopo
-            /*Matrix<double, 3, 2> estremiTraccia;
-            estremiTraccia.col(0) = vecI[0];
-            estremiTraccia.col(1) = vecI[1];
-            trace.CoordinatesEstremiTraces.push_back(estremiTraccia);*/
-            ///da modificare
-            /* double lunghezzaTraccia = euclidean_distance(vecI[0], vecI[1]);
-            trace.lengthTraces.push_back(lunghezzaTraccia);*/
+            
 
             // Visualizza i dati della traccia
             cout << "\nTraccia " << trace.numTraces << ":" << endl;
@@ -439,6 +433,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 
 }
 
+
 int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d Point, Vector3d t, const unsigned int i, const unsigned int j)
 {   // i e j solo per il cout
@@ -446,6 +441,9 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
     double freeParP2;
     double freeParP3;
     double freeParP4;
+    
+    
+    
     for (unsigned int s=0; s<3; s++)
     {
         if (abs(t[s])>1e-15){ //mi baso sul fatto che esista almeno una coordinata di t diversa da zero altrimenti non saremmo arrivati qua
@@ -455,8 +453,16 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
             freeParP4=(vecJ[1][s]-Point[s])/(t[s]);
         }
     }
+    
+    
+    //creo un vettore di 4 elementi da ordinare
+    vector<double> intersezioni= {freeParP1, freeParP2, freeParP3, freeParP4};
+    BubbleSort(intersezioni);
+    
+    
+    
     // creo un dizionario per poter riottenere le informazioni sul punto sulla retta a partire dal parametro libero
-    map<double, Vector3d> dizfreeParToVec;
+    map<pair<double,unsigned int>, Vector3d> dizfreeParToVec;
     // popolo il dizionario (non mi interessa se ho una chiave che si ripete (quindi questa verrebbe sovrascritta) tanto il dizionario viene usato negli ultimi elseif)
     dizfreeParToVec[freeParP1] = vecI[0];
     dizfreeParToVec[freeParP2] = vecI[1];
