@@ -350,20 +350,23 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     }
 
     //end for i
-    for (const auto& pair : trace.TraceIdsPassxFracture) {
-        cout << "Fratture passanti " << pair.first << ": ";
-        for (const auto& trace_id : pair.second) {
-            cout << trace_id << " ";
+    cout << "\n\nRisultati finali delle mappe:" << endl;
+
+    // Funzione per stampare il contenuto di una mappa
+    auto printMap = [](const map<unsigned int, list<unsigned int>>& m, const string& mapName) {
+        cout << mapName << " contenuto:" << endl;
+        for (const auto& pair : m) {
+            cout << "Frattura " << pair.first << ": ";
+            for (const auto& traceId : pair.second) {
+                cout << traceId << " ";
+            }
+            cout << endl;
         }
-        cout << endl;
-    }
-    for (const auto& pair : trace.TraceIdsNoPassxFracture) {
-        cout << "Fratture non passanti " << pair.first << ": ";
-        for (const auto& trace_id : pair.second) {
-            cout << trace_id << " ";
-        }
-        cout << endl;
-    }
+    };
+
+    // Stampa il contenuto delle mappe
+    printMap(trace.TraceIdsPassxFracture, "\nTraceIdsPassxFracture");
+    printMap(trace.TraceIdsNoPassxFracture, "\nTraceIdsNoPassxFracture");
 
 
 
@@ -440,7 +443,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 }
 
 
-int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
+int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d Point, Vector3d t, unsigned int i, unsigned int j)
 {   // i e j solo per il cout
     double freeParP1 = 0.0;
@@ -449,6 +452,7 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
     double freeParP4 = 0.0;
 
     vector<array<double,2>> idpar = {}; //è un vector di arrai da 2 che contengono l'id della frattura e il parametro del punto
+    idpar.reserve(4);
 
     for (unsigned int s=0; s<3; s++)
     {
@@ -493,7 +497,7 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
 
 
         // Visualizza i dati della traccia
-        cout << "\nTraccia " << trace.numTraces << ":" << endl;
+        cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
         cout << " - Frattura 1: " << i << endl;
         cout << " - Frattura 2: " << j << endl;
         //determino gli estremi
@@ -522,58 +526,79 @@ int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& 
 
 
     //controllo PASSANTO O NO?
+
+    std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
+
+
+
+
+    int pass = 0;
     //evitiamo cancellaione numerica con la sottrazione
-    if (idpar[0][1]< 1e-14+idpar[1][1] && idpar[2][1]< idpar[3][1] + 1e-14){
-        double pass = 0;
+    if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){
+
+        pass = 0;
         inserimento_map(pass,idpar[0][0], trace);
         inserimento_map(pass,idpar[1][0], trace);
 
-    }else if (idpar[0][1] < 1e-14+idpar[1][1]){
+        cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
 
-        double pass = 0;
+
+
+
+    }else if (abs(idpar[0][1]- idpar[1][1]) < 1e-14){ //caso traccia passante per entrambi
+
+        pass = 0;
         inserimento_map(pass,idpar[2][0], trace);
+        cout << "   Passante per la frattura " <<idpar[2][0]<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[3][0], trace);
+        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
     }
-    else if(idpar[2][1] < idpar[3][1] + 1e-14){
+    else if(abs(idpar[2][1]- idpar[3][1]) < 1e-14){ //caso
 
-        double pass = 0;
+        pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
+        cout << "   Passante per la frattura " <<idpar[1][0]<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
+        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
     }
-    else if (idpar[1][0]<idpar[2][0]+ 1e-14){
-        double pass = 0;
+    else if (idpar[1][0] == idpar[2][0]){
+        pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
+        cout << "   Passante per la frattura " <<idpar[1][0]<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
+        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
     }else{
-        double pass = 1;
+        pass = 1;
         inserimento_map(pass,idpar[1][0], trace);
         inserimento_map(pass,idpar[0][0], trace);
+        cout << "   NON Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
     }
 
 
+
+    std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
+    double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
+    cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
 
     ///SI INTROMETTE QUELLA FICCANASO DI SHY
     ///
     ///
-
+    ///
     Tips_Shy(fracture, trace, vecI, vecJ, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
 
     ///
     ///
     /// fine
 
-
-
-
-    return 0;
+    return 3;
 }
 
 
 
-bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
+bool Tips_Shy(Fractures& fracture, Traces& trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
               double freeParP1,
               double freeParP2,
               double freeParP3,
@@ -606,23 +631,25 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
     trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
 
 
+    std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
+
     int touchCount = 0;
     bool passa;
 
     MatrixXd vertice = fracture.CoordinatesVertice[i];
-        for (int k = 0; k < vertice.cols(); ++k) {
-            Vector3d v1 = vertice.col(k);
-            Vector3d v2 = vertice.col((k + 1) % vertice.cols());;
-            double edgeLength = euclidean_distance(v1, v2);
+    for (int k = 0; k < vertice.cols(); ++k) {
+        Vector3d v1 = vertice.col(k);
+        Vector3d v2 = vertice.col((k + 1) % vertice.cols());;
+        double edgeLength = euclidean_distance(v1, v2);
 
-            for (int e = 0; e < 2; ++e) {
-                Vector3d extremity = Estremi.col(e);
-                if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-14) {
-                    touchCount++;
-                    break;
-                }
+        for (int e = 0; e < 2; ++e) {
+            Vector3d extremity = Estremi.col(e);
+            if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-14) {
+                touchCount++;
+                break;
             }
         }
+    }
 
     if (touchCount == 2){
         //la traccia è passante
@@ -645,7 +672,7 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
 
         for (int e = 0; e < 2; ++e) {
             Vector3d extremity = Estremi.col(e);
-            if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-14) {
+            if (abs(euclidean_distance(extremity, v1) + euclidean_distance(extremity, v2) - edgeLength) < 1e-10) {
                 touchCount++;
                 break;
             }
@@ -663,6 +690,14 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
 
     cout << " - Passante per la frattura " <<j<< " : " << (passa ? "Sì" : "No") << endl;
     cout << endl;
+
+
+    std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
+    double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
+    cout<<"\t ------- Tips_sHy elapsed time: "<<duration<<" microseconds\n" <<endl;
+
+
+
 
 
 }

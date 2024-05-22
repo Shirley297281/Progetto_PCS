@@ -16,13 +16,13 @@ bool ImportFR(const string &filename,
 
 void CalcoloTracce(Fractures& fracture, Traces& trace);
 
-bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
+bool Tips_Shy(Fractures& fracture, Traces& trace,const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
               double freeParP1,
               double freeParP2,
               double freeParP3,
               double freeParP4);
 
-int Controllo_tracce2(Fractures fracture, Traces trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
+int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d Point, Vector3d t, unsigned int i, unsigned int j);
 
 //calculate free parameter of points
@@ -166,7 +166,7 @@ inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
 }
 
 
-inline void inserimento_map(double pass, unsigned int idpar, GeometryLibrary::Traces& trace) {
+inline void inserimento_map(int pass, unsigned int idpar, GeometryLibrary::Traces& trace) {
     if (pass==0) {
 
         // Inserisci nella mappa delle tracce passanti
