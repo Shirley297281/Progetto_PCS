@@ -125,12 +125,15 @@ bool ImportFR(const string &filename,
     getline(converter, token); // Utilizza converter invece di file per ottenere il token dalla stringa
     istringstream(token) >> num_fractures;
 
+    cout << "num fractrues = "<< num_fractures<<endl;
+
     fracture.NumFractures = num_fractures;
 
     fracture.IdFractures.reserve(num_fractures);
     fracture.numVertices.reserve(num_fractures);
     fracture.lenghtMaxEdges.reserve(num_fractures);
     fracture.baricentro.reserve(num_fractures);
+    //fracture.CoordinatesVertice.resize(num_fractures);
 
     //introduco un count per far arrestare la lettura
     int count = 0;
@@ -284,7 +287,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     // funzione raddoppio nelle slide) giuro che qua la pianto con i commenti, ecco inizia il codice da inserire a riga 261
             if (!ris)
             {
-                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
+                cout<<" || ! ||  non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
             }
     // TRACCE SI o NO?
@@ -353,7 +356,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             //cout << " il punto di intersezione tra il lato della frattura "<<i<<" e "<<j<<" è : "<< Punto0.transpose() <<endl;
             //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
 
-            cout << "Frattura " << i << " ha " << iterI << " punti di intersezione." << endl;
+            // cout << "Frattura " << i << " ha " << iterI << " punti di intersezione." << endl;
 
             if (iterI != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
             {
@@ -410,7 +413,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
             // Stampa di debug per iterI e iterJ
 
-            cout << "Frattura " << j << " ha " << iterJ << " punti di intersezione." << endl;
+            // cout << "Frattura " << j << " ha " << iterJ << " punti di intersezione." << endl;
 
             if (iterJ != 2 ) // la frattura non può avere traccia con l'altra frattura e passo ad altre due fratture
             {
@@ -426,7 +429,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
             // Memorizzo i dati nella struttura Traces
             trace.numTraces++;
-            trace.IdTraces.push_back(trace.numTraces);
+            trace.IdTraces.push_back((trace.numTraces)-1);
             //è sbagliato qui, da spostare dopo
             /*Matrix<double, 3, 2> estremiTraccia;
             estremiTraccia.col(0) = vecI[0];
@@ -437,7 +440,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             trace.lengthTraces.push_back(lunghezzaTraccia);*/
 
             // Visualizza i dati della traccia
-            cout << "Traccia " << trace.numTraces << ":" << endl;
+            cout << "\nTraccia " << trace.numTraces << ":" << endl;
             cout << " - Frattura 1: " << i << endl;
             cout << " - Frattura 2: " << j << endl;
             //da spostare dopo
@@ -465,6 +468,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
     }//end for i
+
+
     cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
 
 //magari ancora qua dentro facciamo il primo file output
@@ -597,7 +602,7 @@ bool Tips_Shy(Fractures fracture, Traces trace,const vector<Vector3d>& vecI, con
         Estremi.col(0) = dizfreeParToVec[intersezioni[1]];
         Estremi.col(1) = dizfreeParToVec[intersezioni[2]];
     } else {
-        std::cerr << "Chiavi non trovate nel dizionario!" << std::endl;
+        cerr << "Chiavi non trovate nel dizionario!" << endl;
         return false; // O gestisci l'errore in modo appropriato
     }
 

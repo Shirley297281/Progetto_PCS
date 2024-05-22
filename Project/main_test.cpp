@@ -1,0 +1,15 @@
+#include "gtest/gtest.h"
+#include "src/Utils.hpp"
+#include "src/FracturesTraces.hpp"
+#include <sstream>
+#include "src_test/TestFractures.hpp"
+
+using namespace std;
+using namespace Eigen;
+using namespace GeometryLibrary;
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+
+    return RUN_ALL_TESTS();
+}

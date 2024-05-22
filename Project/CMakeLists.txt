@@ -86,6 +86,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR200_data.txt
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR362_data.txt
               DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR2_datatest.txt
+              DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 
 target_link_libraries(${PROJECT_NAME} ${DFN_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${DFN_include})
