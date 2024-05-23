@@ -8,6 +8,8 @@
 #include <gtest/gtest.h> // framework Google Test
 #include "Eigen/Eigen"
 #include <math.h>
+#include "namespace.hpp"
+#include "inline.hpp"
 
 using namespace std;
 using namespace Eigen;

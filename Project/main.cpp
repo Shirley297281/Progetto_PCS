@@ -1,6 +1,8 @@
 #include "src/Utils.hpp"
 #include "src/FracturesTraces.hpp"
 #include <sstream>
+#include "src/namespace.hpp"
+
 
 using namespace std;
 using namespace Eigen;
