@@ -36,8 +36,14 @@ struct Traces{
     vector<unsigned int> IdTraces = {};  // vettore con Id tracce
     vector<Matrix<double, 3, 2>> CoordinatesEstremiTraces = {}; // vettore con matrice((x,y,z), estremo1 x estremo2)
     vector<double> lengthTraces = {};  // vettore lunghezza tracce
-    map<unsigned int, list<unsigned int>> TraceIdsPassxFracture = {}; //per ogni frattura elenco tracce passanti assegnate
-    map<unsigned int, list<unsigned int>> TraceIdsNoPassxFracture = {};
+
+    //Per ogni traccia memorizzo i due id delle fratture
+    vector<array<unsigned int,2>> IdsFractures;
+
+    // Per ogni frattura, elenco delle tracce passanti assegnate
+    vector<vector<unsigned int>> TraceIdsPassxFracture;
+    // Per ogni frattura, elenco delle tracce non passanti assegnate
+    vector<vector<unsigned int>> TraceIdsNoPassxFracture;
     // vector<vector<vector<unsigned int>>> TriangulatePolygons();
     // vector<double> computePolygonsArea();
 

@@ -34,7 +34,7 @@ void BubbleSort(vector<array<T,2>>& data)
         swapped = false;
         for (size_t i = 1; i < rem_size; i++) {
             if (data[i-1][1] > data[i][1]) {
-                std::swap(data[i-1], data[i]);
+                swap(data[i-1], data[i]);
                 swapped = true;
                 last_seen = i;
             }

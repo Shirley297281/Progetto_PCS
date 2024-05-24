@@ -29,6 +29,11 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point,  int i, vector<Vector3d>& vec, Fractures& fracture);
 
 
+bool exportFR1(const string &filename, const Traces& trace);
+
+bool secondoOutput(const string &filename, const Fractures& fracture, const Traces& trace);
+
+
 }
 
 #endif

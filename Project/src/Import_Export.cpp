@@ -19,7 +19,7 @@ bool ImportFR(const string &filename,
 {
 
     ifstream file;
-    file.open(filename);
+    file.open(filename+"_data.txt");
 
     if (file.fail())
     {
@@ -146,5 +146,106 @@ bool ImportFR(const string &filename,
     return true;
 
 }
+
+bool exportFR1(const string &filename, const Traces& trace)
+{
+    // #include <fstream> in main
+    ofstream outFile("1TRACES_"+filename+".txt");
+    if (!outFile) {
+        cerr << "Errore nell'apertura del file per la scrittura." << endl;
+        return 1;
+    }
+    outFile << "#Number of traces" << endl;
+    outFile << trace.numTraces << endl;
+    outFile << "#TraceId; FractureId1; FractureId2; X1; Y1; Z1; X2; Y2; Z2"<<endl;
+    for (unsigned int i = 0; i < trace.numTraces; i++)
+    {
+        outFile  << trace.IdTraces[i] <<"; ";
+        outFile  << trace.IdsFractures[i][0] <<"; ";
+        outFile  << trace.IdsFractures[i][1];
+
+        Matrix<double, 3, 2> vertices = trace.CoordinatesEstremiTraces[i];
+        Vector3d V1 = vertices.col(0);
+        Vector3d V2 = vertices.col(1);
+        for (unsigned int k = 0; k < 3; k++)
+        {
+            outFile << "; " << V1[k];
+        }
+        for (unsigned int k = 0; k < 3; k++)
+        {
+            outFile << "; " << V2[k];
+        }
+        outFile<< endl;
+    }
+    // Chiudere il file
+    outFile.close();
+    return 8;
+}
+
+
+bool secondoOutput(const string &filename, const Fractures& fracture, const Traces& trace)
+{
+    ofstream outFile("2TRACESforeachFRECTURE_"+filename+".txt");
+    if (!outFile) {
+        cerr << "Errore nell'apertura del file per la scrittura." << endl;
+        return false;
+    }
+    for (unsigned int i=0; i<fracture.NumFractures; i++)
+    {
+        // controllo che esista la chiave
+        vector<unsigned int> VecIdTracesPassI = trace.TraceIdsPassxFracture[i]; //estraggo il vettore di tracce passanti della frattura i
+        vector<unsigned int> VecIdTracesNoPassI = trace.TraceIdsNoPassxFracture[i];  //estraggo il vettore di tracce non passanti della frattura i
+        unsigned int dimPass =  VecIdTracesPassI.size(); //quante sono le tracce passanti della frattura i
+        unsigned int dimNoPass =  VecIdTracesNoPassI.size();
+        unsigned int numTracesXi =  dimPass + dimNoPass;
+        outFile << "#FractureId; NumTraces" << endl;
+        outFile << i << "; " << numTracesXi << endl;
+        outFile << "#TraceId; Tips; Length" <<endl;
+        // Id traccia in ordine di lunghezza
+        vector<array<double,2>> idLenghtsPass = {};  // costruisco vettori di array [idtraccia, lunghezzatraccia]
+        idLenghtsPass.reserve(dimPass);
+        vector<array<double,2>> idLenghtsNoPass = {};
+        idLenghtsNoPass.reserve(dimNoPass);
+        if (dimPass != 0) //altrimenti non faccio nulla
+        {
+            bool tips = false; // false se passante
+            for (unsigned int j=0; j<dimPass; j++) //riempio idLenghtsPass
+            {
+                unsigned int tracciaIdPass = VecIdTracesPassI[j];
+                double lunghezza = trace.lengthTraces[tracciaIdPass]; //estraggo la sua lunghezza tramite la posizione
+                array<double,2> ArrayDiSupporto = {double(tracciaIdPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
+                idLenghtsPass.push_back(ArrayDiSupporto);
+            }
+            // uso bubble sort già creato apposta per ordinare secondo il secondo elemento (lunghezza)
+            BubbleSort(idLenghtsPass);
+
+            for (unsigned int j = 0; j < dimPass; j++)
+            {
+                // printo da idLenghsPass a sto punto ordinato
+                outFile << idLenghtsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLenghtsPass[dimPass-j-1][1]<<endl; // CREARE VARIABILE TIPS, è specificatamente richiesto e sostituire passante con "fracture.Tips[idLengthsPass[i][0]]"
+            }
+        }
+        if (dimNoPass != 0)
+        {
+            bool tips = true; // false se non passante
+            for (unsigned int j=0; j<dimNoPass; j++)
+            {
+                unsigned int tracciaIdNoPass = VecIdTracesNoPassI[j] ;
+                double lunghezza = trace.lengthTraces[tracciaIdNoPass];
+                array<double,2> ArrayDiSupporto = {double(tracciaIdNoPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
+                idLenghtsNoPass.push_back(ArrayDiSupporto);
+            }
+            // uso bubble sort già creato apposta per ordinare secondo il secondo elemento
+            BubbleSort(idLenghtsNoPass);
+            for (unsigned int j = 0; j < dimNoPass; j++)
+            {
+                outFile << idLenghtsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLenghtsNoPass[dimNoPass - j-1][1] << endl; // sostituire con fracture.Tips[idLengthsPass[i][0]]
+            }
+
+        }
+    }
+    return true;
+}
+
 
 }

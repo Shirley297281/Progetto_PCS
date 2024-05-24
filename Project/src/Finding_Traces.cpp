@@ -108,7 +108,9 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
             }
 
-            const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
+            //RADDOPPIO
+
+            //const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
 
             // Reserving space for unordered_maps if applicable
             //trace.TraceIdsPassxFracture.reserve(estimatedSize);
@@ -139,21 +141,23 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     cout << "\n\nRisultati finali delle mappe:" << endl;
 
     // Funzione per stampare il contenuto di una mappa
-    auto printMap = [](const map<unsigned int, list<unsigned int>>& m, const string& mapName) {
-        cout << mapName << " contenuto:" << endl;
-        for (const auto& pair : m) {
-            cout << "Frattura " << pair.first << ": ";
-            for (const auto& traceId : pair.second) {
-                cout << traceId << " ";
-            }
-            cout << endl;
+    cout << "TraceIdsPassxFracture contenuto:" << endl;
+    for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
+        cout << "Frattura " << i << ":";
+        for (unsigned int j = 0; j < trace.TraceIdsPassxFracture[i].size(); ++j) {
+            cout << " " << trace.TraceIdsPassxFracture[i][j];
         }
-    };
+        cout << endl;
+    }
 
-    // Stampa il contenuto delle mappe
-    printMap(trace.TraceIdsPassxFracture, "\nTraceIdsPassxFracture");
-    printMap(trace.TraceIdsNoPassxFracture, "\nTraceIdsNoPassxFracture");
-
+    cout << "TraceIdsNoPassxFracture contenuto:" << endl;
+    for (unsigned int i = 0; i < trace.TraceIdsNoPassxFracture.size(); ++i) {
+        cout << "Frattura " << i << ":";
+        for (unsigned int j = 0; j < trace.TraceIdsNoPassxFracture[i].size(); ++j) {
+            cout << " " << trace.TraceIdsNoPassxFracture[i][j];
+        }
+        cout << endl;
+    }
 
 
     cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
@@ -220,7 +224,15 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         // Visualizza i dati della traccia
         cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
         cout << " - Frattura 1: " << i << endl;
+        trace.IdsFractures.resize(trace.numTraces);
+
         cout << " - Frattura 2: " << j << endl;
+
+        array<unsigned int,2> vector_id_fractures = {};
+        vector_id_fractures[0] = i;
+        vector_id_fractures[1] = j;
+        trace.IdsFractures[trace.numTraces - 1]=vector_id_fractures;
+
         //determino gli estremi
 
         //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
@@ -240,6 +252,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
         trace.CoordinatesEstremiTraces.push_back(Estremi);
         cout << " - Estremi traccia: (" << Estremi.col(0).transpose() << "), (" << Estremi.col(1).transpose() << ")" << endl;
+        trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
     }else
     {
         return 3; //controllo se ci sono casistiche non considerate
@@ -308,7 +321,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     ///
     ///
     ///
-    Tips_Shy(fracture, trace, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
+    // Tips_Shy(fracture, trace, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
 
     ///
     ///

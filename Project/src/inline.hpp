@@ -49,7 +49,7 @@ inline bool system_solution (Vector3d& n1,
         // Risoluzione del sistema lineare per trovare il punto di intersezione
         Vector3d B;
         B << d1, d2, 0;
-        Point = A.colPivHouseholderQr().solve(B);
+        Point = A.fullPivHouseholderQr().solve(B);
         return true;
 
     } else {
@@ -125,19 +125,21 @@ inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
 
 
 inline void inserimento_map(int pass, unsigned int idpar, GeometryLibrary::Traces& trace) {
-    if (pass==0) {
+    if (pass == 0) {
+        // Assicurati che il vettore interno esista
+        if (idpar >= trace.TraceIdsPassxFracture.size()) {
+            trace.TraceIdsPassxFracture.resize(idpar + 1);
+        }
+        // Inserisci l'ID della traccia nel vector TraceIdsPassxFracture nella posizione idpar
+        trace.TraceIdsPassxFracture[idpar].push_back(trace.numTraces - 1);
 
-        // Inserisci nella mappa delle tracce passanti
-        auto ret = trace.TraceIdsPassxFracture.insert({idpar, {(trace.numTraces - 1)}});
-        if (!ret.second) {
-            ret.first->second.push_back(trace.numTraces - 1);
-        }
     } else {
-        // Inserisci nella mappa delle tracce non passanti
-        auto ret = trace.TraceIdsNoPassxFracture.insert({idpar, {(trace.numTraces - 1)}});
-        if (!ret.second) {
-            ret.first->second.push_back(trace.numTraces - 1);
+        // Assicurati che il vettore interno esista
+        if (idpar >= trace.TraceIdsNoPassxFracture.size()) {
+            trace.TraceIdsNoPassxFracture.resize(idpar + 1);
         }
+        // Inserisci l'ID della traccia nel vector TraceIdsNoPassxFracture nella posizione idpar
+        trace.TraceIdsNoPassxFracture[idpar].push_back(trace.numTraces - 1);
     }
 }
 
