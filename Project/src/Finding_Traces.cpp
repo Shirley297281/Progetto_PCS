@@ -110,11 +110,11 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
             //RADDOPPIO
 
-            //const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
+            const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
 
             // Reserving space for unordered_maps if applicable
-            //trace.TraceIdsPassxFracture.reserve(estimatedSize);
-            //trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
+            trace.TraceIdsPassxFracture.reserve(estimatedSize);
+            trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
             int result = Controllo_tracce2(fracture,trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
@@ -218,14 +218,13 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
         // Memorizzo i dati nella struttura Traces
         trace.numTraces++;
-        trace.IdTraces.push_back((trace.numTraces)-1);
+        trace.IdsFractures.resize(trace.numTraces);
+        trace.IdTraces.push_back(trace.numTraces-1);
 
 
         // Visualizza i dati della traccia
         cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
         cout << " - Frattura 1: " << i << endl;
-        trace.IdsFractures.resize(trace.numTraces);
-
         cout << " - Frattura 2: " << j << endl;
 
         array<unsigned int,2> vector_id_fractures = {};

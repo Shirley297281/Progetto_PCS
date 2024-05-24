@@ -192,22 +192,44 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
     }
     for (unsigned int i=0; i<fracture.NumFractures; i++)
     {
+
+
+        vector<unsigned int> VecIdTracesPassI = {};
+        vector<unsigned int> VecIdTracesNoPassI ={};
+        unsigned int dimPass = 0;
+        unsigned int dimNoPass = 0;
+
+
+
+
+        if (trace.TraceIdsPassxFracture[i].size() == 0 && trace.TraceIdsNoPassxFracture[i].size() == 0) {
+            continue; // se entrambi i vettori sono vuoti, salta questa frattura
+
+        }else if(!trace.TraceIdsPassxFracture[i].empty()){
+
+           VecIdTracesPassI = trace.TraceIdsPassxFracture[i]; //estraggo il vettore di tracce passanti della frattura i
+           dimPass =  VecIdTracesPassI.size();
+
+        }else{
+            VecIdTracesNoPassI = trace.TraceIdsNoPassxFracture[i];  //estraggo il vettore di tracce non passanti della frattura i
+            dimNoPass =  VecIdTracesNoPassI.size();
+        }
         // controllo che esista la chiave
-        vector<unsigned int> VecIdTracesPassI = trace.TraceIdsPassxFracture[i]; //estraggo il vettore di tracce passanti della frattura i
-        vector<unsigned int> VecIdTracesNoPassI = trace.TraceIdsNoPassxFracture[i];  //estraggo il vettore di tracce non passanti della frattura i
-        unsigned int dimPass =  VecIdTracesPassI.size(); //quante sono le tracce passanti della frattura i
-        unsigned int dimNoPass =  VecIdTracesNoPassI.size();
+
         unsigned int numTracesXi =  dimPass + dimNoPass;
         outFile << "#FractureId; NumTraces" << endl;
         outFile << i << "; " << numTracesXi << endl;
         outFile << "#TraceId; Tips; Length" <<endl;
+
         // Id traccia in ordine di lunghezza
         vector<array<double,2>> idLenghtsPass = {};  // costruisco vettori di array [idtraccia, lunghezzatraccia]
-        idLenghtsPass.reserve(dimPass);
+
         vector<array<double,2>> idLenghtsNoPass = {};
-        idLenghtsNoPass.reserve(dimNoPass);
+
+
         if (dimPass != 0) //altrimenti non faccio nulla
         {
+            idLenghtsPass.reserve(dimPass);
             bool tips = false; // false se passante
             for (unsigned int j=0; j<dimPass; j++) //riempio idLenghtsPass
             {
@@ -227,6 +249,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
         }
         if (dimNoPass != 0)
         {
+            idLenghtsNoPass.reserve(dimNoPass);
             bool tips = true; // false se non passante
             for (unsigned int j=0; j<dimNoPass; j++)
             {

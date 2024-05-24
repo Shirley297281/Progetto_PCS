@@ -168,9 +168,11 @@ inline bool soluzione_sistema3x2 (Vector3d& t,
 
         int rankC = Completa.fullPivLu().rank();
 
+        Vector3d vettopa = t.cross(vettoreDirezioneI);
+        double norm = vettopa.norm();
 
         //cout << "\n\nIl rango della matrice A è: " << rank << std::endl;
-        if (rankA == rankC && rankA == 2) {
+        if (norm>1e-15) {
             VectorXd sol;
             if (A.rows() >= A.cols()) {
 
