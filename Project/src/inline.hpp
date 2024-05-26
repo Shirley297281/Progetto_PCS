@@ -164,9 +164,9 @@ inline bool soluzione_sistema3x2 (Vector3d& t,
         Completa.col(2) << termine_noto;
 
         // Calcola il rango utilizzando la decomposizione LU
-        int rankA = A.fullPivLu().rank();
+        //int rankA = A.fullPivLu().rank();
 
-        int rankC = Completa.fullPivLu().rank();
+        //int rankC = Completa.fullPivLu().rank();
 
         Vector3d vettopa = t.cross(vettoreDirezioneI);
         double norm = vettopa.norm();

@@ -176,7 +176,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     double freeParP3 = 0.0;
     double freeParP4 = 0.0;
 
-    vector<array<double,2>> idpar = {}; //è un vector di arrai da 2 che contengono l'id della frattura e il parametro del punto
+    vector<array<double,2>> idpar = {}; //è un vector di array da 2 che contengono l'id della frattura e il parametro del punto
     idpar.reserve(4);
 
     for (unsigned int s=0; s<3; s++)
@@ -234,7 +234,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
         //determino gli estremi
 
-        //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
+        //creo la matrice 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
         Matrix<double, 3, 2> Estremi;
 
         // Controllo che le chiavi esistano nel dizionario prima di accedervi
@@ -254,7 +254,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
     }else
     {
-        return 3; //controllo se ci sono casistiche non considerate
+        return 2; //controllo se ci sono casistiche non considerate
     }
 
 

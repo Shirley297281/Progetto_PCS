@@ -8,7 +8,8 @@
 
 //facciamo anche l'export??
 
-
+//using namespace Eigen;
+//using namespace std;
 
 namespace GeometryLibrary
 {
