@@ -91,12 +91,12 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass) // 1^ caso
 
     Fractures fracture;
     Traces trace;
-    vector<Vector3d> vecI; // contiene i candidati estremi della traccia per la frattura i
+    vector<Vector3d> vecI;
     vecI.reserve(2);
     vecI.push_back(v1);
     vecI.push_back(v2);
 
-    vector<Vector3d> vecJ; // contiene i candidati estremi della traccia per la frattura j
+    vector<Vector3d> vecJ;
     vecJ.reserve(2);
     vecJ.push_back(v3);
     vecJ.push_back(v4);
@@ -107,7 +107,7 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass) // 1^ caso
     unsigned int j = 1;
     int sol;
     sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 3);
+    EXPECT_EQ(sol, 5);
 }
 
 TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
@@ -119,12 +119,12 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
 
     Fractures fracture;
     Traces trace;
-    vector<Vector3d> vecI; // contiene i candidati estremi della traccia per la frattura i
+    vector<Vector3d> vecI;
     vecI.reserve(2);
     vecI.push_back(v1);
     vecI.push_back(v2);
 
-    vector<Vector3d> vecJ; // contiene i candidati estremi della traccia per la frattura j
+    vector<Vector3d> vecJ;
     vecJ.reserve(2);
     vecJ.push_back(v2);
     vecJ.push_back(v3);
@@ -135,7 +135,7 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
     unsigned int j = 1;
     int sol;
     sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 3);
+    EXPECT_EQ(sol, 4);
 }
 
 TEST(TestControllo_tracce2, Test_Notrace) // 3^ caso
@@ -148,12 +148,12 @@ TEST(TestControllo_tracce2, Test_Notrace) // 3^ caso
 
     Fractures fracture;
     Traces trace;
-    vector<Vector3d> vecI; // contiene i candidati estremi della traccia per la frattura i
+    vector<Vector3d> vecI;
     vecI.reserve(2);
     vecI.push_back(v1);
     vecI.push_back(v2);
 
-    vector<Vector3d> vecJ; // contiene i candidati estremi della traccia per la frattura j
+    vector<Vector3d> vecJ;
     vecJ.reserve(2);
     vecJ.push_back(v3);
     vecJ.push_back(v4);
@@ -174,23 +174,23 @@ TEST(TestControllo_tracce2, Test_2coindenteExtremes) // 4^ caso
     Vector3d v2(-1.0, 0.0, 1.0);
     Fractures fracture;
     Traces trace;
-    vector<Vector3d> vecI; // contiene i candidati estremi della traccia per la frattura i
+    vector<Vector3d> vecI;
     vecI.reserve(2);
     vecI.push_back(v1);
     vecI.push_back(v2);
 
-    vector<Vector3d> vecJ; // contiene i candidati estremi della traccia per la frattura j
+    vector<Vector3d> vecJ;
     vecJ.reserve(2);
     vecI.push_back(v1);
     vecI.push_back(v2);
 
-    Vector3d Point = v1;
-    Vector3d t(2, 0, 0);
+    Vector3d Point = v2;
+    Vector3d t(-2, 0, 0);
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
     sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 3);
+    EXPECT_EQ(sol, 3); // il test fallisce probabilmente da quello che viene implementato alla riga 182 (quando entra nell'if per stabilire passanti e non le cose già non funzionano)
 }
 
 TEST(TestControllo_tracce2, Test_2notpass) // 5^ caso
@@ -219,7 +219,7 @@ TEST(TestControllo_tracce2, Test_2notpass) // 5^ caso
     unsigned int j = 1;
     int sol;
     sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 3);
+    EXPECT_EQ(sol, 6);
 }
 
 /*
@@ -347,44 +347,6 @@ TEST(TestCalcola_par, Test_t_intersect_2vertices){
     EXPECT_EQ(par, 2);
 }
 
-/*
-TEST(TestFractures, TestTraceSorting)
-{
-    // create DFN with multiple fractures and traces
-
-    // call the function to sort traces by length in descending order
-
-    // verify that the traces are correctly sorted for each fracture
-
-}
-
-TEST(TestFractures, TestPassingNonPassingSeparation)
-{
-    // create DFN with multiple fractures and traces
-
-    // call the function to separate passing and non-passing traces
-
-    // verify that the passing and non-passing traces are correctly separated for each fracture
-}
-
-TEST(TestFractures, TestFractureIntersection)
-{
-    // create DFN with multiple fractures that intersect
-
-    // verify that the fractures are correctly intersected and the resulting sub-polygons are correctly generated
-}
-
-TEST(TestFractures, TestEdgeCases)
-{
-    // create DFN with a sigle fracture
-
-    // create a DFN with no traces
-
-    // create a DFN with multiple fractures that do not intersect
-
-    // verify that the correct results are returned for each edge case
-}
-*/
 
 // test su function implementate nel file Utils.cpp
 TEST(TestUtils, TestBarycenter)

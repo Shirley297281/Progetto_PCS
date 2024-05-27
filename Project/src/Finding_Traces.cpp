@@ -258,7 +258,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     }
 
 
-    //controllo PASSANTO O NO?
+    //controllo PASSANTi O NO?
 
     std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
 
@@ -266,19 +266,17 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
 
     int pass = 0;
-    //evitiamo cancellaione numerica con la sottrazione
-    if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){
+    //evitiamo cancellazione numerica con la sottrazione
+    if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){ // estremi coincidenti, passante per entrambe le fratture
 
         pass = 0;
         inserimento_map(pass,idpar[0][0], trace);
         inserimento_map(pass,idpar[1][0], trace);
 
         cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
+        return 3;
 
-
-
-
-    }else if (abs(idpar[0][1]- idpar[1][1]) < 1e-14){ //caso traccia passante per entrambi
+    }else if (abs(idpar[0][1]- idpar[1][1]) < 1e-14){ // passante per una frattura e non per l'altra, un estremo coincidente
 
         pass = 0;
         inserimento_map(pass,idpar[2][0], trace);
@@ -286,8 +284,9 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         pass = 1;
         inserimento_map(pass,idpar[3][0], trace);
         cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
+        return 4;
     }
-    else if(abs(idpar[2][1]- idpar[3][1]) < 1e-14){ //caso
+    else if(abs(idpar[2][1]- idpar[3][1]) < 1e-14){ // analogo al caso precedente ma con l'altro estremo coincidente della traccia
 
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
@@ -295,19 +294,22 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
         cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
+        return 4;
     }
-    else if (idpar[1][0] == idpar[2][0]){
+    else if (idpar[1][0] == idpar[2][0]){ // una frattura dentro l'altra, passante per quella interna e non per quella esterna
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
         cout << "   Passante per la frattura " <<idpar[1][0]<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
         cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
+        return 5;
     }else{
         pass = 1;
         inserimento_map(pass,idpar[1][0], trace);
         inserimento_map(pass,idpar[0][0], trace);
         cout << "   NON Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
+        return 6;
     }
 
 
@@ -326,7 +328,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     ///
     /// fine
 
-    return 3;
+    return 0;
 }
 
 
