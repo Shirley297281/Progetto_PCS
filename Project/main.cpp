@@ -12,7 +12,7 @@ using namespace GeometryLibrary;
 int main()
 {
     Fractures fracture;
-    string filename = "FR10";
+    string filename = "FR10_data.txt";
 
     if( !ImportFR(filename, fracture) )
         return 1;

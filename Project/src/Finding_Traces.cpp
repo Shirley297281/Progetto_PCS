@@ -25,7 +25,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 {
     int escluse = 0;
 
-    /*
+
     // sovrastima ragionevole basata sul numero massimo di combinazioni di fratture = binomiale
     const unsigned int estimatedNumTraces = (fracture.NumFractures * (fracture.NumFractures - 1)) * 0.5;
     // Stima del numero di tracce: uso la sovrastima perchè riservare troppo spazio in anticipo può sprecare memoria,
@@ -35,8 +35,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     trace.IdTraces.reserve(estimatedNumTraces);
     trace.CoordinatesEstremiTraces.reserve(estimatedNumTraces);
     trace.lengthTraces.reserve(estimatedNumTraces);
-    trace.vectorTips.reserve(estimatedNumTraces);
-    */
+
+
 
     for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
         for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
@@ -267,7 +267,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
     int pass = 0;
     //evitiamo cancellazione numerica con la sottrazione
-    if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){ // estremi coincidenti, passante per entrambe le fratture
+    if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){ //passante per entrambe le fratture
 
         pass = 0;
         inserimento_map(pass,idpar[0][0], trace);
@@ -276,35 +276,32 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
         return 3;
 
-    }else if (abs(idpar[0][1]- idpar[1][1]) < 1e-14){ // passante per una frattura e non per l'altra, un estremo coincidente
+    }else if ((idpar[0][0] == double(j) &&  idpar[3][0] == double(j)
+                || (idpar[0][0]==double(i) && idpar[0][2]==double(i) && abs(idpar[0][1]-idpar[1][1])<1e-14)
+                || (idpar[0][0]==double(j) && idpar[0][2]==double(j) && abs(idpar[2][1]-idpar[3][1])<1e-14))) // passante solo per i
+    {
 
         pass = 0;
-        inserimento_map(pass,idpar[2][0], trace);
-        cout << "   Passante per la frattura " <<idpar[2][0]<< " ."<<endl;
+        inserimento_map(pass,i, trace);
+        cout << "   Passante per la frattura " <<i<< " ."<<endl;
         pass = 1;
-        inserimento_map(pass,idpar[3][0], trace);
-        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
+        inserimento_map(pass,j, trace);
+        cout << "   NON Passante per la frattura " <<j<< " ."<<endl;
         return 4;
     }
-    else if(abs(idpar[2][1]- idpar[3][1]) < 1e-14){ // analogo al caso precedente ma con l'altro estremo coincidente della traccia
-
+    else if((idpar[0][0] == double(i) && idpar[3][0] == double(i))
+              ||(idpar[0][0]== double(j) && idpar[0][2] == double(j) && abs(idpar[0][1]-idpar[1][1])<1e-14)
+              || (idpar[0][0]== i && idpar[0][2] == i && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per j
+    {
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
-        cout << "   Passante per la frattura " <<idpar[1][0]<< " ."<<endl;
+        cout << "   Passante per la frattura " <<j<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
-        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
+        cout << "   NON Passante per la frattura " <<i<< " ."<<endl;
         return 4;
     }
-    else if (idpar[1][0] == idpar[2][0]){ // una frattura dentro l'altra, passante per quella interna e non per quella esterna
-        pass = 0;
-        inserimento_map(pass,idpar[1][0], trace);
-        cout << "   Passante per la frattura " <<idpar[1][0]<< " ."<<endl;
-        pass = 1;
-        inserimento_map(pass,idpar[0][0], trace);
-        cout << "   NON Passante per la frattura " <<idpar[3][0]<< " ."<<endl;
-        return 5;
-    }else{
+    else{ //non passante per entrambe
         pass = 1;
         inserimento_map(pass,idpar[1][0], trace);
         inserimento_map(pass,idpar[0][0], trace);

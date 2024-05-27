@@ -33,17 +33,18 @@ inline bool system_solution (Vector3d& n1,
     d1 = n1[0] * b1[0] + n1[1] * b1[1]  + n1[2] * b1[2];
     d2 = n2[0] * b2[0] + n2[1] * b2[1]  + n2[2] * b2[2];
 
-
+    Vector3d vec = n1.cross(n2);
     //parametrizzo la z = t
     // t individua la direzione della retta di intersezione tra i due piani. dobbiamo trovare un Point qualsiasi che sta su quella retta,
     //    quindi un suo parametro può essere scelto a piacere. Scelgo la z del Point come parametro libero, ma non lo posso fare se la t[2] = 0, qiundi selezione diversa se t[2] = 0
-    if (t[2]>1e-14)//se t[2] != 0
-    {
+    //if (t[2]>1e-14)//se t[2] != 0
+    //{
         // Faccio quel che ho fTTO ALL'INIZIO
         // Create the matrix A and initialize it with vectors n1, n2, and t
-        Matrix2d A;
-        A << n1[0], n1[1],
-            n2[0], n2[1];
+        Matrix3d A;
+        A << n1[0], n1[1],n1[2],
+            n2[0], n2[1],n2[2],
+            t[0], t[1], t[2];
         //A.row(2) = t;
 
         //risolviamo il sistema
@@ -51,22 +52,21 @@ inline bool system_solution (Vector3d& n1,
         // aggiungere non complanarity! controllo che il modulo di t sia diverso da 0 per evitare prodotto vettoriale != 0
 
         // Verifica della possibilità di intersezione
-        if (abs(A.determinant()) > 1e-14 && t.dot(t) > 1e-14) {
+        if (vec.dot(t) > 1e-14) {
             // Risoluzione del sistema lineare per trovare il punto di intersezione
-            Vector2d B;
-            B << d1, d2;
-            Vector2d duecompPoint = A.fullPivHouseholderQr().solve(B); //(x,y,t)
-            Point[0] = duecompPoint[0];
-            Point[1] = duecompPoint[1];
-            Point[2] = 0;
+            Vector3d B;
+            B << d1, d2,0;
+            Point = A.colPivHouseholderQr().solve(B); //(x,y,t)
+
             return true;
 
         } else {
             // I piani sono paralleli o coincidenti
+
             return false;
         }
 
-    }else{//se t[2] == 0
+    /*}else{//se t[2] == 0
         //devo scegliere un altro parametro libero rispetto a quello che
         // Create the matrix A and initialize it with vectors n1, n2, and t
         Matrix2d A;
@@ -80,11 +80,11 @@ inline bool system_solution (Vector3d& n1,
         // aggiungere non complanarity! controllo che il modulo di t sia diverso da 0 per evitare prodotto vettoriale != 0
 
         // Verifica della possibilità di intersezione
-        if (abs(A.determinant()) > 1e-14 && t.dot(t) > 1e-14) {
+        if (vec.dot(t) > 1e-14) {
             // Risoluzione del sistema lineare per trovare il punto di intersezione
             Vector2d B;
             B << d1, d2;
-            Vector2d duecompPoint = A.fullPivHouseholderQr().solve(B); //(x,y,t)
+            Vector2d duecompPoint = A.colPivHouseholderQr().solve(B); //(x,y,t)
             Point[0] = duecompPoint[0];
             Point[2] = duecompPoint[1];
             Point[1] = 0;
@@ -94,10 +94,7 @@ inline bool system_solution (Vector3d& n1,
             // I piani sono paralleli o coincidenti
             return false;
         }
-    }
-
-
-
+    }*/
 }
 
 //troviamo il punto di intersezione tra la retta (Point, t)  e la retta di prolungamento del segmento V1V2

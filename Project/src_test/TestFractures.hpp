@@ -16,7 +16,7 @@ using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
 // test su fratture e tracce ->
-/*TEST(TestFractures, TestDFNReading)
+TEST(TestFractures, TestDFNReading)
 {
     ifstream file("FR2_datatest.txt");
     if (!file.is_open()) {
@@ -75,7 +75,7 @@ using namespace GeometryLibrary;
     }else{
         cerr << "No coordinates found for the second fracture" << endl;
     }
-}*/
+}
 
 
 // test sulle function contenute in Finding_Traces.cpp

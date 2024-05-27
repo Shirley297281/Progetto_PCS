@@ -20,7 +20,7 @@ bool ImportFR(const string &filename,
 {
 
     ifstream file;
-    file.open(filename+"_data.txt");
+    file.open(filename);
 
     if (file.fail())
     {
@@ -151,7 +151,7 @@ bool ImportFR(const string &filename,
 bool exportFR1(const string &filename, const Traces& trace)
 {
     // #include <fstream> in main
-    ofstream outFile("1TRACES_"+filename+".txt");
+    ofstream outFile("1TRACES_"+filename);
     if (!outFile) {
         cerr << "Errore nell'apertura del file per la scrittura." << endl;
         return 1;
@@ -186,7 +186,7 @@ bool exportFR1(const string &filename, const Traces& trace)
 
 bool secondoOutput(const string &filename, const Fractures& fracture, const Traces& trace)
 {
-    ofstream outFile("2TRACESforeachFRECTURE_"+filename+".txt");
+    ofstream outFile("2TRACESforeachFRECTURE_"+filename);
     if (!outFile) {
         cerr << "Errore nell'apertura del file per la scrittura." << endl;
         return false;
@@ -206,12 +206,14 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
         if (trace.TraceIdsPassxFracture[i].size() == 0 && trace.TraceIdsNoPassxFracture[i].size() == 0) {
             continue; // se entrambi i vettori sono vuoti, salta questa frattura
 
-        }else if(!trace.TraceIdsPassxFracture[i].empty()){
+        }
+        if(!trace.TraceIdsPassxFracture[i].empty()){
 
            VecIdTracesPassI = trace.TraceIdsPassxFracture[i]; //estraggo il vettore di tracce passanti della frattura i
            dimPass =  VecIdTracesPassI.size();
 
-        }else{
+        }
+        if (!trace.TraceIdsNoPassxFracture[i].empty()){
             VecIdTracesNoPassI = trace.TraceIdsNoPassxFracture[i];  //estraggo il vettore di tracce non passanti della frattura i
             dimNoPass =  VecIdTracesNoPassI.size();
         }
