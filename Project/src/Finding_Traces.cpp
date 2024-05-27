@@ -7,9 +7,7 @@
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
 
-#include <sstream>
 #include <iostream>
-#include <iomanip>
 #include <vector>
 #include <chrono> //for counting time
 #include <stdlib.h>
@@ -116,13 +114,13 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             trace.TraceIdsPassxFracture.reserve(estimatedSize);
             trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
-            int result = Controllo_tracce2(fracture,trace,vecI,vecJ,Point,t,i,j);
+            int result = Controllo_tracce2(fracture, trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
             {
                 cout<<"non ho intersezione perchè sono nel caso 1 e 2"<<endl;
                 continue;
             }
-            else if (result == 3)
+            else if (result == 2)
             {
                 cout<<"non ho considerato questa casistica: "<< i << " e "<< j<< endl;
                 continue;
@@ -197,7 +195,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     idpar.push_back({double(j), freeParP4});
 
     //ora lo devo ordinare rispetto a freeParP_
-    BubbleSort(idpar);
+    BubbleSort_mod(idpar);
 
     // creo un dizionario per poter riottenere le informazioni sul punto sulla retta a partire dal parametro libero
     map<double, Vector3d> dizfreeParToVec;
@@ -263,8 +261,6 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
 
 
-
-
     int pass = 0;
     //evitiamo cancellazione numerica con la sottrazione
     if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){ //passante per entrambe le fratture
@@ -276,9 +272,9 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
         return 3;
 
-    }else if ((idpar[0][0] == double(j) &&  idpar[3][0] == double(j)
+    }else if (  (idpar[0][0] == double(j) &&  idpar[3][0] == double(j))
                 || (idpar[0][0]==double(i) && idpar[0][2]==double(i) && abs(idpar[0][1]-idpar[1][1])<1e-14)
-                || (idpar[0][0]==double(j) && idpar[0][2]==double(j) && abs(idpar[2][1]-idpar[3][1])<1e-14))) // passante solo per i
+                || (idpar[0][0]==double(j) && idpar[0][2]==double(j) && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per i
     {
 
         pass = 0;
@@ -299,7 +295,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
         cout << "   NON Passante per la frattura " <<i<< " ."<<endl;
-        return 4;
+        return 5;
     }
     else{ //non passante per entrambe
         pass = 1;
@@ -319,7 +315,8 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     ///
     ///
     ///
-    // Tips_Shy(fracture, trace, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
+
+    // bool a = Tips_Shy(fracture, trace, i, j, dizfreeParToVec, freeParP1, freeParP2, freeParP3, freeParP4);
 
     ///
     ///
@@ -330,31 +327,31 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
 
 
-bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<double, Vector3d>& dizfreeParToVec,
+bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j, map<double, Vector3d>& dizfreeParToVec,
               double freeParP1,
               double freeParP2,
               double freeParP3,
               double freeParP4)
 {
+    // Create a vector of 4 elements to sort
+    vector<double> intersezioni = {freeParP1, freeParP2, freeParP3, freeParP4};
 
-    //creo un vettore di 4 elementi da ordinare
-    vector<double> intersezioni= {freeParP1, freeParP2, freeParP3, freeParP4};
+    // Uncomment and implement this if sorting is needed
+    // BubbleSort(intersezioni);
 
-    //BubbleSort(intersezioni);
-
-    //creo la matrcie 3 righe 2 colonne da inserire nel vettore delle matrici degli estremi.
+    // Create a matrix with 3 rows and 2 columns to insert into the extremi matrix vector.
     Matrix<double, 3, 2> Estremi;
 
-    // Controllo che le chiavi esistano nel dizionario prima di accedervi
+    // Check if the keys exist in the map before accessing them
     if (dizfreeParToVec.find(intersezioni[1]) != dizfreeParToVec.end() &&
         dizfreeParToVec.find(intersezioni[2]) != dizfreeParToVec.end()) {
 
-        // Riempio la matrice con i punti dai valori del dizionario
+        // Fill the matrix with points from the map values
         Estremi.col(0) = dizfreeParToVec[intersezioni[1]];
         Estremi.col(1) = dizfreeParToVec[intersezioni[2]];
     } else {
         cerr << "Chiavi non trovate nel dizionario!" << endl;
-        return false; // O gestisci l'errore in modo appropriato
+        return false; // Handle error appropriately
     }
 
     trace.CoordinatesEstremiTraces.push_back(Estremi);
@@ -363,8 +360,7 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<
 
     trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
 
-
-    std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
+    auto t_begin = chrono::steady_clock::now();
 
     int touchCount = 0;
     bool passa;
@@ -372,7 +368,7 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<
     MatrixXd vertice = fracture.CoordinatesVertice[i];
     for (int k = 0; k < vertice.cols(); ++k) {
         Vector3d v1 = vertice.col(k);
-        Vector3d v2 = vertice.col((k + 1) % vertice.cols());;
+        Vector3d v2 = vertice.col((k + 1) % vertice.cols());
         double edgeLength = euclidean_distance(v1, v2);
 
         for (int e = 0; e < 2; ++e) {
@@ -384,23 +380,14 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<
         }
     }
 
-    if (touchCount == 2){
-        //la traccia è passante
-        passa = true;
-
-    }else{
-        passa = false;
-
-    }
-
-    cout << " - Passante per la frattura " <<i<< " : " << (passa ? "Sì" : "No") << endl;
-
+    passa = (touchCount == 2);
+    cout << " - Passante per la frattura " << i << " : " << (passa ? "Sì" : "No") << endl;
 
     touchCount = 0;
     vertice = fracture.CoordinatesVertice[j];
     for (int k = 0; k < vertice.cols(); ++k) {
         Vector3d v1 = vertice.col(k);
-        Vector3d v2 = vertice.col((k + 1)% vertice.cols());
+        Vector3d v2 = vertice.col((k + 1) % vertice.cols());
         double edgeLength = euclidean_distance(v1, v2);
 
         for (int e = 0; e < 2; ++e) {
@@ -412,28 +399,17 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j ,map<
         }
     }
 
-    if (touchCount == 2){
-        //la traccia è passante
-        passa = true;
-
-    }else{
-        passa = false;
-
-    }
-
-    cout << " - Passante per la frattura " <<j<< " : " << (passa ? "Sì" : "No") << endl;
+    passa = (touchCount == 2);
+    cout << " - Passante per la frattura " << j << " : " << (passa ? "Sì" : "No") << endl;
     cout << endl;
 
-
-    std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
+    auto t_end = chrono::steady_clock::now();
     double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    cout<<"\t ------- Tips_sHy elapsed time: "<<duration<<" microseconds\n" <<endl;
+    cout << "\t ------- Tips_sHy elapsed time: " << duration << " microseconds" << endl;
 
-
-
-
-
+    return true;
 }
+
 
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& vec, Fractures& fracture)
 {

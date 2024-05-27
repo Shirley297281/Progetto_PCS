@@ -242,7 +242,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
                 idLenghtsPass.push_back(ArrayDiSupporto);
             }
             // uso bubble sort già creato apposta per ordinare secondo il secondo elemento (lunghezza)
-            BubbleSort(idLenghtsPass);
+            BubbleSort_mod(idLenghtsPass);
 
             for (unsigned int j = 0; j < dimPass; j++)
             {
@@ -262,7 +262,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
                 idLenghtsNoPass.push_back(ArrayDiSupporto);
             }
             // uso bubble sort già creato apposta per ordinare secondo il secondo elemento
-            BubbleSort(idLenghtsNoPass);
+            BubbleSort_mod(idLenghtsNoPass);
             for (unsigned int j = 0; j < dimNoPass; j++)
             {
                 outFile << idLenghtsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLenghtsNoPass[dimNoPass - j-1][1] << endl; // sostituire con fracture.Tips[idLengthsPass[i][0]]
