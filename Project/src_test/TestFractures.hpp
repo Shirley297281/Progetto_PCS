@@ -107,7 +107,7 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass) // 1^ caso
     unsigned int j = 1;
     int sol;
     sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 5);
+    EXPECT_EQ(sol, 4);
 }
 
 TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
@@ -181,8 +181,8 @@ TEST(TestControllo_tracce2, Test_2coindenteExtremes) // 4^ caso
 
     vector<Vector3d> vecJ;
     vecJ.reserve(2);
-    vecI.push_back(v1);
-    vecI.push_back(v2);
+    vecJ.push_back(v1);
+    vecJ.push_back(v2);
 
     Vector3d Point = v2;
     Vector3d t(-2, 0, 0);

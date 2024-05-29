@@ -262,6 +262,13 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
 
     int pass = 0;
+
+
+    cout << "idpar[0][0]==double(i) : "<<idpar[0][0]<< "=="<< double(i)<<endl;
+    cout << "idpar[2][0]==double(i) : "<<idpar[2][0]<< "=="<< double(i)<<endl;
+    cout << "abs: "<< abs(idpar[0][1]-idpar[1][1]);
+
+
     //evitiamo cancellazione numerica con la sottrazione
     if (abs(idpar[0][1]- idpar[1][1]) < 1e-14 && abs(idpar[2][1]- idpar[3][1]) < 1e-14){ //passante per entrambe le fratture
 
@@ -273,8 +280,8 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         return 3;
 
     }else if (  (idpar[0][0] == double(j) &&  idpar[3][0] == double(j))
-                || (idpar[0][0]==double(i) && idpar[0][2]==double(i) && abs(idpar[0][1]-idpar[1][1])<1e-14)
-                || (idpar[0][0]==double(j) && idpar[0][2]==double(j) && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per i
+                || (idpar[0][0]==double(i) && idpar[2][0]==double(i) && abs(idpar[0][1]-idpar[1][1])<1e-14)
+                || (idpar[0][0]==double(j) && idpar[2][0]==double(j) && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per i
     {
 
         pass = 0;
@@ -286,8 +293,8 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         return 4;
     }
     else if((idpar[0][0] == double(i) && idpar[3][0] == double(i))
-              ||(idpar[0][0]== double(j) && idpar[0][2] == double(j) && abs(idpar[0][1]-idpar[1][1])<1e-14)
-              || (idpar[0][0]== i && idpar[0][2] == i && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per j
+              ||(idpar[0][0]== double(j) && idpar[2][0] == double(j) && abs(idpar[0][1]-idpar[1][1])<1e-14)
+               || (idpar[0][0]== double(i) && idpar[2][0] == double(i) && abs(idpar[2][1]-idpar[3][1])<1e-14) ) // passante solo per j
     {
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
@@ -295,7 +302,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
         cout << "   NON Passante per la frattura " <<i<< " ."<<endl;
-        return 5;
+        return 4;
     }
     else{ //non passante per entrambe
         pass = 1;
