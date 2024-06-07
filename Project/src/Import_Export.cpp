@@ -184,13 +184,15 @@ bool exportFR1(const string &filename, const Traces& trace)
 }
 
 
-bool secondoOutput(const string &filename, const Fractures& fracture, const Traces& trace)
+bool secondoOutput(const string &filename, const Fractures& fracture, Traces& trace)
 {
     ofstream outFile("2TRACESforeachFRECTURE_"+filename);
     if (!outFile) {
         cerr << "Errore nell'apertura del file per la scrittura." << endl;
         return false;
     }
+
+
     for (unsigned int i=0; i<fracture.NumFractures; i++)
     {
 
@@ -202,11 +204,6 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
 
 
 
-
-        if (trace.TraceIdsPassxFracture[i].size() == 0 && trace.TraceIdsNoPassxFracture[i].size() == 0) {
-            continue; // se entrambi i vettori sono vuoti, salta questa frattura
-
-        }
         if(!trace.TraceIdsPassxFracture[i].empty()){
 
            VecIdTracesPassI = trace.TraceIdsPassxFracture[i]; //estraggo il vettore di tracce passanti della frattura i
@@ -217,7 +214,12 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
             VecIdTracesNoPassI = trace.TraceIdsNoPassxFracture[i];  //estraggo il vettore di tracce non passanti della frattura i
             dimNoPass =  VecIdTracesNoPassI.size();
         }
-        // controllo che esista la chiave
+
+        if(dimPass == 0 && dimNoPass == 0){
+            continue;
+        }
+
+
 
         unsigned int numTracesXi =  dimPass + dimNoPass;
         outFile << "#FractureId; NumTraces" << endl;
@@ -225,51 +227,76 @@ bool secondoOutput(const string &filename, const Fractures& fracture, const Trac
         outFile << "#TraceId; Tips; Length" <<endl;
 
         // Id traccia in ordine di lunghezza
-        vector<array<double,2>> idLenghtsPass = {};  // costruisco vettori di array [idtraccia, lunghezzatraccia]
+        vector<array<double,2>> idLengthsPass = {};  // costruisco vettori di array [idtraccia, lunghezzatraccia]
 
-        vector<array<double,2>> idLenghtsNoPass = {};
+        vector<array<double,2>> idLengthsNoPass = {};
 
 
         if (dimPass != 0) //altrimenti non faccio nulla
         {
-            idLenghtsPass.reserve(dimPass);
+            idLengthsPass.reserve(dimPass);
             bool tips = false; // false se passante
-            for (unsigned int j=0; j<dimPass; j++) //riempio idLenghtsPass
+            for (unsigned int j=0; j<dimPass; j++) //riempio idLengthsPass
             {
                 unsigned int tracciaIdPass = VecIdTracesPassI[j];
                 double lunghezza = trace.lengthTraces[tracciaIdPass]; //estraggo la sua lunghezza tramite la posizione
                 array<double,2> ArrayDiSupporto = {double(tracciaIdPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
-                idLenghtsPass.push_back(ArrayDiSupporto);
+                idLengthsPass.push_back(ArrayDiSupporto);
             }
             // uso bubble sort già creato apposta per ordinare secondo il secondo elemento (lunghezza)
-            BubbleSort_mod(idLenghtsPass);
+            BubbleSort_mod(idLengthsPass);
 
             for (unsigned int j = 0; j < dimPass; j++)
             {
                 // printo da idLenghsPass a sto punto ordinato
-                outFile << idLenghtsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLenghtsPass[dimPass-j-1][1]<<endl; // CREARE VARIABILE TIPS, è specificatamente richiesto e sostituire passante con "fracture.Tips[idLengthsPass[i][0]]"
+                outFile << idLengthsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLengthsPass[dimPass-j-1][1]<<endl; // CREARE VARIABILE TIPS, è specificatamente richiesto e sostituire passante con "fracture.Tips[idLengthsPass[i][0]]"
+                trace.TraceIdsPassxFracture[i][j] = idLengthsPass[dimPass-j-1][0];
             }
         }
         if (dimNoPass != 0)
         {
-            idLenghtsNoPass.reserve(dimNoPass);
+            idLengthsNoPass.reserve(dimNoPass);
             bool tips = true; // false se non passante
+
             for (unsigned int j=0; j<dimNoPass; j++)
             {
                 unsigned int tracciaIdNoPass = VecIdTracesNoPassI[j] ;
                 double lunghezza = trace.lengthTraces[tracciaIdNoPass];
                 array<double,2> ArrayDiSupporto = {double(tracciaIdNoPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
-                idLenghtsNoPass.push_back(ArrayDiSupporto);
+                idLengthsNoPass.push_back(ArrayDiSupporto);
             }
             // uso bubble sort già creato apposta per ordinare secondo il secondo elemento
-            BubbleSort_mod(idLenghtsNoPass);
+            BubbleSort_mod(idLengthsNoPass);
+
             for (unsigned int j = 0; j < dimNoPass; j++)
             {
-                outFile << idLenghtsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLenghtsNoPass[dimNoPass - j-1][1] << endl; // sostituire con fracture.Tips[idLengthsPass[i][0]]
+                outFile << idLengthsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLengthsNoPass[dimNoPass - j-1][1] << endl; // sostituire con fracture.Tips[idLengthsPass[i][0]]
+                trace.TraceIdsNoPassxFracture[i][j] = idLengthsNoPass[dimNoPass-j-1][0];
             }
 
         }
     }
+
+    // Funzione per stampare il contenuto di una mappa
+    cout <<"\n\nper il check post riordinamento della TestId%PassxFracture\n";
+    cout << "TraceIdsPassxFracture contenuto:" << endl;
+    for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
+        cout << "Frattura " << i << ":";
+        for (unsigned int j = 0; j < trace.TraceIdsPassxFracture[i].size(); ++j) {
+            cout << " " << trace.TraceIdsPassxFracture[i][j];
+        }
+        cout << endl;
+    }
+
+    cout << "TraceIdsNoPassxFracture contenuto:" << endl;
+    for (unsigned int i = 0; i < trace.TraceIdsNoPassxFracture.size(); ++i) {
+        cout << "Frattura " << i << ":";
+        for (unsigned int j = 0; j < trace.TraceIdsNoPassxFracture[i].size(); ++j) {
+            cout << " " << trace.TraceIdsNoPassxFracture[i][j];
+        }
+        cout << endl;
+    }
+
     return true;
 }
 

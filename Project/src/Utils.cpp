@@ -5,9 +5,12 @@
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
 #include <vector>
-
+#include <limits> //per tolleranza
 
 using namespace std;
+
+// Definisci la variabile globale
+double tolDefault = 100 * std::numeric_limits<double>::epsilon();
 
 
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
