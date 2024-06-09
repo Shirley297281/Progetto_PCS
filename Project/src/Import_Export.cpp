@@ -5,6 +5,7 @@
 #include "Eigen/Eigen"
 #include <iostream>
 #include <fstream>
+#include "inline.hpp"
 
 //facciamo anche l'export??
 

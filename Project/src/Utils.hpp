@@ -9,8 +9,6 @@ using namespace std;
 using namespace Eigen;
 
 
-extern double tolDefault;
-
 // compute the max eedge in fracture
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices);
 

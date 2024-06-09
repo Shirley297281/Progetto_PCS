@@ -8,6 +8,8 @@
 using namespace Eigen;
 using namespace std;
 
+// Definisci la variabile globale
+extern double tolDefault; //= 100 * std::numeric_limits<double>::epsilon();
 
 namespace GeometryLibrary {
 
@@ -68,10 +70,10 @@ struct Polygons{
     vector<unsigned int> Cell0DId = {};
     // coordinates of each point
     vector<Vector3d> Cell0DCoordinates = {};
-    /*
+
     // map for linking each marker (key) with the list of vertices Id associated with that marker
     map<unsigned int, list<unsigned int>> Cell0DMarkers = {};
-    */
+
 
     // from Cell1D
     // number of cell1D
@@ -80,10 +82,10 @@ struct Polygons{
     vector<unsigned int> Cell1DId = {};
     // two vertices Id of each edge (origin and end)
     vector<Vector2i> Cell1DVertices = {};
-    /*
+
     // map for linking each marker (key) with the list of edges Id associated with that marker
     map<unsigned int, list<unsigned int>> Cell1DMarkers = {};
-    */
+
 
     // from Cell2D
     // number of Cell2D
