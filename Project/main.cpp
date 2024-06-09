@@ -14,7 +14,7 @@ using namespace GeometryLibrary;
 int main()
 {
     Fractures fracture;
-    string filename = "FR50_data.txt";
+    string filename = "FR10_data.txt";
 
     if( !ImportFR(filename, fracture) )
         return 1;
@@ -36,105 +36,31 @@ int main()
         cerr<<"errore nella scrittura del file2";
     }
 
+
+
+    ///
     ///Seconda Parte
     /// riferimento a utils_partTwo
     ///
-    // DA QUI
+    ///
+    cout<<"\n\n---SECONDA PARTE---\n\n";
+
     // scelta da utente l'id della frattura di cui voglio vedere la sottopoligonazione
     Polygons sottoPoligono;
-    unsigned int z = 0;
+    unsigned int z = 9;
 
     // INIZIO SALVATAGGIO PUNTI
-    Memo_Cello0Ds(fracture, trace, sottoPoligono, z);
+    MemorizzaVertici_Cell0Ds(fracture, trace, sottoPoligono, z);
     // FINE SALVATAGGIO PUNTI
 
 
     // INIZIO CREAZIONI SEQUENZE
-    /*
-    /// std::vector<Matrix<float, Dynamic, Dynamic>> SequenzeXpunto = {};
-    /// numCol = numSequenze (=num sottopoligoni)
-    /// numRow = numTraces
 
-    for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ ) //ciclo di nuovo sulle tracce passanti
-    {
-        unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
-        Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
-        Vector3d Estremo2Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(1); //estraggo estremo 2 della traccia i
-        // controllo per ogni punto se è a destra o sinistra
-        for(unsigned int j = 0; j < sottoPoligono.NumberCell0D; j++) //ciclo su tutti i punti salvati in precedenza in Cell0D
-        {
-            MatrixXd& M = sottoPoligono.SequenzeXpunto[j]; //estraggo la matrice riferita al punto con id = j dal vettore per riferimento: modificando M modifico quella nel vettore
-            Vector3d coordinatePuntoInCell0d = sottoPoligono.Cell0DCoordinates[j];
-            Vector3d vec1 = Estremo2Traccia - Estremo1Traccia;
-            Vector3d vec2 = coordinatePuntoInCell0d - Estremo1Traccia;
-            Vector3d prodVett = vec1.cross(vec2);
-            double prodScal = prodVett.dot(vecNormaleAfratt);
-            if (abs(prodScal)< 1e-14) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia
-            {
-                // duplico le sequenze e assegno sia 0 che 1
-                if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
-                {
-                    MatrixXd MatriceDiSupporto(1, 2);
-                    MatriceDiSupporto.row(0) << 1, 0;
-                    M = MatriceDiSupporto;
-                }
-                else // se la matrice non è vuota dovrò duplicare le sequenza già esistenti e inserire vettori di 0 in una e vettori di 1 nell'altra
-                {
-                    MatrixXd MatriceDiSupporto1(M.rows() + 1, M.cols());
-                    MatrixXd MatriceDiSupporto2(M.rows() + 1, M.cols());
-                    RowVectorXd nuovaRiga0 = RowVectorXd::Zero(M.cols());
-                    RowVectorXd nuovaRiga1 = RowVectorXd::Ones(M.cols());
-                    MatriceDiSupporto1 << M, nuovaRiga0;
-                    MatriceDiSupporto2 << M, nuovaRiga1;
-                    MatrixXd MConcatenata(MatriceDiSupporto1.rows(), MatriceDiSupporto1.cols() + MatriceDiSupporto2.cols());
-                    MConcatenata << MatriceDiSupporto1, MatriceDiSupporto2;
-                    M = MConcatenata;
-                }
-            }
-            else if( prodScal < 0)
-            {
-                // assegno 1 alla sequenza (convenzione)
-                unsigned int numCols;
-                if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
-                {
-                    M = MatrixXd:: Ones(1, 1);
-                }
-                else
-                {
-                    numCols = M.cols(); //conto le colonne
-                    RowVectorXd nuovaRiga = RowVectorXd::Ones(numCols); // creo vettore riga di tutti 1
-                    MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
+    Creazioni_Sequenze(fracture, trace, sottoPoligono, z);
 
-                    MatriceDiSupporto << M, nuovaRiga; // copio A e aggiungo vettore di 1
-
-                    // Aggiorniamo la matrice A e quindi anche quella nel vettore di matrici
-                    M = MatriceDiSupporto;
-                }
-
-            }
-            else
-            {
-                // assegno 0 alla sequenza (convenzione)
-                unsigned int numCols;
-                if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
-                {
-                    M = MatrixXd:: Zero(1, 1);
-                }
-                else
-                {
-                    numCols = M.cols(); //conto le colonne
-                    RowVectorXd nuovaRiga = RowVectorXd::Zero(numCols); // creo vettore riga di tutti 0
-                    MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
-
-                    MatriceDiSupporto << M, nuovaRiga; // copio A e aggiungo vettore di 0
-
-                    // Aggiorniamo la matrice A e quindi anche quella nel vettore di matrici
-                    M = MatriceDiSupporto;
-                }
-            }
-        }
-    }
     // FINE CREAZIONI SEQUENZE
+
+
     // INIZIO CONFRONTI SEQUENZE e RAGGRUPPAMENTI IN POLIGONI
     vector<list<unsigned int>> VettSequenza_Punto = {};
     vector<VectorXd> LinktraSequenzaELista = {};
@@ -190,7 +116,8 @@ int main()
         list<unsigned int> listaIdVertici = VettSequenza_Punto[i];
         // dò in pasto a funzione di Ceci per ordinamento (in caso modificare da lista in vettore)
     }
-    // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D*/
+    // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
+
 
 
 

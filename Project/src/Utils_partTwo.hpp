@@ -14,10 +14,10 @@ bool operator==(const VectorXd &v1, const VectorXd &v2);
 namespace GeometryLibrary {
 
 
-void Memo_Cello0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
+void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
 
 
-
+void Creazioni_Sequenze(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
 
 
 
