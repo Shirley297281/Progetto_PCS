@@ -37,9 +37,11 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
     map<unsigned int, list<unsigned int>>& markerDiz = sottoPoligono.Cell0DMarkers; // passo in referenza così lo modifico direttamente senza farne una copia
     cout << "Numero di vertici della frattura: " << numVerticiFrattZ << endl;
 
+    //inserimento dei vertici della frattura nella mesh
     for (unsigned int i = 0; i<numVerticiFrattZ; i++) //ciclo sui vertici
     {
         Vector3d vertice = insiemeVerticiFrattZ.col(i);
+
         unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
         sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
 
@@ -72,23 +74,101 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             cout << "ID del punto " << sottoPoligono.Cell0DId[i] << " non trovato nella mappa." << endl;
         }
 
-        //da inserire dopo
-        /*for (const auto& pair : markerDiz) {
+
+    }
+
+
+    // salvo puntiestremi di tracce passanti traccia
+    /// ciclo su fratture (cambiare TraceIdsPassxFracture con quello ordinato)
+    unsigned int numTraccePassantiInZ = trace.TraceIdsPassxFracture[z].size();
+    for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ ){
+
+        //Vector3d vecNormaleAfratt = fracture.vettoreNormalePiano[z]; //mi serve dopo
+
+        unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
+
+        for (int t= 0; t<2; t++){
+        Vector3d EstremoTraccia = trace.CoordinatesEstremiTraces[idTraccia].col(t); //estraggo estremo 1 della traccia i
+
+        vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
+        // CheckInserimento returna true se l'inserimento non è ancora avvenuto e false se è già avvenuto (inline fun)
+        if (!checkInserimento(EstremoTraccia, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+        {
+            continue;
+        }
+
+        cout<<"aggiungo estremi di traccia "<<idTraccia<<endl;
+        addAndPrintPoint(sottoPoligono, markerDiz, EstremoTraccia, 1);
+
+        }//fine for per i due estremi della traccia
+
+        cout<<"\n\nmarker aggiornati dopo inserimento estremi di traccia: "<<endl;
+        for (const auto& pair : markerDiz) {
             cout << "Marker " << pair.first << ": ";
             for (const auto& id : pair.second) {
                 cout << id << " ";
             }
             cout << endl;
-        }*/
+        }
+
+        // salvo punti che derivano da intersezione di due tracce
+        // ciclo sulle fratture che rimangono (prendo sempre quelle successive ma prima controllo di non sforare con l'iteratore)
+        if (i == trace.TraceIdsPassxFracture[z].size()-1)
+        {
+            continue;
+        }
+        for (unsigned int j = i + 1; j< trace.TraceIdsPassxFracture[z].size()-1; j++ )
+        {
+            unsigned int idTraccia2 = trace.TraceIdsPassxFracture[z][j];
+            Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
+            Vector3d Estremo2Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(1); //estraggo estremo 2 della traccia i
+
+            Vector3d Estremo1Traccia2 = trace.CoordinatesEstremiTraces[idTraccia2].col(0); //estraggo estremo 1 della traccia j
+            Vector3d Estremo2Traccia2 = trace.CoordinatesEstremiTraces[idTraccia2].col(1); //estraggo estremo 2 della traccia j
+            // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
+            Vector3d Punto02 = {0, 0, 0};
+            Vector3d t = Estremo2Traccia - Estremo1Traccia; //serve dopo
+            if (!soluzione_sistema3x2(t, Estremo1Traccia2, Estremo2Traccia2,Estremo1Traccia, Punto02))
+            {
+                continue;
+            }
+            // controllo se il punto è compreso tra gli estremi di almeno una delle due traccia (in teoria basta perchè i punti di una traccia per def appartengono alla frattura)
+            // ho scelto senza un motivo (è uguale) la traccia i
+            // inline per combinazione convessa
+            if (!combinazione_convessa(Estremo1Traccia, Estremo2Traccia, Punto02))
+            {
+                continue;
+            }
+            // controllo che punto non sia già stato inserito nelle strutture (in caso di intersezioni coincidenti)
+            vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
+            // CheckInserimento returna true se l'inserimento non è ancora avvenuto e false se è già avvenuto (inline fun)
+            if (!checkInserimento(Punto02, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+            {
+                continue;
+            }
+
+            cout<<"c'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
+
+            addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
+
+        }
 
 
-
+    }//fine for tracce passanti
+    cout<<"\n\nmarker aggiornati alla fine del controllo sulle passanti: "<<endl;
+    for (const auto& pair : markerDiz) {
+        cout << "Marker " << pair.first << ": ";
+        for (const auto& id : pair.second) {
+            cout << id << " ";
+        }
+        cout << endl;
     }
+
+
+
     // salvo punti che derivano da intersezione lato-traccia
     /// ciclo su fratture (cambiare TraceIdsPassxFracture con quello ordinato)
-    unsigned int numTraccePassantiInZ = trace.TraceIdsPassxFracture[z].size();
-    //Vector3d vecNormaleAfratt = fracture.vettoreNormalePiano[z]; //mi serve dopo
-    for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ )
+    /*for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ )
     {
         unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
         Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
@@ -122,6 +202,7 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             {
                 continue;
             }
+            cout << "Punto0: " << Punto0<<endl;
             // controllo che punto non sia già stato inserito nelle strutture (in caso di intersezioni coincidenti)
             vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
             // CheckInserimento returna true se l'inserimento non è ancora avvenuto e false se è già avvenuto (inline fun)
@@ -135,14 +216,14 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
             sottoPoligono.Cell0DCoordinates.push_back(Punto0);
 
-            cout <<"++ Cell0D --> Punto "<<sottoPoligono.Cell0DId[NumPuntiFinora-1]<<": "<<sottoPoligono.Cell0DCoordinates[NumPuntiFinora-1];
+            cout <<"++ Punto "<<sottoPoligono.Cell0DId[NumPuntiFinora]<<": "<<sottoPoligono.Cell0DCoordinates[NumPuntiFinora].transpose();
 
             // non so se sia necessario questo però sto allocando memoria
             MatrixXd M(0,0); //matrice vuota di dimensione
             sottoPoligono.SequenzeXpunto.push_back(M);
             markerDiz[1].push_back(NumPuntiFinora); //marker con chiave 1 per punti sui lati
 
-            cout<<"marker aggiornati: "<<endl;
+            cout<<"\n\nmarker aggiornati: "<<endl;
             for (const auto& pair : markerDiz) {
                 cout << "Marker " << pair.first << ": ";
                 for (const auto& id : pair.second) {
@@ -151,6 +232,7 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
                 cout << endl;
             }
         }
+
         // salvo punti che derivano da intersezione di due tracce
         // ciclo sulle fratture che rimangono (prendo sempre quelle successive ma prima controllo di non sforare con l'iteratore)
         if (i == trace.TraceIdsPassxFracture[z].size()-1)
@@ -192,9 +274,7 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             sottoPoligono.SequenzeXpunto.push_back(M); //pensare a un resize eventuale
             markerDiz[2].push_back(NumPuntiFinora); //marker con chiave 2 per punti interni
         }
-    }
-
-
+    }*/
 
 }
 

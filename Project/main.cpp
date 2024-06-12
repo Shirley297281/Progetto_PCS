@@ -14,7 +14,7 @@ using namespace GeometryLibrary;
 int main()
 {
     Fractures fracture;
-    string filename = "FR3_data.txt";
+    string filename = "FR50_data.txt";
 
     if( !ImportFR(filename, fracture) )
         return 1;
@@ -47,7 +47,7 @@ int main()
 
     // scelta da utente l'id della frattura di cui voglio vedere la sottopoligonazione
     Polygons sottoPoligono;
-    unsigned int z = 0;
+    unsigned int z = 1;
 
     // INIZIO SALVATAGGIO PUNTI
     MemorizzaVertici_Cell0Ds(fracture, trace, sottoPoligono, z);

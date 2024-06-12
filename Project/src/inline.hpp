@@ -3,6 +3,7 @@
 
 #include "Eigen/Eigen"
 #include "FracturesTraces.hpp"
+#include <iostream>
 
 // Definisci la variabile globale
 //extern double tolDefault = 100 * std::numeric_limits<double>::epsilon();
@@ -113,6 +114,40 @@ inline bool checkInserimento(const Vector3d Punto0, const vector<Vector3d>& Vett
             return true;
         }
         return false;
+    }
+}
+
+inline void addAndPrintPoint(GeometryLibrary::Polygons& sottoPoligono, map<unsigned int, list<unsigned int>>& markerDiz, const Vector3d& coordinates, unsigned int markerKey) {
+    unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
+    sottoPoligono.NumberCell0D = NumPuntiFinora + 1;
+
+    sottoPoligono.Cell0DId.push_back(NumPuntiFinora);
+    sottoPoligono.Cell0DCoordinates.push_back(coordinates);
+
+    cout << "++ Punto " << sottoPoligono.Cell0DId[NumPuntiFinora] << ": " << sottoPoligono.Cell0DCoordinates[NumPuntiFinora].transpose();
+    cout << " con Marker: ";
+
+    MatrixXd M(0, 0); // matrice vuota di dimensione
+    sottoPoligono.SequenzeXpunto.push_back(M);
+    markerDiz[markerKey].push_back(NumPuntiFinora); // marker con chiave markerKey
+
+    bool foundidpunto = false;
+
+    // Itera attraverso la mappa
+    for (const auto& pair : markerDiz) {
+        const unsigned int key = pair.first;
+        const list<unsigned int>& values = pair.second;
+
+        // Cerca l'ID del punto nella lista dei valori
+        if (find(values.begin(), values.end(), sottoPoligono.Cell0DId[NumPuntiFinora]) != values.end()) {
+            cout << key << endl;
+            foundidpunto = true;
+            break; // Esci dal ciclo una volta trovato l'ID
+        }
+    }
+
+    if (!foundidpunto) {
+        cout << "ID del punto " << sottoPoligono.Cell0DId[NumPuntiFinora] << " non trovato nella mappa." << endl;
     }
 }
 

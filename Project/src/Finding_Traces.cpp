@@ -262,7 +262,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
     //controllo PASSANTi O NO?
 
-    cout << Tips_Shy(fracture, trace, i, j)<<endl;
+    // cout << Tips_Shy(fracture, trace, i, j)<<endl;
 
     std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
 
