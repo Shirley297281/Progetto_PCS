@@ -278,8 +278,8 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
         }
     }
 
-    // Funzione per stampare il contenuto di una mappa
-    cout <<"\n\nper il check post riordinamento della TestId%PassxFracture\n";
+    // Funzione per stampare il contenuto di TraceIdPassxFracture
+    /*cout <<"\n\nper il check post riordinamento della TraceId%PassxFracture\n";
     cout << "TraceIdsPassxFracture contenuto:" << endl;
     for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
         cout << "Frattura " << i << ":";
@@ -296,7 +296,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
             cout << " " << trace.TraceIdsNoPassxFracture[i][j];
         }
         cout << endl;
-    }
+    }*/
 
     return true;
 }

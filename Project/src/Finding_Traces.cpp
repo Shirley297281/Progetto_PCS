@@ -1,4 +1,4 @@
-#include "namespace.hpp" //contiene gli header di tutte le funzione definite come GeometryLibrary
+#include "namespace.hpp" //contiene gli header di tutte le funzione definite come GeometryLibrary (anche Tol)
 #include "Utils.hpp"
 #include "inline.hpp"
 
@@ -45,7 +45,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
         for (unsigned int j=i+1; j < fracture.NumFractures; j++ ){
 
-            cout << "\nAnalisi coppia di fratture: " << i << " e " << j << endl;
+            ///cout << "\nAnalisi coppia di fratture: " << i << " e " << j << endl;
 
 
             // richiamo funzione sfera
@@ -77,7 +77,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             // funzione raddoppio nelle slide) giuro che qua la pianto con i commenti, ecco inizia il codice da inserire a riga 261
             if (!ris)
             {
-                cout<<" || ! ||  non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
+                ///cout<<" || ! ||  non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
             }
 
@@ -93,7 +93,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             if (iterI != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
             {
                 vecI.clear();
-                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
+                ///cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
             }
 
@@ -107,12 +107,12 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             if (iterJ != 2) // la frattura non può avere traccia con l'altra frattura, mi fermo
             {
                 vecJ.clear();
-                cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
+                ///cout<<"non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
                 continue;
 
             }
 
-            //RADDOPPIO
+            //Riservo spazio stimato
 
             const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
 
@@ -120,19 +120,16 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             trace.TraceIdsPassxFracture.reserve(estimatedSize);
             trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
-            //trace.TraceIdsPassxFracture[i].resize(10);
-            //trace.TraceIdsNoPassxFracture[i].resize(10);
-
 
             int result = Controllo_tracce2(fracture, trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
             {
-                cout<<"non ho intersezione perchè sono nel caso 1 e 2"<<endl;
+                ///cout<<"non ho intersezione perchè sono nel caso 1 e 2"<<endl;
                 continue;
             }
             else if (result == 2)
             {
-                cout<<"non ho considerato questa casistica: "<< i << " e "<< j<< endl;
+                ///cout<<"non ho considerato questa casistica: "<< i << " e "<< j<< endl;
                 continue;
             }
 
@@ -143,12 +140,9 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
 
-    }
+    } //end for i
 
-    //end for i
-    cout << "\n\nRisultati finali delle mappe:" << endl;
-
-    // Funzione per stampare il contenuto di una mappa
+    /*
     cout << "TraceIdsPassxFracture contenuto:" << endl;
     for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
         cout << "Frattura " << i << ":";
@@ -168,9 +162,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     }
 
 
-    cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;
+    cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;*/
 
-    //magari ancora qua dentro facciamo il primo file output
 }//Calcolo tracce
 
 
@@ -231,9 +224,9 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
 
         // Visualizza i dati della traccia
-        cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
+        /*cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
         cout << " - Frattura 1: " << i << endl;
-        cout << " - Frattura 2: " << j << endl;
+        cout << " - Frattura 2: " << j << endl;*/
 
         array<unsigned int,2> vector_id_fractures = {};
         vector_id_fractures[0] = i;
@@ -258,9 +251,9 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         }
 
         trace.CoordinatesEstremiTraces.push_back(Estremi);
-        cout << " - Estremi traccia: (" << Estremi.col(0).transpose() << "), (" << Estremi.col(1).transpose() << ")" << endl;
+        ///cout << " - Estremi traccia: (" << Estremi.col(0).transpose() << "), (" << Estremi.col(1).transpose() << ")" << endl;
         trace.lengthTraces.push_back(euclidean_distance(Estremi.col(0), Estremi.col(1)));
-        cout<<"trace length: "<<euclidean_distance(Estremi.col(0), Estremi.col(1))<<endl;
+        ///cout<<"trace length: "<<euclidean_distance(Estremi.col(0), Estremi.col(1))<<endl;
     }else
     {
         return 2; //controllo se ci sono casistiche non considerate
@@ -273,15 +266,7 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
     std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
 
-
     int pass = 0;
-
-
-    // cout << "idpar[0][0]==double(i) : "<<idpar[0][0]<< "=="<< double(i)<<endl;
-    // cout << "idpar[2][0]==double(i) : "<<idpar[2][0]<< "=="<< double(i)<<endl;
-    // cout << "abs: "<< abs(idpar[0][1]-idpar[1][1]);
-
-
 
     //evitiamo cancellazione numerica con la sottrazione
     if (abs(idpar[0][1]- idpar[1][1]) < tolDefault && abs(idpar[2][1]- idpar[3][1]) < tolDefault){ //passante per entrambe le fratture
@@ -290,12 +275,13 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         inserimento_map(pass,idpar[0][0], trace);
         inserimento_map(pass,idpar[1][0], trace);
 
-        cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
+        ///cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
 
-
-        std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
+        //lascio solo il primo per ricordarci che abbiamo fatto un controllo sul tempo di esecuzione e avere un'idea sul costo computazionale
+        // poi l'abbiamo fatto per ogni condizione
+        /*std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
         double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
+        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;*/
 
 
         return 3;
@@ -308,15 +294,10 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
         pass = 0;
         inserimento_map(pass,i, trace);
-        cout << "   Passante per la frattura " <<i<< " ."<<endl;
+        ///cout << "   Passante per la frattura " <<i<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,j, trace);
-        cout << "   NON Passante per la frattura " <<j<< " ."<<endl;
-
-
-        std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-        double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
+        ///cout << "   NON Passante per la frattura " <<j<< " ."<<endl;
 
         return 4;
 
@@ -328,17 +309,10 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
     {
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
-        cout << "   Passante per la frattura " <<j<< " ."<<endl;
+        ///cout << "   Passante per la frattura " <<j<< " ."<<endl;
         pass = 1;
         inserimento_map(pass,idpar[0][0], trace);
-        cout << "   NON Passante per la frattura " <<i<< " ."<<endl;
-
-
-        std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-        double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
-
-
+        ///cout << "   NON Passante per la frattura " <<i<< " ."<<endl;
 
         return 4;
     }
@@ -346,23 +320,10 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
         pass = 1;
         inserimento_map(pass,idpar[1][0], trace);
         inserimento_map(pass,idpar[0][0], trace);
-        cout << "   NON Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
-
-
-        std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-        double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
+        ///cout << "   NON Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
 
         return 6;
     }
-
-
-
-    std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-    double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;
-
-
 
     return 0;
 }
@@ -398,14 +359,14 @@ bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j)
     };
 
     bool passa_i = is_passing(fracture.CoordinatesVertice[i], trace.CoordinatesEstremiTraces[trace.numTraces-1]);
-    cout << " - Passante per la frattura " << i << " : " << (passa_i ? "Sì" : "No") << endl;
+    //cout << " - Passante per la frattura " << i << " : " << (passa_i ? "Sì" : "No") << endl;
 
     bool passa_j = is_passing(fracture.CoordinatesVertice[j], trace.CoordinatesEstremiTraces[trace.numTraces-1]);
-    cout << " - Passante per la frattura " << j << " : " << (passa_j ? "Sì" : "No") << endl;
+    //cout << " - Passante per la frattura " << j << " : " << (passa_j ? "Sì" : "No") << endl;
 
     auto t_end = chrono::steady_clock::now();
     double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    cout << "\t ------- Tips_sHy elapsed time: " << duration << " microseconds" << endl;
+    //cout << "\t ------- Tips_sHy elapsed time: " << duration << " microseconds" << endl;
 
     return passa_i && passa_j;
 }
@@ -475,11 +436,6 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
     //cout << " il punto di intersezione tra il lato della frattura "<<i<<" e "<<j<<" è : "<< Punto0.transpose() <<endl;
     //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
 
-
-
-    auto t_end = chrono::steady_clock::now();
-    double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    cout << "\t ------- Calcolo_par elapsed time: " << duration << " microseconds" << endl;
 
     return iter;
 

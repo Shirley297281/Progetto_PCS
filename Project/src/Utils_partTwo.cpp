@@ -3,7 +3,7 @@
 #include "inline.hpp"
 #include <vector>
 #include "Eigen/Eigen"
-
+#include <iostream>
 #include <vector>
 
 
@@ -29,21 +29,60 @@ bool operator==(const VectorXd &v1, const VectorXd &v2) // operatore per uguagli
 namespace GeometryLibrary{
 
 void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z){
+
     // salvo i punti coincidenti con i vertici della frattura
     MatrixXd insiemeVerticiFrattZ = fracture.CoordinatesVertice[z];//estraggo la matrice di vertici di z
+
     unsigned int numVerticiFrattZ = fracture.numVertices[z];
-    map<unsigned int, list<unsigned int>>& markerDiz = sottoPoligono.Cell1DMarkers; // passo in referenza così lo modifico direttamente senza farne una copia
+    map<unsigned int, list<unsigned int>>& markerDiz = sottoPoligono.Cell0DMarkers; // passo in referenza così lo modifico direttamente senza farne una copia
+    cout << "Numero di vertici della frattura: " << numVerticiFrattZ << endl;
+
     for (unsigned int i = 0; i<numVerticiFrattZ; i++) //ciclo sui vertici
     {
         Vector3d vertice = insiemeVerticiFrattZ.col(i);
         unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
         sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
+
         // visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
         sottoPoligono.Cell0DId.push_back(NumPuntiFinora); //d'ora in poi userò come id dei vertici il numero di punti salvati
         sottoPoligono.Cell0DCoordinates.push_back(vertice);
         MatrixXd M(0,0);
         sottoPoligono.SequenzeXpunto.push_back(M);
         markerDiz[0].push_back(NumPuntiFinora); // marker con chiave 0 se vertici
+
+        cout << "Vertice " << sottoPoligono.Cell0DId[i] << ": " << sottoPoligono.Cell0DCoordinates[i].transpose();
+        cout <<" con Marker: ";
+
+        bool foundidpunto = false;
+
+        // Itera attraverso la mappa
+        for (const auto& pair : markerDiz) {
+            const unsigned int key = pair.first;
+            const list<unsigned int>& values = pair.second;
+
+            // Cerca l'ID del punto nella lista dei valori
+            if (find(values.begin(), values.end(), sottoPoligono.Cell0DId[i]) != values.end()) {
+                cout << key << endl;
+                foundidpunto = true;
+                break; // Esci dal ciclo una volta trovato l'ID
+            }
+        }
+
+        if (!foundidpunto) {
+            cout << "ID del punto " << sottoPoligono.Cell0DId[i] << " non trovato nella mappa." << endl;
+        }
+
+        //da inserire dopo
+        /*for (const auto& pair : markerDiz) {
+            cout << "Marker " << pair.first << ": ";
+            for (const auto& id : pair.second) {
+                cout << id << " ";
+            }
+            cout << endl;
+        }*/
+
+
+
     }
     // salvo punti che derivano da intersezione lato-traccia
     /// ciclo su fratture (cambiare TraceIdsPassxFracture con quello ordinato)
@@ -95,10 +134,22 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
             sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
             sottoPoligono.Cell0DCoordinates.push_back(Punto0);
+
+            cout <<"++ Cell0D --> Punto "<<sottoPoligono.Cell0DId[NumPuntiFinora-1]<<": "<<sottoPoligono.Cell0DCoordinates[NumPuntiFinora-1];
+
             // non so se sia necessario questo però sto allocando memoria
             MatrixXd M(0,0); //matrice vuota di dimensione
             sottoPoligono.SequenzeXpunto.push_back(M);
             markerDiz[1].push_back(NumPuntiFinora); //marker con chiave 1 per punti sui lati
+
+            cout<<"marker aggiornati: "<<endl;
+            for (const auto& pair : markerDiz) {
+                cout << "Marker " << pair.first << ": ";
+                for (const auto& id : pair.second) {
+                    cout << id << " ";
+                }
+                cout << endl;
+            }
         }
         // salvo punti che derivano da intersezione di due tracce
         // ciclo sulle fratture che rimangono (prendo sempre quelle successive ma prima controllo di non sforare con l'iteratore)
