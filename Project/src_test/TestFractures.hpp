@@ -439,9 +439,56 @@ TEST(TestInline, TestVecProd)
     EXPECT_DOUBLE_EQ(v[2], 10.0);
 }
 
+// controllo che l'inserimento attraverso la function inserimento_map() funzioni correttamente
 TEST(TestInline, Test_inserimento_map){
+    // caso 1 passante 1 non passante di Test_1pass_1notpass
+    Vector3d v1(1.0, 0.0, 1.0);
+    Vector3d v2(-1.0, 0.0, 1.0);
+    Vector3d v3(3.0, 0.0, 1.0);
+    Vector3d v4(-3.0, 0.0, 1.0);
 
+    Traces trace;
+    vector<Vector3d> vecI;
+    vecI.reserve(2);
+    vecI.push_back(v1);
+    vecI.push_back(v2);
+
+    vector<Vector3d> vecJ;
+    vecJ.reserve(2);
+    vecJ.push_back(v3);
+    vecJ.push_back(v4);
+
+    trace.numTraces = 1; // se ho una traccia => il suo identificativo è 0
+    unsigned int i = 0; // idpar della frattura i
+    unsigned int j = 1; // idpar della frattura j
+    int pass0 = 0;
+    int pass1 = 1;
+    inserimento_map(pass0, i, trace); // restituisce passante per i
+    inserimento_map(pass1, j, trace); // restituisce non passante per j
+    int id_pass = trace.TraceIdsPassxFracture[i][0];
+    int id_nopass = trace.TraceIdsNoPassxFracture[j][0];
+    ASSERT_EQ(id_pass, 0);
+    ASSERT_EQ(id_nopass, 0);
 }
+
+// p non appartiene al segmento v1v2
+TEST(TestInline, Test_combinazione_convessa_si){
+    Vector3d v1(0.0, 0.0, 0.0);
+    Vector3d v2(2.0, 2.0, 2.0);
+    Vector3d p(1.0, 1.0, 1.0);
+    bool sol = combinazione_convessa(v1, v2, p);
+    ASSERT_TRUE(sol);
+}
+
+// p appartiene al segmento v1v2
+TEST(TestInline, Test_combinazione_convessa_no){
+    Vector3d v1(0.0, 0.0, 0.0);
+    Vector3d v2(2.0, 2.0, 2.0);
+    Vector3d p(3.0, 3.0, 3.0);
+    bool sol = combinazione_convessa(v1, v2, p);
+    ASSERT_FALSE(sol);
+}
+
 
 // test su system_solution con vettori v1, v2 (vettori normali ai piani) tra loro paralleli
 TEST(TestSystemSolution, TestVecParallel)

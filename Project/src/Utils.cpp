@@ -1,14 +1,14 @@
 #include "Utils.hpp"
-//#include "FracturesTraces.hpp"
+#include "FracturesTraces.hpp"
 #include "inline.hpp"
 #include <vector>
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
 #include <vector>
 
+double tolDefault = 100 * std::numeric_limits<double>::epsilon();
 
 using namespace std;
-
 
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices)
 {
@@ -126,7 +126,7 @@ bool system_solution (Vector3d& n1,
     // aggiungere non complanarity! controllo che il modulo di t sia diverso da 0 per evitare prodotto vettoriale != 0
 
     // Verifica della possibilità di intersezione
-    if (vec.dot(t) > 1e-14) {
+    if (vec.dot(t) > tolDefault) {
         // Risoluzione del sistema lineare per trovare il punto di intersezione
         Vector3d B;
         B << d1, d2,0;
@@ -244,7 +244,7 @@ bool soluzione_sistema3x2 (Vector3d& t,
     double norm = vettopa.norm();
 
     //cout << "\n\nIl rango della matrice A è: " << rank << std::endl;
-    if (norm>1e-15) {
+    if (norm>tolDefault) {
         VectorXd sol;
         if (A.rows() >= A.cols()) {
 
