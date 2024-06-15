@@ -10,6 +10,7 @@
 #include <math.h>
 #include "namespace.hpp"
 #include "inline.hpp"
+#include "Utils_partTwo.hpp"
 
 
 using namespace std;
@@ -552,6 +553,43 @@ TEST(TestSystemSolution, TestSoluzioneSistema3x2_vecNotParallel)
     Vector3d Punto0 = {};
     bool sol = soluzione_sistema3x2(t, V1, V2, Point, Punto0);
     ASSERT_TRUE(sol);
+}
+
+// test su creo_sottopoligoni
+TEST(TestSottopoligoni, Testcreo_sottopoligoni){
+    unsigned int num_fracture = 0;
+    Fractures fracture;
+
+    unsigned int num_sottopoligono1 = 0;
+    Polygons sottopoligono1;
+    list<unsigned int> listaIdVertici1;
+    listaIdVertici1.push_back(0);
+    listaIdVertici1.push_back(4);
+    listaIdVertici1.push_back(5);
+    listaIdVertici1.push_back(3);
+
+
+    unsigned int num_sottopoligono2 = 1;
+    Polygons sottopoligono2;
+    list<unsigned int> listaIdVertici2;
+    listaIdVertici2.push_back(4);
+    listaIdVertici2.push_back(1);
+    listaIdVertici2.push_back(2);
+    listaIdVertici2.push_back(5);
+    // continua a crashare!
+    Creo_sottopoligono(num_fracture, num_sottopoligono1, listaIdVertici1, sottopoligono1, fracture);
+    Creo_sottopoligono(num_fracture, num_sottopoligono2, listaIdVertici2, sottopoligono2, fracture);
+
+    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][0], 0);
+    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][1], 1);
+    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][2], 2);
+    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][3], 3);
+
+    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][0], 4);
+    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][1], 5);
+    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][2], 6);
+    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][3], 1);
+
 }
 
 #endif

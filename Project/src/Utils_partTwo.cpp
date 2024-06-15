@@ -5,6 +5,8 @@
 #include "Eigen/Eigen"
 #include <iostream>
 #include <vector>
+#include <list>
+#include <set>
 
 
 using namespace std;
@@ -165,10 +167,10 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
     }
 
 
-
+    /*
     // salvo punti che derivano da intersezione lato-traccia
     /// ciclo su fratture (cambiare TraceIdsPassxFracture con quello ordinato)
-    /*for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ )
+    for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ )
     {
         unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
         Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
@@ -182,11 +184,11 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
             Vector3d Vertice2 = {0,0,0};
             if (j == numVerticiFrattZ -1)
             {
-                Vector3d Vertice2 = insiemeVerticiFrattZ.col(0);
+                Vertice2 = insiemeVerticiFrattZ.col(0);
             }
             else
             {
-                Vector3d Vertice2 = insiemeVerticiFrattZ.col(j+1);
+                Vertice2 = insiemeVerticiFrattZ.col(j+1);
             }
 
             // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
@@ -299,7 +301,7 @@ void Creazioni_Sequenze(const Fractures& fracture, const Traces& trace, Polygons
             Vector3d vec2 = coordinatePuntoInCell0d - Estremo1Traccia;
             Vector3d prodVett = vec1.cross(vec2);
             double prodScal = prodVett.dot(vecNormaleAfratt);
-            if (abs(prodScal)< 1e-14) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia
+            if (abs(prodScal)< tolDefault) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia
             {
                 // duplico le sequenze e assegno sia 0 che 1
                 if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
@@ -366,18 +368,173 @@ void Creazioni_Sequenze(const Fractures& fracture, const Traces& trace, Polygons
     }
 }
 
+// quando la chiamo ho già fatto il controllo e ho trovato tutti i vertici con la stessa sequenza, ho incrementato il numero di Cell2D
+void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono,list<unsigned int> listaIdVertici, Polygons& sottopoligono, Fractures& fracture){
 
 
 
+    vector<unsigned int> estremi(listaIdVertici.begin(), listaIdVertici.end()); // trasformo la lista in un vector
+    unsigned int n = estremi.size();
+    vector<Vector2i> id_estremi_lato; // lati identificati dagli id degli estremi
+    id_estremi_lato.reserve(n); // n vertici => avrò n lati
+    MatrixXd vertices(3, n); // per baricentro
+    Vector3d vett_normale_frattura = fracture.vettoreNormalePiano[num_fracture];
+    vector<unsigned int> id_lati;
+    id_lati.reserve(n);
+
+
+    // con i primi due for seleziono due vertici e verifico che possano essere consecutivi (faccio il controllo con il terzo for)
+    unsigned int num_iterazioni = 0;
+    unsigned int i = 0;
+    //for(unsigned int i = 0; i < n; i++ ){
+    unsigned int id_i = estremi[i];
+    unsigned int id_i_primo = id_i;
+    unsigned int id_j = 0;
+    Vector3d coord_i = sottopoligono.Cell0DCoordinates[id_i]; // seleziono il primo estremo
+
+    for (unsigned int j = 0; j < n+1; j++)
+    {
+        bool lato_valido = true;
+
+        if (j==i){continue;} // MANCA UN LATO
+        if(num_iterazioni == n-1){
+            id_i = id_estremi_lato[n-2][1];
+            id_j = id_i_primo;
+        }
+        // aggiorna!!!!!
+        else{
+            id_j = estremi[j];
+            Vector3d coord_j = sottopoligono.Cell0DCoordinates[id_j];
+            Vector3d vec1 = coord_j - coord_i; // vettore direzione che congiunge i candidati vertici consecutivi
+
+            // per ogni candidato lato devo verificare il prodotto vettoriale con il vettore congiungente un suo estremo con tutti gli altri punti che sono in totale n-2
+            unsigned iter = 0;
+            unsigned int m = n-2;
+            vector<double> prodscalare;
+            prodscalare.reserve(m);
+
+            for (unsigned int k = 0; k < n; k++){ // devo confrontarli con tutti gli altri punti, se avessi fatto con k = j+1 mi sarei persa il confronto con gli i e j precedenti
+                if (k == i || k == j){ // se trovo k uguale a uno dei vertici che sto considerando come estremi => incremento k
+                    continue;
+                }
+
+                unsigned int id_k = estremi[k];
+                Vector3d coord_k = sottopoligono.Cell0DCoordinates[id_k];
+                Vector3d vec2 = coord_k - coord_i;
+                Vector3d prodVett = {};
+                prodVett = vec1.cross(vec2);
+                prodscalare[iter] = prodVett.dot(vett_normale_frattura);
+
+
+                if(iter > 0){
+                    if ((prodscalare[iter] > 0 && prodscalare[iter -1] < 0) || (prodscalare[iter] < 0 && prodscalare[iter -1] > 0)){ // se è diverso dal precedente vuol dire che il lato non va bene
+                        lato_valido = false;
+                        continue;
+                    }
+                }
+                iter += 1;
+            }
+        }
+
+        // se sono arrivata qui => ho trovato un lato
+        if(lato_valido && num_iterazioni < 4){
+            Vector2i l(id_i, id_j);
+            id_estremi_lato.push_back(l);
+
+            cout << "id_estremi_lato di " << i << ": "<<id_estremi_lato[i].transpose()<<endl;
+
+            // verifico se il lato è già presente in Cell1D
+            auto it = find(sottopoligono.Cell1DVertices.begin(), sottopoligono.Cell1DVertices.end(), l);
+            Vector2i l_inverso(id_j, id_i);
+            auto it1 = find(sottopoligono.Cell1DVertices.begin(), sottopoligono.Cell1DVertices.end(), l_inverso);
+
+            if(it != sottopoligono.Cell1DVertices.end() || it1 != sottopoligono.Cell1DVertices.end()){ // l'ho già trovato
+                num_iterazioni++;
+                continue;
+            }
+            else if(it == sottopoligono.Cell1DVertices.end() || it1 == sottopoligono.Cell1DVertices.end()){
+                sottopoligono.Cell1DVertices.push_back(l);
+                unsigned int id;
+
+                if(sottopoligono.Cell1DId.empty())
+                {
+                    id =0;
+
+                }
+                else if(!sottopoligono.Cell1DId.empty()){
+                    id = sottopoligono.Cell1DId.back() + 1;
+                }
+                sottopoligono.Cell1DId.push_back(id);
+                id_lati.push_back(id); // inizio a creare il vettore da inserire in Cell2DEdges (se li sto ordinando in senso orario piuttosto li inverto dopo)
+                num_iterazioni += 1;
+            }
 
 
 
+        }
+        i = j; // mi permette di trovare i lati in ordine
+        id_i = estremi[i];//mi serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
 
+        //break;
 
+    }
 
+    sottopoligono.NumberCell1D = sottopoligono.Cell1DId.size();
+    // calcolo il baricentro del sottopoligono
+    for (unsigned int i = 0; i < n; i++){
+        unsigned int id_i = sottopoligono.Cell0DId[i];
+        Vector3d coord_i = sottopoligono.Cell0DCoordinates[id_i];
+        vertices.col(i) = coord_i;
+    }
+    array <double,3> bar = barycenter(vertices, n);
+    Vector3d bar_vec(bar[0], bar[1], bar[2]);
+
+    // i lati che trovo sono in ordine (devo solo verificare che siano in ordine antiorario e NON orario)
+    // devo prendere id_estremi_lato[0]
+    unsigned int id_0 = id_estremi_lato[0][0];
+    unsigned int id_1 = id_estremi_lato[0][1];
+    Vector3d coord_0 = sottopoligono.Cell0DCoordinates[id_0];
+    Vector3d coord_1 = sottopoligono.Cell0DCoordinates[id_1];
+
+    // trovo i vettori che congiungono gli estremi del primo lato al baricentro
+    Vector3d v1 = coord_0 - bar_vec;
+    Vector3d v2 = coord_1 - bar_vec;
+    Vector3d v1xv2 = vec_product(v1, v2);
+    double prod_scal = v1xv2.dot(vett_normale_frattura);
+
+    // se il prodotto scalare è negativo => devo prendere l'altro senso
+    if(prod_scal < 0){
+        reverse(id_estremi_lato.begin(), id_estremi_lato.end());
+        reverse(id_lati.begin(), id_lati.end());
+    }
+
+    // aggiorno Cell2D
+    sottopoligono.Cell2DId.push_back(num_sottopoligono); // aggiorno l'id del sottopoligono
+    sottopoligono.NumberVertices.push_back(n); // aggiorno num vertici
+    sottopoligono.NumberEdges.push_back(n); // aggiorno num lati
+
+    // Cell2DVertices trasformo la lista delle coppie di estremi identificativi del lato in una sequenza di punti consecutivi
+    set<int> id_estremi;
+    for(auto it = id_estremi_lato.begin(); it!= id_estremi_lato.end(); ++it){
+        Vector2i vec = *it;
+        id_estremi.insert(vec[0]);
+        id_estremi.insert(vec[1]);
+    }
+
+    vector<unsigned int> id_lati_vec(id_estremi.begin(), id_estremi.end());
+    sottopoligono.Cell2DVertices[num_sottopoligono] = id_lati_vec;
+
+    // Cell2DEdges: ogni sottopoligono identificato da vettore contenente l'id dei lati
+
+    sottopoligono.Cell2DEdges[num_sottopoligono] = id_lati; // NON LO RIEMPIE
 
 
 
 
 }
 
+
+
+
+
+}//del namespace
