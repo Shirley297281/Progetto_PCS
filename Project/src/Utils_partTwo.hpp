@@ -20,7 +20,7 @@ void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Po
 void Creazioni_Sequenze(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
 
 
-
+void Creo_sottopoligono (unsigned int num_fracture, unsigned int num_sottopoligono,list<unsigned int> listaIdVertici, Polygons& sottopoligono, Fractures& fracture);
 
 
 

@@ -14,7 +14,7 @@ using namespace GeometryLibrary;
 int main()
 {
     Fractures fracture;
-    string filename = "FR50_data.txt";
+    string filename = "FR3_data.txt";
 
     if( !ImportFR(filename, fracture) )
         return 1;
@@ -83,7 +83,7 @@ int main()
             // controllo se la sequenza è già inserita
             for (unsigned int z = 0; z < LinktraSequenzaELista.size(); z++)
             {
-                VectorXd SequenzaAttuale =  LinktraSequenzaELista[z];
+                VectorXd SequenzaAttuale = LinktraSequenzaELista[z];
                 if (Vettore::operator==(SequenzaJ, SequenzaAttuale)) // ho trovato la sequenza
                 {
                     VettSequenza_Punto[z].push_back(i); // aggiungo allora nella lista l'id del punto
@@ -111,16 +111,66 @@ int main()
     // INIZIO ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
     size_t numSottopoligoni = LinktraSequenzaELista.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
     sottoPoligono.NumberCell2D = numSottopoligoni;
+
+
+    sottoPoligono.Cell2DEdges.resize(numSottopoligoni);
+    sottoPoligono.Cell2DVertices.resize(numSottopoligoni);
+    sottoPoligono.Cell1DVertices.reserve(numSottopoligoni);
+    sottoPoligono.Cell1DId.reserve(numSottopoligoni*4);
+
     for (unsigned int i = 0; i < numSottopoligoni; i++)
     {
         list<unsigned int> listaIdVertici = VettSequenza_Punto[i];
-        // dò in pasto a funzione di Ceci per ordinamento (in caso modificare da lista in vettore)
+        // dò in pasto a funzione di Ceci per ordinamento
+        Creo_sottopoligono(z, i, listaIdVertici, sottoPoligono, fracture);
     }
-    // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
+
+
+    // controllo che stampi tutto bene
+
+    for(unsigned int j = 0; j < sottoPoligono.Cell1DId.size(); j++){ // giusto
+        cout << "gli estremi del lato con id " << sottoPoligono.Cell1DId[j] << " sono: " << sottoPoligono.Cell1DVertices[j][0] << " e " << sottoPoligono.Cell1DVertices[j][1] << endl;
+    }
+
+    cout << "NumberCell1D: " << sottoPoligono.NumberCell1D << endl; // giusto
+
+    cout << endl;
+    // verifico gli identificativi dei lati del primo sottopoligono
+    //cout << "num lati per secondo sottopoligono: " << sottoPoligono.NumberEdges.back() << endl;
+    for(unsigned int i=0; i < 4; i++){
+        cout << "lato " << i << " : id "<< sottoPoligono.Cell2DEdges[1][i] << endl; // SBAGLIATO
+    }
+
+    //verifico che sia giusto il riempimento di Cell2DVertices -> GIUSTO
+    cout << "id degli estremi del sottopoligono 0" << endl;
+    for(unsigned int i = 0; i < 4; i++){
+        cout << "estremo " << i << " : " << sottoPoligono.Cell2DVertices[0][i] << endl;
+    }
+    cout << "id degli estremi del sottopoligono 1" << endl;
+    for(unsigned int i = 0; i < 4; i++){
+        cout << "estremo " << i << " : " << sottoPoligono.Cell2DVertices[1][i] << endl;
+    }
+
+    // attenzione: ne viene uno in + e gli ultimi sono sballati
+    cout << "Cell1DVertices[0][0]: " << sottoPoligono.Cell1DVertices[0][0] << ", Cell1DVertices[0][1]: " << sottoPoligono.Cell1DVertices[0][1] << endl;
+    cout << "Cell1DVertices[1][0]: " << sottoPoligono.Cell1DVertices[1][0] << ", Cell1DVertices[1][1]: " << sottoPoligono.Cell1DVertices[1][1] << endl;
+    cout << "Cell1DVertices[2][0]: " << sottoPoligono.Cell1DVertices[2][0] << ", Cell1DVertices[2][1]: " << sottoPoligono.Cell1DVertices[2][1] << endl;
+    cout << "Cell1DVertices[3][0]: " << sottoPoligono.Cell1DVertices[3][0] << ", Cell1DVertices[3][1]: " << sottoPoligono.Cell1DVertices[3][1] << endl;
+    cout << "Cell1DVertices[4][0]: " << sottoPoligono.Cell1DVertices[4][0] << ", Cell1DVertices[4][1]: " << sottoPoligono.Cell1DVertices[4][1] << endl;
+    cout << "Cell1DVertices[5][0]: " << sottoPoligono.Cell1DVertices[5][0] << ", Cell1DVertices[5][1]: " << sottoPoligono.Cell1DVertices[5][1] << endl;
+    cout << "Cell1DVertices[6][0]: " << sottoPoligono.Cell1DVertices[6][0] << ", Cell1DVertices[6][1]: " << sottoPoligono.Cell1DVertices[6][1] << endl;
+    cout << endl;
+    cout << "Cell1DId[0]" << sottoPoligono.Cell1DId[0] << endl;
+    cout << "Cell1DId[1]" << sottoPoligono.Cell1DId[1] << endl;
+    cout << "Cell1DId[2]" << sottoPoligono.Cell1DId[2] << endl;
+    cout << "Cell1DId[3]" << sottoPoligono.Cell1DId[3] << endl;
+    cout << "Cell1DId[4]" << sottoPoligono.Cell1DId[4] << endl;
+    cout << "Cell1DId[5]" << sottoPoligono.Cell1DId[5] << endl;
+    cout << "Cell1DId[6]" << sottoPoligono.Cell1DId[6] << endl;
+    // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D (già fatto tutto in Creo_sottopoligono)
 
 
 
 
     return 0;
 }
-
