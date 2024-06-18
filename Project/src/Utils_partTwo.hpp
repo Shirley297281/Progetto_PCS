@@ -14,10 +14,11 @@ namespace Vettore{
 namespace GeometryLibrary {
 
 
-void MemorizzaVertici_Cell0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
+void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
+void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
 
 
-void Creazioni_Sequenze(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
+void Creazioni_Sequenze_Passanti(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
 
 
 void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono, list<unsigned int> listaIdVertici, Polygons& poligoni, Fractures& fracture);
