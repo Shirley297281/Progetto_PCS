@@ -1,7 +1,7 @@
 #ifndef Namespace_H
 #define Namespace_H
 #include "Eigen/Eigen"
-#include "FracturesTraces.hpp"
+#include "FracturesTracesPolygons.hpp"
 
 using namespace std;
 using namespace Eigen;

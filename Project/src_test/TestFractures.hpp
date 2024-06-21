@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "FracturesTraces.hpp"
+#include "FracturesTracesPolygons.hpp"
 #include "Utils.hpp"
 #include <gtest/gtest.h> // framework Google Test
 #include "Eigen/Eigen"

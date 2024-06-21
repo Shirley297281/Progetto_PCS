@@ -1,5 +1,3 @@
-# Project/CMakeLists.txt
-
 cmake_minimum_required(VERSION 3.9)
 
 project(DFN LANGUAGES CXX C VERSION 1.0.0)
@@ -54,20 +52,13 @@ list(APPEND ${CMAKE_PROJECT_NAME}_TEST_sources ${src_test_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_TEST_headers ${src_test_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_TEST_includes ${src_test_includes})
 
+add_subdirectory(TestingParaview/Code/src)
+list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_paraview_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_paraview_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_paraview_includes})
 
-# Create executable
+# copia automaticamente i tre file nella cartella di Debug ma dalla cartella che ho rinominato come Mesh e non PolygonalMesh
 ################################################################################
-add_executable(${CMAKE_PROJECT_NAME} main.cpp
-                ${${CMAKE_PROJECT_NAME}_sources}
-                ${${CMAKE_PROJECT_NAME}_headers})
-
-add_executable(${CMAKE_PROJECT_NAME}_TEST main_test.cpp
-    ${${CMAKE_PROJECT_NAME}_sources} ${${CMAKE_PROJECT_NAME}_headers}
-    ${${CMAKE_PROJECT_NAME}_TEST_headers} ${${CMAKE_PROJECT_NAME}_TEST_sources})
-
-
-
-#copia automaticamente i tre file nella cartella di Debug ma dalla cartella che ho rinominato come Mesh e non PolygonalMesh
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR3_data.txt
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -88,6 +79,17 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR362_data.txt
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN/FR2_datatest.txt
               DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
+# Create executable
+################################################################################
+add_executable(${CMAKE_PROJECT_NAME} main.cpp
+                ${${CMAKE_PROJECT_NAME}_sources}
+                ${${CMAKE_PROJECT_NAME}_headers})
+
+add_executable(${CMAKE_PROJECT_NAME}_TEST main_test.cpp
+    ${${CMAKE_PROJECT_NAME}_sources} ${${CMAKE_PROJECT_NAME}_headers}
+    ${${CMAKE_PROJECT_NAME}_TEST_headers} ${${CMAKE_PROJECT_NAME}_TEST_sources})
 
 
 target_link_libraries(${PROJECT_NAME} ${DFN_LINKED_LIBRARIES})
