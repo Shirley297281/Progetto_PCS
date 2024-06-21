@@ -1,7 +1,7 @@
 #ifndef Utils_2
 #define Utils_2
 #include "Eigen/Eigen"
-#include "FracturesTraces.hpp"
+#include "FracturesTracesPolygons.hpp"
 
 using namespace std;
 using namespace Eigen;

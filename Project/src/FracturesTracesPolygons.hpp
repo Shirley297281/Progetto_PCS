@@ -1,5 +1,5 @@
-#ifndef __FRACTURESTRACES_H
-#define __FRACTURESTRACES_H
+#ifndef __FRACTURESTRACESPOLYGONS_H
+#define __FRACTURESTRACESPOLYGONS_H
 
 #include "Eigen/Eigen"
 #include <array>
@@ -111,6 +111,11 @@ struct Polygons{
     /// numRow = numTraces
     vector<Vector3d> CoordinatesPunto;
     /// mi servono per valutare se ogni punto è a destra o sinistra
+    ///
+
+
+    void GedimInterface(vector<vector<unsigned int>>& triangles,
+                        VectorXi& materials);
 };
 }
 

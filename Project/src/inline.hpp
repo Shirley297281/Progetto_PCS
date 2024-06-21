@@ -2,7 +2,7 @@
 #define Inline_H
 
 #include "Eigen/Eigen"
-#include "FracturesTraces.hpp"
+#include "FracturesTracesPolygons.hpp"
 #include <iostream>
 
 // Definisci la variabile globale

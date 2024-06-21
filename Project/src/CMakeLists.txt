@@ -20,7 +20,7 @@ list(APPEND src_headers "${CMAKE_CURRENT_SOURCE_DIR}/utils_partTwo.hpp")
 list(APPEND src_headers "${CMAKE_CURRENT_SOURCE_DIR}/inline.hpp")
 
 
-list(APPEND src_headers "${CMAKE_CURRENT_SOURCE_DIR}/FracturesTraces.hpp")
+list(APPEND src_headers "${CMAKE_CURRENT_SOURCE_DIR}/FracturesTracesPolygons.hpp")
 
 list(APPEND src_includes ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -28,3 +28,4 @@ list(APPEND src_includes ${CMAKE_CURRENT_SOURCE_DIR})
 set(src_sources ${src_sources} PARENT_SCOPE)
 set(src_headers ${src_headers} PARENT_SCOPE)
 set(src_includes ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(CMAKE_SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/TestingParaview)

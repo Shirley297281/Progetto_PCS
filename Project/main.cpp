@@ -1,10 +1,12 @@
 #include "src/Utils.hpp"
-#include "src/FracturesTraces.hpp"
+#include "src/FracturesTracesPolygons.hpp"
 #include "src/utils_partTwo.hpp"
 #include <sstream>
 #include <iostream>
 #include "src/namespace.hpp"
 #include "src/inline.hpp"
+
+#include "TestingParaview/Code/src/UCDUtilities.hpp" //per Paraview esportazione
 
 
 using namespace std;
@@ -48,32 +50,25 @@ int main()
     // scelta da utente l'id della frattura di cui voglio vedere la sottopoligonazione
     Polygons sottoPoligono;
     unsigned int z = 0;
+    cout << " ### ANALISI Frattura con ID "<<z<<endl;
 
     // INIZIO SALVATAGGIO PUNTI DA PASSANTI
-    cout << "\n -INIZIO SALVATAGGIO PUNTI DA PASSANTI-\n";
+    cout << "\n -SALVATAGGIO PUNTI DA TRACCE PASSANTI-\n\n";
     MemorizzaVerticiPassanti_Cell0Ds(fracture, trace, sottoPoligono, z);
-     cout << " -FINE SALVATAGGIO PUNTI DA PASSANTI-\n";
     // FINE SALVATAGGIO PUNTI
 
 
     // INIZIO CREAZIONI SEQUENZE
+
     Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
     // FINE CREAZIONI SEQUENZE
 
 
 
     // INIZIO SALVATAGGIO PUNTI DA NON PASSANTI
+    cout << "\n -SALVATAGGIO PUNTI DA TRACCE NON PASSANTI-\n\n";
     MemorizzaVerticiNonPassanti_Cell0Ds (fracture, trace, sottoPoligono, z);
     // FINE MEMO PUNTI DA NON PASSANTI
-
-
-
-
-
-
-
-
-
 
 
 
@@ -198,6 +193,47 @@ int main()
     // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D (già fatto tutto in Creo_sottopoligono)
 
 
+
+
+
+    ///EXPORTING PARAVIEW
+    Gedim::UCDUtilities exporter;
+    std::vector<std::vector<unsigned int>> triangles;
+    Eigen::VectorXi materials;
+    sottoPoligono.GedimInterface(triangles, materials);
+    cout<<"GEdimInterfaceokay"<<endl;
+
+
+    // Check if the input vector is empty
+    if (sottoPoligono.Cell2DVertices.empty()) {
+       throw runtime_error("Cell2DVertices is empty");
+    }
+
+    // Get the number of polygons and vertices per polygon
+    const int numPolygons = sottoPoligono.Cell2DVertices.size();
+    const int numVerticesPerPolygon = sottoPoligono.Cell2DVertices[0].size();
+
+    // Create an Eigen::MatrixXd to store the converted data
+    MatrixXd eigenMatrix(3, numVerticesPerPolygon*numPolygons);
+
+    // Iterate through each polygon and copy data to the Eigen matrix
+    for (int p = 0; p < numPolygons; ++p) {
+        for (int v = 0; v < numVerticesPerPolygon; ++v) {
+            unsigned int id_punto = sottoPoligono.Cell2DVertices[p][v];
+            Vector3d coord = sottoPoligono.Cell0DCoordinates[id_punto];
+            eigenMatrix(0, v+p*numVerticesPerPolygon) = coord[0];
+            eigenMatrix(1, v+p*numVerticesPerPolygon) = coord[1];
+            eigenMatrix(2, v+p*numVerticesPerPolygon) = coord[2];
+
+        }
+    }
+
+    exporter.ExportPolygons("./Polygon0_FR3.inp",
+                            eigenMatrix,
+                            triangles,
+                            {},
+                            {},
+                            materials);
 
 
     return 0;

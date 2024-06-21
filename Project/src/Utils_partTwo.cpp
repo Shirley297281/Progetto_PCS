@@ -1,7 +1,7 @@
 #include "Utils.hpp"
-#include "FracturesTraces.hpp"
+#include "FracturesTracesPolygons.hpp"
 #include "inline.hpp"
-#include <vector>
+#include <numeric>
 #include "Eigen/Eigen"
 #include <iostream>
 #include <vector>
@@ -25,6 +25,50 @@ bool operator==(const VectorXd &v1, const VectorXd &v2) // operatore per uguagli
     }
     return true;
 }
+}
+
+
+void GeometryLibrary::Polygons::GedimInterface(vector<vector<unsigned int>>& triangles,
+                                               VectorXi& materials)
+{
+    const unsigned int numPolygons = NumberCell2D;
+    vector<vector<vector<unsigned int>>> triangleList(numPolygons);
+
+    for (unsigned int p = 0; p < numPolygons; p++)
+    {
+        const vector<unsigned int>& polygonVertices = Cell2DVertices[p];
+
+        // Check if it's a quadrilateral
+        if (polygonVertices.size() != 4)
+        {
+            throw runtime_error("Only quadrilateral polygons are supported.");
+        }
+
+        // Triangulate the quadrilateral
+        vector<unsigned int> triangle1 = { polygonVertices[0], polygonVertices[1], polygonVertices[2] };
+        vector<unsigned int> triangle2 = { polygonVertices[0], polygonVertices[2], polygonVertices[3] };
+
+        triangleList[p].push_back(triangle1);
+        triangleList[p].push_back(triangle2);
+    }
+
+    unsigned int numTotalTriangles = 0;
+    for (unsigned int p = 0; p < numPolygons; p++)
+        numTotalTriangles += triangleList[p].size();
+
+    triangles.reserve(numTotalTriangles);
+    materials = VectorXi::Zero(numTotalTriangles);
+
+    unsigned int count = 0;
+    for (unsigned int p = 0; p < numPolygons; p++)
+    {
+        for (unsigned int t = 0; t < triangleList[p].size(); t++)
+        {
+            triangles.push_back(triangleList[p][t]);
+            materials(count) = p;
+            count++;
+        }
+    }
 }
 
 
@@ -358,8 +402,9 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             puntiIntersPapabili.push_back(Punto02); // superati i controlli inserisco il punto di intersezione tra i papabili
             Vector3d vettDir = Estremo1Traccia2-Estremo2Traccia2;
             vettoriDirettoriRette.push_back(vettDir);
+            addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, Punto02,3);
         }
-        cout << "Numero di punti di intersezione dopo le tracce passanti: " << puntiIntersPapabili.size() << std::endl;
+        cout << "Numero di punti di intersezione dopo il controllo con le tracce passanti: " << puntiIntersPapabili.size() << std::endl;
         // ciclo su tracce non passanti già iterate
         if (NuoviEstremi.empty()) // non ci sono tracce non passanti già iterate
         {
@@ -721,8 +766,12 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     double prod_scal = v1xv2.dot(vett_normale_frattura);
 
     // se il prodotto scalare è negativo => devo prendere l'altro senso
-    if(prod_scal < 0){
+    if(prod_scal > 0){
         reverse(id_estremi_lato.begin(), id_estremi_lato.end());
+        // Invertire l'ordine all'interno di ogni coppia in id_estremi_lato
+        for (auto& coppia : id_estremi_lato) {
+            std::swap(coppia[0], coppia[1]);
+        }
         reverse(id_lati.begin(), id_lati.end());
     }
 
@@ -734,6 +783,20 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     // Cell2DVertices trasformo la lista delle coppie di estremi identificativi del lato in una sequenza di punti consecutivi
     unordered_set<int> id_estremi_set;
     vector<unsigned int> id_lati_vec;
+
+    /*// Ordinamento manuale del vettore
+    for (int i = 0; i < id_estremi_lato.size(); ++i) {
+        for (int j = i + 1; j < id_estremi_lato.size(); ++j) {
+            if (id_estremi_lato[j][1] < id_estremi_lato[i][1]) {
+                swap(id_estremi_lato[i], id_estremi_lato[j]);
+            }
+        }
+    }*/
+
+    // Stampa delle coppie ordinate
+    for (const auto& matrix : id_estremi_lato) {
+        std::cout << matrix[0] << ";" << matrix[1] << std::endl;
+    }
 
     for (auto it = id_estremi_lato.begin(); it != id_estremi_lato.end(); ++it) {
         Vector2i vec = *it;
