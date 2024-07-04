@@ -96,25 +96,26 @@ inline bool combinazione_convessa(Vector3d v1, Vector3d v2, Vector3d p){
 }
 
 // Funzione per controllare se mi serve memorizzare un punto o se è già presente (PARTE 2)
+///Controllo se Punto0 è presente in VettoreCoordianteIn0D --> retruna true se l'inserimento non è ancora avvenuto e false se è già avvenuto
 inline bool checkInserimento(const Vector3d Punto0, const vector<Vector3d>& VettoreCoordinateIn0D){
     // Vettore Coordinate lo passiamo in referenza perchè potrebbe essere "grande" e quindi sarebbe oneroso fare una copia
+    bool presente = false;
     for (unsigned int i = 0; i<VettoreCoordinateIn0D.size();i++)
     {
-        Vector3d vettorino = VettoreCoordinateIn0D[i];
-        if (abs(vettorino[0] - Punto0[0])>tolDefault)
+        Vector3d vettorino = VettoreCoordinateIn0D[i];//punto a 3 coordinate
+
+        if (abs(vettorino[0] - Punto0[0])<tolDefault)//se la prima coord è uguale
         {
-            return true;
+            if (abs(vettorino[1] - Punto0[1])<tolDefault)//se la seconda coordinata è uguale
+            {
+                if (abs(vettorino[2] - Punto0[2])<tolDefault) //se la terza coordinata è uguale
+                {
+                    presente = true;
+                }
+            }
         }
-        if (abs(vettorino[1] - Punto0[1])>tolDefault)
-        {
-            return true;
-        }
-        if (abs(vettorino[2] - Punto0[2])>tolDefault)
-        {
-            return true;
-        }
-        return false;
     }
+    return presente;
 }
 
 inline void addAndPrintPoint(GeometryLibrary::Polygons& sottoPoligono, map<unsigned int, list<unsigned int>>& markerDiz, const Vector3d& coordinates, unsigned int markerKey) {

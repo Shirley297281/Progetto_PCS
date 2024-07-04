@@ -36,6 +36,7 @@ void GeometryLibrary::Polygons::GedimInterface(vector<vector<unsigned int>>& tri
 
     for (unsigned int p = 0; p < numPolygons; p++)
     {
+        //forse prendere in considerazione un'altra struttura per fare la sottotriangolazione (magari Cell1D)
         const vector<unsigned int>& polygonVertices = Cell2DVertices[p];
 
         // Check if it's a quadrilateral
@@ -139,7 +140,7 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
 
         vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
         // CheckInserimento returna true se l'inserimento non è ancora avvenuto e false se è già avvenuto (inline fun)
-        if (!checkInserimento(EstremoTraccia, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+        if (checkInserimento(EstremoTraccia, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
         {
             continue;
         }
@@ -189,14 +190,15 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
             // controllo che punto non sia già stato inserito nelle strutture (in caso di intersezioni coincidenti)
             vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
             // CheckInserimento returna true se l'inserimento non è ancora avvenuto e false se è già avvenuto (inline fun)
-            if (!checkInserimento(Punto02, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+            if (checkInserimento(Punto02, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D (=false) non aggiungerlo
             {
                 continue;
             }
 
-            cout<<"c'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
+            cout<<"C'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
 
-            addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
+            //é DA AGGIUNGERE MA PER IL MOMENTO é COMMENTATOO
+            //addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
 
         }
 
@@ -347,7 +349,7 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
         Vector3d Estremo2Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(1); //estraggo estremo 2 della traccia i
         Vector3d t = Estremo2Traccia - Estremo1Traccia;
-        cout << "Estremi della traccia: (" << Estremo1Traccia.transpose() << "), (" << Estremo2Traccia.transpose() << ")" << std::endl;
+        cout << "Estremi della traccia: (" << Estremo1Traccia.transpose() << "), (" << Estremo2Traccia.transpose() << ")" << endl;
         for (unsigned int j = 0; j < numVerticiFrattZ ; j++) //// ciclo su vertici e determino intersezione lati-traccia non passante
         {
             // estraggo un vertice della frattura e il successivo per individuare un lato della frattura
@@ -379,7 +381,7 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             Vector3d vettDir = Vertice2-Vertice1;
             vettoriDirettoriRette.push_back(vettDir);
         }
-        cout << "Numero di punti di intersezione dopo i lati della frattura: " << puntiIntersPapabili.size() << std::endl;
+        cout << "Numero di punti di intersezione dopo i lati della frattura: " << puntiIntersPapabili.size() << endl;
         // ciclo su tracce passanti
         for (unsigned int j = 0; j<  numTraccePassantiInZtrace ; j++ ) //// ciclo su tracce passanti per determinare intersezione con traccia non passante
         {
@@ -402,14 +404,15 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             puntiIntersPapabili.push_back(Punto02); // superati i controlli inserisco il punto di intersezione tra i papabili
             Vector3d vettDir = Estremo1Traccia2-Estremo2Traccia2;
             vettoriDirettoriRette.push_back(vettDir);
-            addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, Punto02,3);
+            //addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, Punto02,3);
         }
-        cout << "Numero di punti di intersezione dopo il controllo con le tracce passanti: " << puntiIntersPapabili.size() << std::endl;
+        cout << "Numero di punti di intersezione dopo il controllo con le tracce passanti: " << puntiIntersPapabili.size() << endl;
         // ciclo su tracce non passanti già iterate
-        if (NuoviEstremi.empty()) // non ci sono tracce non passanti già iterate
+            // STRA CONTROLLA QUESTO CHE DAVA PROBLEMI
+        /*if (NuoviEstremi.empty()) // non ci sono tracce non passanti già iterate
         {
             continue;
-        }
+        }*/
         for (unsigned int j = 0; j< NuoviEstremi.size() ; j++ ) //// ciclo su tracce non passanti già iterate (quindi contenute in NuoviEstremi)
         {
             // vector<Matrix<double, 3, 4>> NuoviEstremi = {};
@@ -429,7 +432,7 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             Vector3d vettDir = Estremo1Traccia3-Estremo2Traccia3;
             vettoriDirettoriRette.push_back(vettDir);
         }
-        cout << "Numero di punti di intersezione dopo le tracce non passanti: " << puntiIntersPapabili.size() << std::endl;
+        cout << "Numero di punti di intersezione dopo le tracce non passanti: " << puntiIntersPapabili.size() << endl;
         // 2) valutazione punti papabili
         // ora valuto tra i punti papabili quali sono i punti che mi interessano:
         // ci saranno due punti che saranno deputati all'essere estremi della traccia non passante (quello più grande tra il minimo e il più piccolo tra il massimo se guardo i parametri liberi)
@@ -472,8 +475,9 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
                 {
                     continue;
                 }
+
                 // è un punto interno, lo salvo in Cell0D (senza fare altro)
-                unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
+                /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
                 sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
                 /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
                 sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
@@ -482,6 +486,8 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
                 MatrixXd M(0,0); //matrice vuota di dimensione
                 sottoPoligono.SequenzeXpunto.push_back(M); //pensare a un resize eventuale
                 //markerDiz[2].push_back(NumPuntiFinora); //marker con chiave 2 per punti interni !marker qui non funziona, non so distinguere in maniera semplice se il punto è in una posizione particolare
+                */
+                addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, punto,3);
             }
         }
         // esco dal ciclo sui punti
@@ -498,9 +504,9 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         unsigned int pos2 = static_cast<unsigned int>(pos2Double);
         // inizio salvataggio in Cell0D
         Vector3d nuovoEstremo1 = puntiIntersPapabili[pos1];   // possibile problema di double - int
-        if (checkInserimento(nuovoEstremo1, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+        if (!checkInserimento(nuovoEstremo1, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
         {
-            unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
+            /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
             sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
             /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
             sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
@@ -508,12 +514,13 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             // non so se sia necessario questo però sto allocando memoria
             MatrixXd M(0,0); //matrice vuota di dimensione
             sottoPoligono.SequenzeXpunto.push_back(M);
-            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita
+            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita*/
+            addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, nuovoEstremo1,3);
         }
         Vector3d nuovoEstremo2 = puntiIntersPapabili[pos2];
-        if (checkInserimento(nuovoEstremo2, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
+        if (!checkInserimento(nuovoEstremo2, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
         {
-            unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
+            /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
             sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
             /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
             sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
@@ -521,7 +528,8 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             // non so se sia necessario questo però sto allocando memoria
             MatrixXd M(0,0); //matrice vuota di dimensione
             sottoPoligono.SequenzeXpunto.push_back(M);
-            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita
+            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita*/
+            addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, nuovoEstremo2,3);
         }
         // fine salvataggio in Cell0D
         // inizio salvataggio in "NuoviEstremi"
@@ -539,6 +547,17 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         // fine salvataggio in "Nuovi Estremi"
         /// parentesi fine traccia non passante salvataggio punti intersezione
     }
+
+    cout<<"\n\nmarker aggiornati alla fine del controllo sulle NON passanti: "<<endl;
+    for (const auto& pair : sottoPoligono.Cell0DMarkers) {
+        cout << "Marker " << pair.first << ": ";
+        for (const auto& id : pair.second) {
+            cout << id << " ";
+        }
+        cout << endl;
+    }
+    cout <<endl;
+
 
 }//fine memo non passanti
 
