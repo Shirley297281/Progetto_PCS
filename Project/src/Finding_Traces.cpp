@@ -1,5 +1,5 @@
 #include "namespace.hpp" //contiene gli header di tutte le funzione definite come GeometryLibrary (anche Tol)
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "inline.hpp"
 
 
@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <vector>
-#include <chrono> //for counting time
+//#include <chrono> //for counting time <- usata solo nel controllo di quale funzione conveniva usare
 #include <stdlib.h>
 
 using namespace std;
@@ -21,7 +21,8 @@ namespace GeometryLibrary{
 
 void CalcoloTracce(Fractures& fracture, Traces& trace)
 {
-    int escluse = 0;
+    //variabile per avere un'idea di quante possibili intersezioni venivano escluse con il metodo delle sfere
+    // int escluse = 0;
 
 
     // sovrastima ragionevole basata sul numero massimo di combinazioni di fratture = binomiale
@@ -51,7 +52,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             // richiamo funzione sfera
             if ( !check_sphere( fracture.baricentro[i], fracture.baricentro[j], fracture.lenghtMaxEdges[i], fracture.lenghtMaxEdges[j]) )
             {
-                escluse++;
+                //escluse++;
                 continue;
             }
 
@@ -62,7 +63,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             //il nostro P0 è il baricentro (COMPUTATIONAL GEOMETRY 2, PROBLEMA 4)
             //Point è il punto che appartiene alla retta(intersezione tra piani) che ha parametro libero x e direzione t (tangente)
             Vector3d Point = {};
-            bool ris = system_solution(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j],
+            bool ris = intersezione_piani(fracture.vettoreNormalePiano[i], fracture.vettoreNormalePiano[j],
                                        fracture.baricentro[i], fracture.baricentro[j],
                                        t, Point);
             //tutto questo ci serve per trovare la retta di intersezione r(x) = x*t_ + Point;
@@ -121,7 +122,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
 
-            int result = Controllo_tracce2(fracture, trace,vecI,vecJ,Point,t,i,j);
+            int result = distinzioneTipoTraccia1(trace,vecI,vecJ,Point,t,i,j);
             if (result == 1)
             {
                 ///cout<<"non ho intersezione perchè sono nel caso 1 e 2"<<endl;
@@ -169,7 +170,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
 
 
-int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
+int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova tracce2*/ Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d& Point, Vector3d& t, unsigned int i, unsigned int j)
 {   // i e j solo per il cout
     double freeParP1 = 0.0;
@@ -262,9 +263,9 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
     //controllo PASSANTi O NO?
 
-    // cout << Tips_Shy(fracture, trace, i, j)<<endl;
+    // distinzioneTipoTraccia2(fracture, trace, i, j)<<endl;
 
-    std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
+    ///std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
 
     int pass = 0;
 
@@ -330,52 +331,60 @@ int Controllo_tracce2(Fractures& fracture, Traces& trace, const vector<Vector3d>
 
 
 
-bool Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j)
+void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, const int j)
 {
-    auto t_begin = chrono::steady_clock::now();
+    ///auto t_begin = chrono::steady_clock::now();
     const double tolerance = tolDefault;  // Tolleranza unificata per i confronti
 
-    auto is_passing = [&](const MatrixXd& vertice, const Matrix<double, 3, 2>& trace_coords) {
-        int touchCount = 0;
-        double dist1 = 0;
-        double dist2 = 0;
+    //bool passa_i = false;
+    //bool passa_j = false;
 
-        for (int k = 0; k < vertice.cols(); ++k) {
-            Vector3d v1 = vertice.col(k);
-            Vector3d v2 = vertice.col((k + 1) % vertice.cols());
-            double edgeLength = (v1 - v2).norm();
+    // Verifica se il tracciato passa attraverso la frattura i
+    for (int k = 0; k < fracture.CoordinatesVertice[i].cols(); ++k) {
+        Vector3d v1 = fracture.CoordinatesVertice[i].col(k);
+        Vector3d v2 = fracture.CoordinatesVertice[i].col((k + 1) % fracture.CoordinatesVertice[i].cols());
+        double edgeLength = (v1 - v2).norm();
 
-            for (int e = 0; e < 2; ++e) {
-                Vector3d extremity = trace_coords.col(e);
-                dist1 = (extremity- v1).norm();
-                dist2 = (extremity- v2).norm();
-                if (abs(dist1 + dist2 - edgeLength) <= tolerance) {
-                    touchCount++;
-                    break;
-                }
+        for (int e = 0; e < 2; ++e) {
+            Vector3d extremity = trace.CoordinatesEstremiTraces[trace.numTraces - 1].col(e);
+            double dist1 = (extremity - v1).norm();
+            double dist2 = (extremity - v2).norm();
+            if (abs(dist1 + dist2 - edgeLength) <= tolerance) {
+                //passa_i = true;
+                // Non interrompere il ciclo per continuare a controllare gli altri vertici
             }
         }
-        return (touchCount == 2);
-    };
-
-    bool passa_i = is_passing(fracture.CoordinatesVertice[i], trace.CoordinatesEstremiTraces[trace.numTraces-1]);
+    }
     //cout << " - Passante per la frattura " << i << " : " << (passa_i ? "Sì" : "No") << endl;
 
-    bool passa_j = is_passing(fracture.CoordinatesVertice[j], trace.CoordinatesEstremiTraces[trace.numTraces-1]);
+    // Verifica se il tracciato passa attraverso la frattura j
+    for (int k = 0; k < fracture.CoordinatesVertice[j].cols(); ++k) {
+        Vector3d v1 = fracture.CoordinatesVertice[j].col(k);
+        Vector3d v2 = fracture.CoordinatesVertice[j].col((k + 1) % fracture.CoordinatesVertice[j].cols());
+        double edgeLength = (v1 - v2).norm();
+
+        for (int e = 0; e < 2; ++e) {
+            Vector3d extremity = trace.CoordinatesEstremiTraces[trace.numTraces - 1].col(e);
+            double dist1 = (extremity - v1).norm();
+            double dist2 = (extremity - v2).norm();
+            if (abs(dist1 + dist2 - edgeLength) <= tolerance) {
+                // passa_j = true;
+                // Non interrompere il ciclo per continuare a controllare gli altri vertici
+            }
+        }
+    }
     //cout << " - Passante per la frattura " << j << " : " << (passa_j ? "Sì" : "No") << endl;
+    // auto t_end = chrono::steady_clock::now();
+    // double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
+    // //cout << "\t ------- distinzioneTipoTraccia2 elapsed time: " << duration << " microseconds" << endl;
 
-    auto t_end = chrono::steady_clock::now();
-    double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    //cout << "\t ------- Tips_sHy elapsed time: " << duration << " microseconds" << endl;
-
-    return passa_i && passa_j;
 }
 
 
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& vec, Fractures& fracture)
 {
 
-    auto t_begin = chrono::steady_clock::now();
+    ///auto t_begin = chrono::steady_clock::now();
 
     MatrixXd matrixVertices = fracture.CoordinatesVertice[i];
     unsigned int iter = 0; //valore da resituire = numero di intersezioni trovate
@@ -393,7 +402,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
         }
 
         bool a;
-        a = soluzione_sistema3x2(t,V1,V2,Point,Punto0);
+        a = intersezione_rette(t,V1,V2,Point,Punto0);
 
         if (!a) //se il sistema non ha soluzione cambio lato
         {

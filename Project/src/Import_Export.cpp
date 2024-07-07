@@ -1,16 +1,12 @@
-#include "Utils.hpp"
+#include "utils.hpp"
 #include "FracturesTracesPolygons.hpp"
 #include "namespace.hpp"//contiene gli header di tutte le funzione definite come GeometryLibrary
 #include <vector>
 #include "Eigen/Eigen"
 #include <iostream>
 #include <fstream>
-#include "inline.hpp"
+//#include "inline.hpp"
 
-//facciamo anche l'export??
-
-//using namespace Eigen;
-//using namespace std;
 
 namespace GeometryLibrary
 {

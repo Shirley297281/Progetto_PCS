@@ -4,13 +4,13 @@
 #include <fstream>
 #include <iostream>
 #include "FracturesTracesPolygons.hpp"
-#include "Utils.hpp"
+#include "utils.hpp"
 #include <gtest/gtest.h> // framework Google Test
 #include "Eigen/Eigen"
 #include <math.h>
 #include "namespace.hpp"
 #include "inline.hpp"
-#include "Utils_partTwo.hpp"
+#include "utils_partTwo.hpp"
 
 
 using namespace std;
@@ -81,8 +81,8 @@ TEST(TestFractures, TestDFNReading)
 
 // test sulle function contenute in Finding_Traces.cpp
 
-// test sulla function Controllo_tracce2 (5 casistiche)
-TEST(TestControllo_tracce2, Test_1pass_1notpass) // 1^ caso
+// test sulla function distinzioneTipoTraccia1 (5 casistiche)
+TEST(TestdistinzioneTipoTraccia1, Test_1pass_1notpass) // 1^ caso
 {
     // candidati estremi delle tracce
     Vector3d v1(1.0, 0.0, 1.0);
@@ -107,11 +107,11 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass) // 1^ caso
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
-    sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
+    sol = distinzioneTipoTraccia1( trace, vecI, vecJ, Point, t, i, j);
     EXPECT_EQ(sol, 4);
 }
 
-TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
+TEST(TestdistinzioneTipoTraccia1, Test_1pass_1notpass2) // 2^ caso
 {
     // candidati estremi delle tracce
     Vector3d v1(1.0, 0.0, 1.0);
@@ -135,11 +135,11 @@ TEST(TestControllo_tracce2, Test_1pass_1notpass2) // 2^ caso
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
-    sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
+    sol = distinzioneTipoTraccia1(trace, vecI, vecJ, Point, t, i, j);
     EXPECT_EQ(sol, 4);
 }
 
-TEST(TestControllo_tracce2, Test_Notrace) // 3^ caso
+TEST(TestdistinzioneTipoTraccia1, Test_Notrace) // 3^ caso
 {
     // candidati estremi delle tracce
     Vector3d v1(5.0, 0.0, 1.0);
@@ -164,11 +164,11 @@ TEST(TestControllo_tracce2, Test_Notrace) // 3^ caso
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
-    sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
+    sol = distinzioneTipoTraccia1(trace, vecI, vecJ, Point, t, i, j);
     EXPECT_EQ(sol, 1);
 }
 
-TEST(TestControllo_tracce2, Test_2coindenteExtremes) // 4^ caso
+TEST(TestdistinzioneTipoTraccia1, Test_2coindenteExtremes) // 4^ caso
 {
     // candidati estremi delle tracce
     Vector3d v1(1.0, 0.0, 1.0);
@@ -190,11 +190,11 @@ TEST(TestControllo_tracce2, Test_2coindenteExtremes) // 4^ caso
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
-    sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
+    sol = distinzioneTipoTraccia1( trace, vecI, vecJ, Point, t, i, j);
     EXPECT_EQ(sol, 3); // il test fallisce probabilmente da quello che viene implementato alla riga 182 (quando entra nell'if per stabilire passanti e non le cose già non funzionano)
 }
 
-TEST(TestControllo_tracce2, Test_2notpass) // 5^ caso
+TEST(TestdistinzioneTipoTraccia1, Test_2notpass) // 5^ caso
 {
     // candidati estremi delle tracce
     Vector3d v1(1.0, 0.0, 1.0);
@@ -219,13 +219,13 @@ TEST(TestControllo_tracce2, Test_2notpass) // 5^ caso
     unsigned int i = 0;
     unsigned int j = 1;
     int sol;
-    sol = Controllo_tracce2(fracture, trace, vecI, vecJ, Point, t, i, j);
+    sol = distinzioneTipoTraccia1(trace, vecI, vecJ, Point, t, i, j);
     EXPECT_EQ(sol, 6);
 }
 
 /*
-// test Tips_Shy
-TEST(TestTips, TestTips_shy){}
+// test distinzioneTipoTraccia2
+TEST(TestTips, TestdistinzioneTipoTraccia2){}
 */
 
 // test su Calcolo_par
@@ -491,8 +491,8 @@ TEST(TestInline, Test_combinazione_convessa_no){
 }
 
 
-// test su system_solution con vettori v1, v2 (vettori normali ai piani) tra loro paralleli
-TEST(TestSystemSolution, TestVecParallel)
+// test su intersezione_piani con vettori v1, v2 (vettori normali ai piani) tra loro paralleli
+TEST(TestIntersezione_piani, TestVecParallel)
 {
     // i vettori v1 e v2 sono linearmente dipendenti -> Non hanno un punto di intersezione unico!
     Vector3d n1(1.0, 2.0, 3.0);
@@ -501,12 +501,12 @@ TEST(TestSystemSolution, TestVecParallel)
     array <double, 3> b2= {0.0, 0.0, 1.0};
     Vector3d t(1.0, 2.0, 0.0);
     Vector3d Point = {};
-    bool sol = system_solution(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'false' perchè n1 e n2 sono paralleli
+    bool sol = intersezione_piani(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'false' perchè n1 e n2 sono paralleli
     ASSERT_FALSE(sol); // verifica che la variabile sol sia falsa
 }
 
-// test su system_solution con vettori v1, v2 paralleli e coincidenti
-TEST(TestSystemSolution, TestVecCoincident)
+// test su intersezione_piani con vettori v1, v2 paralleli e coincidenti
+TEST(TestIntersezione_piani, TestVecCoincident)
 {
     Vector3d n1(1.0, 2.0, 3.0);
     Vector3d n2(1.0, 2.0, 3.0);
@@ -514,12 +514,12 @@ TEST(TestSystemSolution, TestVecCoincident)
     array <double, 3> b2 = {0.0, 0.0, 1.0};
     Vector3d t(1.0, 2.0, 0.0);
     Vector3d Point = {};
-    bool sol = system_solution(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'false' perchè n1 e n2 sono coincidenti
+    bool sol = intersezione_piani(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'false' perchè n1 e n2 sono coincidenti
     ASSERT_FALSE(sol); // verifica che la variabile sol sia falsa
 }
 
-// test su system_solution con vettori v1, v2 nè paralleli nè coincidenti
-TEST(TestSystemSolution, TestCorrectSol)
+// test su intersezione_piani con vettori v1, v2 nè paralleli nè coincidenti
+TEST(TestIntersezione_piani, TestCorrectSol)
 {
     Vector3d n1(1.0, 2.0, 3.0);
     Vector3d n2(3.0, 5.0, 7.0);
@@ -527,69 +527,207 @@ TEST(TestSystemSolution, TestCorrectSol)
     array <double, 3> b2 = {0.0, 0.0, 1.0};
     Vector3d t(1.0, 2.0, 0.0);
     Vector3d Point = {};
-    bool sol = system_solution(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'true' perchè n1 e n2 non sono nè paralleli nè coicidenti
+    bool sol = intersezione_piani(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'true' perchè n1 e n2 non sono nè paralleli nè coicidenti
     ASSERT_TRUE(sol); // verifoca che la variabile sol sia vera
 }
 
-// test su sistema 3x2 con vettori t e V1-V2 paralleli
-TEST(TestSystemSolution, TestSoluzioneSistema3x2_vecParallel)
+// test su intersezione_rette con vettori t e V1-V2 paralleli
+TEST(TestIntersezione_rette, TestSoluzioneIntersezione_rette_vecParallel)
 {
     Vector3d t(0.0, -2.0, 0.0);
     Vector3d V1(1.0, 2.0, 3.0);
     Vector3d V2(1.0, 6.0, 3.0); // così il vettoreDirezione = V1 - V2 = (0,-4,0)
     Vector3d Point(1.0, 6.0, 3.0);
     Vector3d Punto0 = {};
-    bool sol = soluzione_sistema3x2(t, V1, V2, Point, Punto0);
+    bool sol = intersezione_rette(t, V1, V2, Point, Punto0);
     ASSERT_FALSE(sol);
 }
 
-// test su sistema 3x2 con vettori t e V1-V2 NON paralleli
-TEST(TestSystemSolution, TestSoluzioneSistema3x2_vecNotParallel)
+// test su intersezione_rette con vettori t e V1-V2 NON paralleli
+TEST(TestIntersezione_rette, TestSoluzioneIntersezione_rette_vecNotParallel)
 {
     Vector3d t(0.0, -2.0, 0.0);
     Vector3d V1(2.0, 3.0, 4.0);
     Vector3d V2(1.0, 1.0, 1.0); // così il vettoreDirezione = V1 - V2 = (1,2,3)
     Vector3d Point(2.0, 1.0, 5.0);
     Vector3d Punto0 = {};
-    bool sol = soluzione_sistema3x2(t, V1, V2, Point, Punto0);
+    bool sol = intersezione_rette(t, V1, V2, Point, Punto0);
     ASSERT_TRUE(sol);
 }
 
+// // test su creo_sottopoligoni
+// TEST(TestSottopoligoni, Testcreo_sottopoligoni){
+//     unsigned int num_fracture = 0;
+//     Fractures fracture;
+
+//     unsigned int num_sottopoligono1 = 0;
+//     Polygons sottopoligono1;
+//     list<unsigned int> listaIdVertici1;
+//     listaIdVertici1.push_back(0);
+//     listaIdVertici1.push_back(4);
+//     listaIdVertici1.push_back(5);
+//     listaIdVertici1.push_back(3);
+
+
+//     unsigned int num_sottopoligono2 = 1;
+//     Polygons sottopoligono2;
+//     list<unsigned int> listaIdVertici2;
+//     listaIdVertici2.push_back(4);
+//     listaIdVertici2.push_back(1);
+//     listaIdVertici2.push_back(2);
+//     listaIdVertici2.push_back(5);
+//     // continua a crashare!
+//     Creo_sottopoligono(num_fracture, num_sottopoligono1, listaIdVertici1, sottopoligono1, fracture);
+//     Creo_sottopoligono(num_fracture, num_sottopoligono2, listaIdVertici2, sottopoligono2, fracture);
+
+//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][0], 0);
+//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][1], 1);
+//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][2], 2);
+//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][3], 3);
+
+//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][0], 4);
+//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][1], 5);
+//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][2], 6);
+//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][3], 1);
+
+// }
+
+
+/// TEST PARTE 2
 // test su creo_sottopoligoni
 TEST(TestSottopoligoni, Testcreo_sottopoligoni){
     unsigned int num_fracture = 0;
+    vector<list<unsigned int>> VettSequenza_Punto = {};
     Fractures fracture;
+    Polygons poligono;
 
-    unsigned int num_sottopoligono1 = 0;
-    Polygons sottopoligono1;
+    poligono.Cell0DCoordinates.reserve(6);
+    poligono.Cell0DCoordinates[0] = {2.0, 1.0, 0.0};
+    poligono.Cell0DCoordinates[1] = {-3.0, 1.0, 0.0};
+    poligono.Cell0DCoordinates[2] = {-3.0, -2.0, 0.0};
+    poligono.Cell0DCoordinates[3] = {2.0, -2.0, 0.0};
+    poligono.Cell0DCoordinates[4] = {-3.0, 0.0, 0.0};
+    poligono.Cell0DCoordinates[5] = {2.0, 0.0, 0.0};
+
+    poligono.Cell0DId.reserve(6);
+    poligono.Cell0DId = {0, 1, 2, 3, 4, 5, 6};
+
+    fracture.vettoreNormalePiano.reserve(1);
+    fracture.vettoreNormalePiano[num_fracture] = {0.0, 0.0, 1.0};
+
     list<unsigned int> listaIdVertici1;
     listaIdVertici1.push_back(0);
+    listaIdVertici1.push_back(1);
     listaIdVertici1.push_back(4);
     listaIdVertici1.push_back(5);
-    listaIdVertici1.push_back(3);
+    VettSequenza_Punto.push_back(listaIdVertici1);
 
-
-    unsigned int num_sottopoligono2 = 1;
-    Polygons sottopoligono2;
     list<unsigned int> listaIdVertici2;
-    listaIdVertici2.push_back(4);
-    listaIdVertici2.push_back(1);
     listaIdVertici2.push_back(2);
+    listaIdVertici2.push_back(3);
     listaIdVertici2.push_back(5);
-    // continua a crashare!
-    Creo_sottopoligono(num_fracture, num_sottopoligono1, listaIdVertici1, sottopoligono1, fracture);
-    Creo_sottopoligono(num_fracture, num_sottopoligono2, listaIdVertici2, sottopoligono2, fracture);
+    listaIdVertici2.push_back(4);
+    VettSequenza_Punto.push_back(listaIdVertici2);
 
-    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][0], 0);
-    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][1], 1);
-    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][2], 2);
-    EXPECT_EQ(sottopoligono1.Cell2DEdges[0][3], 3);
 
-    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][0], 4);
-    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][1], 5);
-    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][2], 6);
-    EXPECT_EQ(sottopoligono2.Cell2DEdges[1][3], 1);
+    poligono.Cell2DEdges.resize(2);
+    poligono.Cell2DVertices.resize(2);
+    poligono.NumberCell2D = 2;
+    poligono.NumberCell0D = 6;
+
+    for (unsigned int i = 0; i < 2; i++)
+    {
+        list<unsigned int> listaIdVertici = VettSequenza_Punto[i];
+        Creo_sottopoligono(num_fracture, i,listaIdVertici, poligono, fracture);
+    }
+
+    EXPECT_EQ(poligono.Cell2DEdges[0][0], 0);
+    EXPECT_EQ(poligono.Cell2DEdges[0][1], 1);
+    EXPECT_EQ(poligono.Cell2DEdges[0][2], 2);
+    EXPECT_EQ(poligono.Cell2DEdges[0][3], 3);
+    EXPECT_EQ(poligono.Cell2DEdges[1][0], 4);
+    EXPECT_EQ(poligono.Cell2DEdges[1][1], 5);
+    EXPECT_EQ(poligono.Cell2DEdges[1][2], 2);
+    EXPECT_EQ(poligono.Cell2DEdges[1][3], 6);
+
+    EXPECT_EQ(poligono.Cell2DVertices[0][0], 0);
+    EXPECT_EQ(poligono.Cell2DVertices[0][1], 1);
+    EXPECT_EQ(poligono.Cell2DVertices[0][2], 4);
+    EXPECT_EQ(poligono.Cell2DVertices[0][3], 5);
+    EXPECT_EQ(poligono.Cell2DVertices[1][0], 2);
+    EXPECT_EQ(poligono.Cell2DVertices[1][1], 3);
+    EXPECT_EQ(poligono.Cell2DVertices[1][2], 5);
+    EXPECT_EQ(poligono.Cell2DVertices[1][3], 4);
+
+    EXPECT_EQ(poligono.NumberEdges.front(), 4);
+    EXPECT_EQ(poligono.NumberVertices.front(), 4);
+    EXPECT_EQ(poligono.NumberEdges.back(), 4);
+    EXPECT_EQ(poligono.NumberVertices.back(), 4);
+    EXPECT_EQ(poligono.NumberCell1D, 7);
+
+    EXPECT_EQ(poligono.Cell2DId[0], 0);
+    EXPECT_EQ(poligono.Cell2DId[1], 1);
+
+    Vector2i v0 = poligono.Cell1DVertices[0];
+    Vector2i v1 = poligono.Cell1DVertices[1];
+    Vector2i v2 = poligono.Cell1DVertices[2];
+    Vector2i v3 = poligono.Cell1DVertices[3];
+    EXPECT_EQ(v0[0], 0);
+    EXPECT_EQ(v0[1], 1);
+    EXPECT_EQ(v1[0], 1);
+    EXPECT_EQ(v1[1], 4);
+    EXPECT_EQ(v2[0], 4);
+    EXPECT_EQ(v2[1], 5);
+    EXPECT_EQ(v3[0], 5);
+    EXPECT_EQ(v3[1], 0);
+
+    Vector2i v4 = poligono.Cell1DVertices[4];
+    Vector2i v5 = poligono.Cell1DVertices[5];
+    Vector2i v6 = poligono.Cell1DVertices[6];
+    EXPECT_EQ(v4[0], 2);
+    EXPECT_EQ(v4[1], 3);
+    EXPECT_EQ(v5[0], 3);
+    EXPECT_EQ(v5[1], 5);
+    EXPECT_EQ(v6[0], 4);
+    EXPECT_EQ(v6[1], 2);
+
+    EXPECT_EQ(poligono.Cell1DId[0], 0);
+    EXPECT_EQ(poligono.Cell1DId[1], 1);
+    EXPECT_EQ(poligono.Cell1DId[2], 2);
+    EXPECT_EQ(poligono.Cell1DId[3], 3);
+    EXPECT_EQ(poligono.Cell1DId[4], 4);
+    EXPECT_EQ(poligono.Cell1DId[5], 5);
+    EXPECT_EQ(poligono.Cell1DId[6], 6);
 
 }
+
+/*
+// testo che il mio codice funzioni nel modo corretto
+TEST(TestCodice, testVerificagenerale){
+    Fractures fracture;
+    string filename = "";
+    if( !ImportFR(filename, fracture) )
+        cerr << "errore nell'apertura di file" << endl;
+
+    // richiamo funzione calcola tracce
+    Traces trace;
+    CalcoloTracce(fracture, trace);
+
+    if (!exportFR1(filename, trace))
+    {
+        cerr << "errore nella scrittura del file1" << endl;
+    }
+
+    if (!secondoOutput(filename, fracture, trace))
+    {
+        cerr << "errore nella scrittura del file2" << endl;
+    }
+    // devo verificare che ciascun elemento dell'output sia corretto
+
+}
+*/
+
+
+
 
 #endif

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "src/Utils.hpp"
+#include "src/utils.hpp"
 #include "src/FracturesTracesPolygons.hpp"
 #include <sstream>
 #include "src_test/TestFractures.hpp"

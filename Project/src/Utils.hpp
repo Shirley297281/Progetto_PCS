@@ -22,7 +22,7 @@ bool check_sphere(const array<double,3> bar1, const array<double,3> bar2, const 
 Vector3d normal_vector(const MatrixXd& m);
 
 // function to implement solution of systems 3x3 to find planes intersections
-bool system_solution (Vector3d& n1,
+bool intersezione_piani(Vector3d& n1,
                      Vector3d& n2,
                      array <double, 3>& b1,
                      array <double, 3>& b2,
@@ -30,7 +30,7 @@ bool system_solution (Vector3d& n1,
                      Vector3d& Point);
 
 // troviamo il punto di intersezione tra la retta (Point, t)  e la retta di prolungamento del segmento V1V2
-bool soluzione_sistema3x2 (Vector3d& t,
+bool intersezione_rette (Vector3d& t,
                           Vector3d& V1,
                           Vector3d& V2,
                           Vector3d& Point,

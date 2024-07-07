@@ -1,11 +1,10 @@
-#include "src/Utils.hpp"
+//#include "src/utils.hpp"
 #include "src/FracturesTracesPolygons.hpp"
 #include "src/utils_partTwo.hpp"
-#include <sstream>
+//#include <sstream>
 #include <iostream>
 #include "src/namespace.hpp"
-#include "src/inline.hpp"
-
+//#include "src/inline.hpp"
 #include "TestingParaview/Code/src/UCDUtilities.hpp" //per Paraview esportazione
 
 
@@ -59,7 +58,6 @@ int main()
 
 
     // INIZIO CREAZIONI SEQUENZE
-
     Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
     // FINE CREAZIONI SEQUENZE
 
@@ -67,11 +65,18 @@ int main()
 
     // INIZIO SALVATAGGIO PUNTI DA NON PASSANTI
     cout << "\n -SALVATAGGIO PUNTI DA TRACCE NON PASSANTI-\n\n";
-    MemorizzaVerticiNonPassanti_Cell0Ds (fracture, trace, sottoPoligono, z);
+
+    vector<Matrix<double, 3, 4>> NuoviEstremi = {};   //mi salvo i nuovi estremi delle tracce non passanti e
+        // mi salvo i vettori direttori delle rette passanti per i nuovi estremi delle tracce
+    NuoviEstremi.reserve(trace.TraceIdsNoPassxFracture[z].size());
+
+    MemorizzaVerticiNonPassanti_Cell0Ds (fracture, trace, sottoPoligono, z, NuoviEstremi);
     // FINE MEMO PUNTI DA NON PASSANTI
 
 
-
+    // INIZIO CREAZIONI SEQUENZA PER NON PASSANTI
+    /// Creazioni_Sequenze_NONPassanti(fracture, trace, sottoPoligono, z, NuoviEstremi);
+    // FINE CREAZIONI SEQUENZE PER NON PASSANTI
 
 
 
@@ -139,6 +144,7 @@ int main()
     // INIZIO ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
     size_t numSottopoligoni = LinktraSequenzaELista.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
     sottoPoligono.NumberCell2D = numSottopoligoni;
+
 
 
     sottoPoligono.Cell2DEdges.resize(numSottopoligoni);
@@ -216,24 +222,77 @@ int main()
     // Create an Eigen::MatrixXd to store the converted data
     MatrixXd eigenMatrix(3, numVerticesPerPolygon*numPolygons);
 
-    // Iterate through each polygon and copy data to the Eigen matrix
-    for (int p = 0; p < numPolygons; ++p) {
-        for (int v = 0; v < numVerticesPerPolygon; ++v) {
-            unsigned int id_punto = sottoPoligono.Cell2DVertices[p][v];
-            Vector3d coord = sottoPoligono.Cell0DCoordinates[id_punto];
-            eigenMatrix(0, v+p*numVerticesPerPolygon) = coord[0];
-            eigenMatrix(1, v+p*numVerticesPerPolygon) = coord[1];
-            eigenMatrix(2, v+p*numVerticesPerPolygon) = coord[2];
+    // // Iterate through each polygon and copy data to the Eigen matrix
+    // for (int p = 0; p < numPolygons; ++p) {
+    //     for (int v = 0; v < numVerticesPerPolygon; ++v) {
+    //         unsigned int id_punto = sottoPoligono.Cell2DVertices[p][v];
+    //         Vector3d coord = sottoPoligono.Cell0DCoordinates[id_punto];
+    //         eigenMatrix(0, v+p*numVerticesPerPolygon) = coord[0];
+    //         eigenMatrix(1, v+p*numVerticesPerPolygon) = coord[1];
+    //         eigenMatrix(2, v+p*numVerticesPerPolygon) = coord[2];
 
+    //     }
+    // }
+
+    eigenMatrix.col(0) = sottoPoligono.Cell0DCoordinates[0];
+    eigenMatrix.col(1) = sottoPoligono.Cell0DCoordinates[5];
+    eigenMatrix.col(2) = sottoPoligono.Cell0DCoordinates[4];
+    eigenMatrix.col(3) = sottoPoligono.Cell0DCoordinates[3];
+    eigenMatrix.col(4) = sottoPoligono.Cell0DCoordinates[5];
+    eigenMatrix.col(5) = sottoPoligono.Cell0DCoordinates[1];
+    eigenMatrix.col(6) = sottoPoligono.Cell0DCoordinates[2];
+    eigenMatrix.col(7) = sottoPoligono.Cell0DCoordinates[4];
+
+    // Verifica i valori di triangles e eigenMatrix
+    for (const auto& triangle : triangles) {
+        for (const auto& vertex : triangle) {
+            std::cout << vertex << " ";
         }
+        std::cout << std::endl;
     }
 
-    exporter.ExportPolygons("./Polygon0_FR3.inp",
+    std::cout << "Eigen Matrix: " << std::endl << eigenMatrix << std::endl;
+
+    /*exporter.ExportPolygons("./Polygon0_FR3.inp",
                             eigenMatrix,
                             triangles,
                             {},
                             {},
+                            materials);*/
+
+
+    // Struttura del lato (linea)
+    std::vector<std::pair<int, int>> lines_data = {
+        {0, 5},
+        {5, 4},
+        {4, 3},
+        {3, 0},
+        {1, 2},
+        {2, 4},
+        {4, 5},
+        {5, 1}
+    };
+
+    // Numero di linee
+    const int numLines = lines_data.size();
+
+    // Creazione della matrice Eigen::MatrixXi per le linee
+    Eigen::MatrixXi lines(2, numLines);
+
+    for (int i = 0; i < numLines; ++i) {
+        lines(0, i) = lines_data[i].first;
+        lines(1, i) = lines_data[i].second;
+    }
+
+    exporter.ExportSegments("./Segments0_FR3.inp",
+                            eigenMatrix,
+                            lines,
+                            {},
+                            {},
                             materials);
+
+
+    ///fine PARAVIEW
 
 
     return 0;
