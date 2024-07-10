@@ -6,6 +6,7 @@
 #include "src/namespace.hpp"
 //#include "src/inline.hpp"
 #include "TestingParaview/Code/src/UCDUtilities.hpp" //per Paraview esportazione
+#include <set>
 
 
 using namespace std;
@@ -56,13 +57,6 @@ int main()
     MemorizzaVerticiPassanti_Cell0Ds(fracture, trace, sottoPoligono, z);
     // FINE SALVATAGGIO PUNTI
 
-
-    // INIZIO CREAZIONI SEQUENZE
-    Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
-    // FINE CREAZIONI SEQUENZE
-
-
-
     // INIZIO SALVATAGGIO PUNTI DA NON PASSANTI
     cout << "\n -SALVATAGGIO PUNTI DA TRACCE NON PASSANTI-\n\n";
 
@@ -73,12 +67,79 @@ int main()
     MemorizzaVerticiNonPassanti_Cell0Ds (fracture, trace, sottoPoligono, z, NuoviEstremi);
     // FINE MEMO PUNTI DA NON PASSANTI
 
+    //controllo salvataggio punti
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    cout << " " <<endl;
+    cout << " " <<endl;
+    // Ciclo per stampare gli elementi
+    cout << " controllo salvataggi punti" <<endl;
+    for (size_t i = 0; i < sottoPoligono.Cell0DId.size(); ++i) {
+        cout << "Id punto:    " <<  sottoPoligono.Cell0DId[i] << endl;
+        cout << "Coordinate:    " ;
+        cout << sottoPoligono.Cell0DCoordinates[i].transpose() << endl;
+    }
+    cout << " " <<endl;
+     cout << " " <<endl;
+    // INIZIO CREAZIONI SEQUENZE
+    Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
+    // FINE CREAZIONI SEQUENZE
+
+    /// controllo riempimento sequenze
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    cout << " " <<endl;
+    cout << " " <<endl;
+    cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
+    cout << "numero punti con sequenze = "<< sottoPoligono.SequenzeXpunto.size() << endl;
+    for (size_t k = 0; k < sottoPoligono.SequenzeXpunto.size(); ++k) {
+        const MatrixXd& matrice = sottoPoligono.SequenzeXpunto[k];
+        int numRighe = matrice.rows();
+        int numColonne = matrice.cols();
+
+        cout << "Matrice " << k << ":" << endl;
+        cout << "Numero di righe: " << numRighe << endl;
+        cout << "Numero di colonne: " << numColonne << endl;
+
+        for (int col = 0; col < numColonne; ++col) {
+            for (int row = 0; row < numRighe; ++row) {
+                cout << matrice(row, col) << " ";
+            }
+            cout << endl; // Fine della riga (colonna della matrice)
+        }
+        cout << "Fine matrice " << k + 1 << endl << endl; // Fine della matrice
+    }
+    cout << " " <<endl;
+    cout << " " <<endl;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // INIZIO CREAZIONI SEQUENZA PER NON PASSANTI
-    /// Creazioni_Sequenze_NONPassanti(fracture, trace, sottoPoligono, z, NuoviEstremi);
+    Creazioni_Sequenze_NONPassanti(fracture, trace, sottoPoligono, z, NuoviEstremi);
     // FINE CREAZIONI SEQUENZE PER NON PASSANTI
+    // cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
 
+    cout << " " <<endl;
+    cout << " " <<endl;
+    cout << "CONTROLLO CREAZIONI SEQUENZA PER NON PASSANTI"<<endl;
+    cout << "numero punti con sequenze = "<< sottoPoligono.SequenzeXpunto.size() << endl;
+    for (size_t k = 0; k < sottoPoligono.SequenzeXpunto.size(); ++k) {
+        const MatrixXd& matrice = sottoPoligono.SequenzeXpunto[k];
+        int numRighe = matrice.rows();
+        int numColonne = matrice.cols();
 
+        cout << "Id: " << k << ":" << endl;
+        cout << "Numero di righe: " << numRighe << endl;
+        cout << "Numero di colonne: " << numColonne << endl;
+
+        for (int row = 0; row < numRighe; ++row) {
+            for (int col = 0; col < numColonne; ++col) {
+                cout << matrice(row, col) << " ";
+            }
+            cout << endl; // Fine della riga (colonna della matrice)
+        }
+        cout << "Fine id " << k << endl << endl; // Fine della matrice
+    }
+    cout << " " <<endl;
+    cout << " " <<endl;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     // INIZIO CONFRONTI SEQUENZE e RAGGRUPPAMENTI IN POLIGONI
@@ -127,7 +188,52 @@ int main()
 
         }
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    cout << " " <<endl;
+    cout << " " <<endl;
+    cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
+    for (size_t i = 0; i < LinktraSequenzaELista.size(); ++i) {
+        cout << "sottopoligono: " << i << " : " << LinktraSequenzaELista[i].transpose() << endl;
+        cout << "ids: ";
+        for (auto it = VettSequenza_Punto[i].begin(); it != VettSequenza_Punto[i].end(); ++it) {
+            cout << *it << " ";
+        }
+        cout << endl;
+    }
+    cout << " " <<endl;
+    cout << " " <<endl;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // RIMOSSIONE 1: SEQUENZE CON N°ID <= 2
+    vector<list<unsigned int>> VettSequenza_PuntoDesiderato1 = {};
+    vector<VectorXd> LinktraSequenzaEListaDesiderato1 = {};
+    VettSequenza_PuntoDesiderato1.reserve(VettSequenza_Punto.size());
+    for (unsigned int i = 0; i < VettSequenza_Punto.size(); ++i)
+    {
+        if (VettSequenza_Punto[i].size() > 2)
+        {
+            VettSequenza_PuntoDesiderato1.push_back(VettSequenza_Punto[i]);
+            LinktraSequenzaEListaDesiderato1.push_back(LinktraSequenzaELista[i]);
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    cout << " " <<endl;
+    cout << " " <<endl;
+    cout << "CONTROLLO RIMOZIONI SEQUENZA 1"<<endl;
+    for (size_t i = 0; i < LinktraSequenzaEListaDesiderato1.size(); ++i) {
+        cout << "sottopoligono: " << i << " : " << LinktraSequenzaEListaDesiderato1[i].transpose() << endl;
+        cout << "ids: ";
+        for (auto it = VettSequenza_PuntoDesiderato1[i].begin(); it != VettSequenza_PuntoDesiderato1[i].end(); ++it) {
+            cout << *it << " ";
+        }
+        cout << endl;
+    }
+    cout << " " <<endl;
+    cout << " " <<endl;
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // RIMOZIONE 2: SOTTOPOLIGONI FORMATI DA ALTRI SOTTOPOLIGONI
+    vector<list<unsigned int>> VettSequenza_PuntoDesiderato2 = {{0, 5, 6, 7}, {1, 2, 4, 5},  {3, 4 ,6, 7}} ;
+    /*
     // controlli con cout che tutti funzioni correttamente
     cout << "lista degli identificativi" << endl;
     for (const auto& lst : VettSequenza_Punto) {
@@ -142,7 +248,7 @@ int main()
     // FINE CONFRONTI SEQUENZE e RAGGRUPPAMENTI IN POLIGONI
 
     // INIZIO ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
-    size_t numSottopoligoni = LinktraSequenzaELista.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
+    size_t numSottopoligoni = VettSequenza_PuntoDesiderato2.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
     sottoPoligono.NumberCell2D = numSottopoligoni;
 
 
@@ -152,7 +258,7 @@ int main()
 
     for (unsigned int i = 0; i < numSottopoligoni; i++)
     {
-        list<unsigned int> listaIdVertici = VettSequenza_Punto[i];
+        list<unsigned int> listaIdVertici = VettSequenza_PuntoDesiderato2[i];
         Creo_sottopoligono(z, i,listaIdVertici, sottoPoligono, fracture);
     }
 
@@ -253,12 +359,12 @@ int main()
 
     std::cout << "Eigen Matrix: " << std::endl << eigenMatrix << std::endl;
 
-    /*exporter.ExportPolygons("./Polygon0_FR3.inp",
+    exporter.ExportPolygons("./Polygon0_FR3.inp",
                             eigenMatrix,
                             triangles,
                             {},
                             {},
-                            materials);*/
+                            materials); // commentata
 
 
     // Struttura del lato (linea)
@@ -293,7 +399,6 @@ int main()
 
 
     ///fine PARAVIEW
-
-
+   */
     return 0;
 }

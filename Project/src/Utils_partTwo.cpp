@@ -198,8 +198,7 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
             cout<<"C'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
 
             //é DA AGGIUNGERE MA PER IL MOMENTO é COMMENTATOO
-            //addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
-
+            addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
         }
 
 
@@ -564,6 +563,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, const Traces& tra
             Vector3d prodVett4 = VettDirTraccia2.cross(vec4);
             double prodScal3 = prodVett3.dot(vecNormaleAfratt);
             double prodScal4 = prodVett4.dot(vecNormaleAfratt);
+
             if (abs(prodScal2) < tolDefault || abs(prodScal4) < tolDefault) // ovvero se il punto appartiene a una delle due rette individuate dai vettori direttori
             {
                 // Caso particolare: devo sdoppiare la sequenza e assegnare 2 e 0 oppure 1 dipende dove sono rispetto alla traccia non passante
@@ -573,26 +573,23 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, const Traces& tra
                 if (abs(prodScal)< 1e-14) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia non passante
                 // in particolare se è un estremo della traccia non passante
                 {
-                    // triplico le sequenze e assegno sia 0 che 1 che 2
+                    // duplico le sequenze e assegno sia 0,1
                     if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
                     {
-                        MatrixXd MatriceDiSupporto(1, 3);
-                        MatriceDiSupporto.row(0) << 2, 1, 0;
+                        MatrixXd MatriceDiSupporto(1, 2);
+                        MatriceDiSupporto.row(0) << 1, 0;
                         M = MatriceDiSupporto;
                     }
                     else // se la matrice non è vuota dovrò duplicare le sequenza già esistenti e inserire vettori di 0 in una e vettori di 1 nell'altra
                     {
                         MatrixXd MatriceDiSupporto1(M.rows() + 1, M.cols());
                         MatrixXd MatriceDiSupporto2(M.rows() + 1, M.cols());
-                        MatrixXd MatriceDiSupporto3(M.rows() + 1, M.cols());
                         RowVectorXd nuovaRiga0 = RowVectorXd::Zero(M.cols());
                         RowVectorXd nuovaRiga1 = RowVectorXd::Ones(M.cols());
-                        RowVectorXd nuovaRiga2 = RowVectorXd::Ones(M.cols())*2;
                         MatriceDiSupporto1 << M, nuovaRiga0;
                         MatriceDiSupporto2 << M, nuovaRiga1;
-                        MatriceDiSupporto3 << M, nuovaRiga2;
-                        MatrixXd MConcatenata(MatriceDiSupporto1.rows(), MatriceDiSupporto1.cols() + MatriceDiSupporto2.cols()+ MatriceDiSupporto3.cols());
-                        MConcatenata << MatriceDiSupporto1, MatriceDiSupporto2, MatriceDiSupporto3;
+                        MatrixXd MConcatenata(MatriceDiSupporto1.rows(), MatriceDiSupporto1.cols() + MatriceDiSupporto2.cols());
+                        MConcatenata << MatriceDiSupporto1, MatriceDiSupporto2;
                         M = MConcatenata;
                     }
                 }
