@@ -1,7 +1,6 @@
 #ifndef Utils_H
 #define Utils_H
 #include "Eigen/Eigen"
-#include "inline.hpp"
 #include <algorithm> // qui si trova std::max_element
 
 

@@ -1,12 +1,9 @@
 #include "namespace.hpp" //contiene gli header di tutte le funzione definite come GeometryLibrary (anche Tol)
 #include "utils.hpp"
 #include "inline.hpp"
-
-
 #include <vector>
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
-
 #include <iostream>
 #include <vector>
 //#include <chrono> //for counting time <- usata solo nel controllo di quale funzione conveniva usare
@@ -210,8 +207,8 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
     dizfreeParToVec[freeParP4] = vecJ[1];
 
     //estraiamo gli estremi delle tracce
-    double id1 = idpar[0][0];
-    double id2 = idpar[1][0];
+    int id1 = idpar[0][0];
+    int id2 = idpar[1][0];
 
     if (id1==id2){
         return 1;
@@ -269,8 +266,9 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
     int pass = 0;
 
-    //evitiamo cancellazione numerica con la sottrazione
-    if (abs(idpar[0][1]- idpar[1][1]) < tolDefault && abs(idpar[2][1]- idpar[3][1]) < tolDefault){ //passante per entrambe le fratture
+    //evitiamo cancellazione numerica senza la sottrazione
+    if ( ((idpar[0][1] >= idpar[1][1] && idpar[0][1]  < idpar[1][1] + tolDefault) || (idpar[0][1] < idpar[1][1] && idpar[1][1] < idpar[0][1] + tolDefault)) &&
+        ((idpar[2][1] >= idpar[3][1] && idpar[2][1]  < idpar[3][1] + tolDefault) || (idpar[2][1] < idpar[3][1] && idpar[3][1] < idpar[2][1] + tolDefault))){ //passante per entrambe le fratture
 
         pass = 0;
         inserimento_map(pass,idpar[0][0], trace);
@@ -289,8 +287,10 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
 
     }else if (  (idpar[0][0] == double(j) &&  idpar[3][0] == double(j))
-                || (idpar[0][0]==double(i) && idpar[2][0]==double(i) && abs(idpar[0][1]-idpar[1][1])<tolDefault)
-                || (idpar[0][0]==double(j) && idpar[2][0]==double(j) && abs(idpar[2][1]-idpar[3][1])<tolDefault) ) // passante solo per i
+                || (idpar[0][0]==double(i) && idpar[2][0]==double(i) &&
+                   ((idpar[0][1] >= idpar[1][1] && idpar[0][1]  < idpar[1][1] + tolDefault) || (idpar[0][1] < idpar[1][1] && idpar[1][1] < idpar[0][1] + tolDefault)) )
+                || (idpar[0][0]==double(j) && idpar[2][0]==double(j) &&
+                   ((idpar[2][1] >= idpar[3][1] && idpar[2][1]  < idpar[3][1] + tolDefault) || (idpar[2][1] < idpar[3][1] && idpar[3][1] < idpar[2][1] + tolDefault)) ) )// passante solo per i
     {
 
         pass = 0;
@@ -305,8 +305,10 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
     }
     else if((idpar[0][0] == double(i) && idpar[3][0] == double(i))
-              ||(idpar[0][0]== double(j) && idpar[2][0] == double(j) && abs(idpar[0][1]-idpar[1][1])<tolDefault)
-               || (idpar[0][0]== double(i) && idpar[2][0] == double(i) && abs(idpar[2][1]-idpar[3][1])<tolDefault) ) // passante solo per j
+              ||(idpar[0][0]== double(j) && idpar[2][0] == double(j) &&
+                   ((idpar[0][1] >= idpar[1][1] && idpar[0][1]  < idpar[1][1] + tolDefault) || (idpar[0][1] < idpar[1][1] && idpar[1][1] < idpar[0][1] + tolDefault)) )
+               || (idpar[0][0]== double(i) && idpar[2][0] == double(i) &&
+                   ((idpar[2][1] >= idpar[3][1] && idpar[2][1]  < idpar[3][1] + tolDefault) || (idpar[2][1] < idpar[3][1] && idpar[3][1] < idpar[2][1] + tolDefault)) ) ) // passante solo per j
     {
         pass = 0;
         inserimento_map(pass,idpar[1][0], trace);
@@ -415,7 +417,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
         double freeParP0 = 0.0; // parametro libero che corrisponde al Punto0
         for (int i=0;i<3;i++) //presupponiamo che le fratture non siano degeneri
         {
-            if (abs(V2[i]-V1[i])>tolDefault)
+            if ( (V2[i] >= V1[i] && V2[i] < V1[i] + tolDefault) || (V2[i] < V1[i] && V1[i] < V2[i] + tolDefault) )
             {
                 freeParP0 = (Punto0[i]-V1[i])/(V2[i]-V1[i]);
                 break;
