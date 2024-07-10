@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "Utils.hpp"
 #include "FracturesTracesPolygons.hpp"
 #include "inline.hpp"
 #include "Eigen/Eigen"
@@ -700,7 +700,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, const Traces& tra
 
 }
 
-// quando la chiamo ho già fatto il controllo e ho trovato tutti i vertici con la stessa sequenza, ho incrementato il numero di Cell2D
+// quando si chiama è già stato fatto il controllo e sono stati trovato tutti i vertici con la stessa sequenza, inoltre si è incrementato il numero di Cell2D
 void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono,list<unsigned int> listaIdVertici, Polygons& sottopoligono, Fractures& fracture){
 
     vector<unsigned int> estremi(listaIdVertici.begin(), listaIdVertici.end()); // trasformo la lista in un vector
@@ -714,12 +714,12 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
 
     // con i seleziono un vertice, con j il consecutivo (effettuo la verifica con k)
-    unsigned int num_iterazioni = 0; // all'ultima iterazione id_j deve essere uguale al primo id_i
+    unsigned int num_iterazioni = 0;
     unsigned int i = 0;
     unsigned int id_i = estremi[i];
     unsigned int id_j;
 
-    for (unsigned int j = 0; j < n+1; j++) // devo arrivare fino a n iterazioni perchè sennò non trovo l'ultimo lato
+    for (unsigned int j = 0; j < n+1; j++) // devo arrivare fino a n iterazioni perchè sennò non trova l'ultimo lato
     {
         bool lato_valido = true;
 
@@ -742,8 +742,8 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
             vector<double> prodscalare;
             prodscalare.reserve(m);
 
-            for (unsigned int k = 0; k < n; k++){ // devo confrontarli con tutti gli altri punti, se avessi fatto con k = j+1 mi sarei persa il confronto con gli i e j precedenti
-                if (k == i || k == j){ // se trovo k uguale a uno dei vertici che sto considerando come estremi => incremento k
+            for (unsigned int k = 0; k < n; k++){
+                if (k == i || k == j){
                     continue;
                 }
 
@@ -807,6 +807,7 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
         if(num_iterazioni <= n){
             i = j; // permette di trovare i lati in ordine
+
             id_i = estremi[i];// serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
         }
 
@@ -823,21 +824,20 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     array <double,3> bar = barycenter(vertices, n);
     Vector3d bar_vec(bar[0], bar[1], bar[2]);
 
-    // i lati che trovo sono in ordine (devo solo verificare che siano in ordine antiorario e NON orario)
-    // devo prendere id_estremi_lato[0]
+    // i lati sono in ordine (devo solo verificare che siano in ordine antiorario e NON orario)
     unsigned int id_0 = id_estremi_lato[0][0];
     unsigned int id_1 = id_estremi_lato[0][1];
     Vector3d coord_0 = sottopoligono.Cell0DCoordinates[id_0];
     Vector3d coord_1 = sottopoligono.Cell0DCoordinates[id_1];
 
-    // trovo i vettori che congiungono gli estremi del primo lato al baricentro
+    // vettori che congiungono gli estremi del primo lato al baricentro
     Vector3d v1 = coord_0 - bar_vec;
     Vector3d v2 = coord_1 - bar_vec;
     Vector3d v1xv2 = vec_product(v1, v2);
     double prod_scal = v1xv2.dot(vett_normale_frattura);
 
     // se il prodotto scalare è negativo => devo prendere l'altro senso
-    if(prod_scal > 0){
+    if(prod_scal < 0){
         reverse(id_estremi_lato.begin(), id_estremi_lato.end());
         // invertire l'ordine all'interno di ogni coppia in id_estremi_lato
         for (auto& coppia : id_estremi_lato) {
@@ -847,9 +847,9 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     }
 
     // aggiorno Cell2D
-    sottopoligono.Cell2DId.push_back(num_sottopoligono); // aggiorno l'id del sottopoligono
-    sottopoligono.NumberVertices.push_back(n); // aggiorno num vertici
-    sottopoligono.NumberEdges.push_back(n); // aggiorno num lati
+    sottopoligono.Cell2DId.push_back(num_sottopoligono);
+    sottopoligono.NumberVertices.push_back(n);
+    sottopoligono.NumberEdges.push_back(n);
 
     // Cell2DVertices trasformo la lista delle coppie di estremi identificativi del lato in una sequenza di punti consecutivi
     unordered_set<int> id_estremi_set;
@@ -878,4 +878,4 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
 
 
-}//del namespace
+}
