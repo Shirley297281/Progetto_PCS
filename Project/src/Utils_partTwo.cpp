@@ -1,7 +1,6 @@
 #include "utils.hpp"
 #include "FracturesTracesPolygons.hpp"
 #include "inline.hpp"
-#include <numeric>
 #include "Eigen/Eigen"
 #include <iostream>
 #include <vector>
@@ -105,16 +104,16 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
 
         bool foundidpunto = false;
 
-        // Itera attraverso la mappa
+        // itera attraverso la mappa
         for (const auto& pair : markerDiz) {
             const unsigned int key = pair.first;
             const list<unsigned int>& values = pair.second;
 
-            // Cerca l'ID del punto nella lista dei valori
+            // cerca l'ID del punto nella lista dei valori
             if (find(values.begin(), values.end(), sottoPoligono.Cell0DId[i]) != values.end()) {
                 cout << key << endl;
                 foundidpunto = true;
-                break; // Esci dal ciclo una volta trovato l'ID
+                break; // esce dal ciclo una volta trovato l'ID
             }
         }
 
@@ -131,7 +130,6 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
     unsigned int numTraccePassantiInZ = trace.TraceIdsPassxFracture[z].size();
     for (unsigned int i = 0; i<numTraccePassantiInZ ; i++ ){
 
-        //Vector3d vecNormaleAfratt = fracture.vettoreNormalePiano[z]; //mi serve dopo
 
         unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
 
@@ -197,7 +195,6 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
 
             cout<<"C'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
 
-            //é DA AGGIUNGERE MA PER IL MOMENTO é COMMENTATOO
             addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
         }
 
@@ -293,15 +290,10 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             //addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, Punto02,3);
         }
         cout << "Numero di punti di intersezione dopo il controllo con le tracce passanti: " << puntiIntersPapabili.size() << endl;
-        // ciclo su tracce non passanti già iterate
-            // STRA CONTROLLA QUESTO CHE DAVA PROBLEMI
-        /*if (NuoviEstremi.empty()) // non ci sono tracce non passanti già iterate
-        {
-            continue;
-        }*/
+
         for (unsigned int j = 0; j< NuoviEstremi.size() ; j++ ) //// ciclo su tracce non passanti già iterate (quindi contenute in NuoviEstremi)
         {
-            // vector<Matrix<double, 3, 4>> NuoviEstremi = {};
+
             Vector3d Estremo1Traccia3 = NuoviEstremi[j].col(0);
             Vector3d Estremo2Traccia3 = NuoviEstremi[j].col(2);
             // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
@@ -362,17 +354,6 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
                     continue;
                 }
 
-                // è un punto interno, lo salvo in Cell0D (senza fare altro)
-                /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
-                sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
-                /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
-                sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
-                sottoPoligono.Cell0DCoordinates.push_back(punto);
-                // non so se sia necessario questo però sto allocando memoria
-                MatrixXd M(0,0); //matrice vuota di dimensione
-                sottoPoligono.SequenzeXpunto.push_back(M); //pensare a un resize eventuale
-                //markerDiz[2].push_back(NumPuntiFinora); //marker con chiave 2 per punti interni !marker qui non funziona, non so distinguere in maniera semplice se il punto è in una posizione particolare
-                */
                 addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, punto,3);
             }
         }
@@ -383,38 +364,19 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         array<double, 2> UltimoArray = PerEstremoSinistro.back();         // devo prendere il massimo tra i parametri liberi minori = al parametro libero dell'estremo della traccia non passante
         array<double, 2> PrimoArray = PerEstremoDestro.front(); // devo prendere il minimo tra i parametri liberi maggiori = al parametro libero dell'estremo della traccia non passante
         // questo lo facciamo perchè gli estremi "nuovi" della traccia non passante devono essere i punti di intersezione più vicini agli estremi originali
-        double pos1Double = UltimoArray[0]; // estraggo k in modo da riuscire a estrarre nuovamente i punti "buoni" da
+        double pos1Double = UltimoArray[0]; // estraggo k in modo da riuscire a estrarre nuovamente i punti "buoni"
         double pos2Double = PrimoArray[0];
-        // consigliato da chat gpt per trasformare da double a int
         unsigned int pos1 = static_cast<unsigned int>(pos1Double);
         unsigned int pos2 = static_cast<unsigned int>(pos2Double);
         // inizio salvataggio in Cell0D
-        Vector3d nuovoEstremo1 = puntiIntersPapabili[pos1];   // possibile problema di double - int
+        Vector3d nuovoEstremo1 = puntiIntersPapabili[pos1];
         if (!checkInserimento(nuovoEstremo1, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
         {
-            /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
-            sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
-            /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
-            sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
-            sottoPoligono.Cell0DCoordinates.push_back(nuovoEstremo1);
-            // non so se sia necessario questo però sto allocando memoria
-            MatrixXd M(0,0); //matrice vuota di dimensione
-            sottoPoligono.SequenzeXpunto.push_back(M);
-            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita*/
             addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, nuovoEstremo1,3);
         }
         Vector3d nuovoEstremo2 = puntiIntersPapabili[pos2];
         if (!checkInserimento(nuovoEstremo2, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
         {
-            /*unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
-            sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
-            /// visto che push_back alloca memoria e inserisce dovrebbe funzionare comunque (reserve non sapevo come farlo)
-            sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // es: se ho già 2 punti questi hanno identificativo 0,1. Quando aggiungo il terzo questo avrà id = 2
-            sottoPoligono.Cell0DCoordinates.push_back(nuovoEstremo2);
-            // non so se sia necessario questo però sto allocando memoria
-            MatrixXd M(0,0); //matrice vuota di dimensione
-            sottoPoligono.SequenzeXpunto.push_back(M);
-            // markerDiz[1].push_back(NumPuntiFinora); qui per i marker è più complicato e visto che non è richiesto non mi complicherei la vita*/
             addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, nuovoEstremo2,3);
         }
         // fine salvataggio in Cell0D
@@ -826,7 +788,7 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
                 id_lati.push_back(id_);
             }
             else if(it == sottopoligono.Cell1DVertices.end() || it1 == sottopoligono.Cell1DVertices.end()){
-                //sottopoligono.Cell1DVertices.push_back(l);
+
                 unsigned int id;
 
                 if(sottopoligono.Cell1DId.empty())
@@ -844,8 +806,8 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
         }
 
         if(num_iterazioni <= n){
-            i = j; // mi permette di trovare i lati in ordine
-            id_i = estremi[i];//mi serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
+            i = j; // permette di trovare i lati in ordine
+            id_i = estremi[i];// serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
         }
 
     }
@@ -877,9 +839,9 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     // se il prodotto scalare è negativo => devo prendere l'altro senso
     if(prod_scal > 0){
         reverse(id_estremi_lato.begin(), id_estremi_lato.end());
-        // Invertire l'ordine all'interno di ogni coppia in id_estremi_lato
+        // invertire l'ordine all'interno di ogni coppia in id_estremi_lato
         for (auto& coppia : id_estremi_lato) {
-            std::swap(coppia[0], coppia[1]);
+            swap(coppia[0], coppia[1]);
         }
         reverse(id_lati.begin(), id_lati.end());
     }
@@ -892,20 +854,6 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     // Cell2DVertices trasformo la lista delle coppie di estremi identificativi del lato in una sequenza di punti consecutivi
     unordered_set<int> id_estremi_set;
     vector<unsigned int> id_lati_vec;
-
-    /*// Ordinamento manuale del vettore
-    for (int i = 0; i < id_estremi_lato.size(); ++i) {
-        for (int j = i + 1; j < id_estremi_lato.size(); ++j) {
-            if (id_estremi_lato[j][1] < id_estremi_lato[i][1]) {
-                swap(id_estremi_lato[i], id_estremi_lato[j]);
-            }
-        }
-    }*/
-
-    // Stampa delle coppie ordinate
-    for (const auto& matrix : id_estremi_lato) {
-        cout << matrix[0] << ";" << matrix[1] << std::endl;
-    }
 
     for (auto it = id_estremi_lato.begin(); it != id_estremi_lato.end(); ++it) {
         Vector2i vec = *it;

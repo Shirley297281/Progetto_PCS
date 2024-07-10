@@ -4,19 +4,20 @@
 #include <fstream>
 #include <iostream>
 #include "FracturesTracesPolygons.hpp"
-#include "utils.hpp"
-#include <gtest/gtest.h> // framework Google Test
+#include "Utils.hpp"
+#include <gtest/gtest.h>
 #include "Eigen/Eigen"
 #include <math.h>
 #include "namespace.hpp"
 #include "inline.hpp"
-#include "utils_partTwo.hpp"
+#include "Utils_partTwo.hpp"
 
 
 using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
-// test su fratture e tracce ->
+
+// test su fratture e tracce
 TEST(TestFractures, TestDFNReading)
 {
     ifstream file("FR2_datatest.txt");
@@ -34,8 +35,8 @@ TEST(TestFractures, TestDFNReading)
         cerr << "Error importing fractures from file." << endl;
         return;
     }
-    // Check that the number of fractures is correct (EXCEPT_EQ verifica che i valori floating distino meno di una tolleranza)
-    EXPECT_EQ(fractures.NumFractures, 2); // Trova un errore!
+    // Check that the number of fractures is correct
+    EXPECT_EQ(fractures.NumFractures, 2);
 
     // Check the properties of the first fracture
     if(fractures.CoordinatesVertice.size() > 0){
@@ -223,14 +224,9 @@ TEST(TestdistinzioneTipoTraccia1, Test_2notpass) // 5^ caso
     EXPECT_EQ(sol, 6);
 }
 
-/*
-// test distinzioneTipoTraccia2
-TEST(TestTips, TestdistinzioneTipoTraccia2){}
-*/
-
 // test su Calcolo_par
 // t (direzione della retta di intersezione fra piani) coincide con uno dei lati della frattura
-TEST(TestCalcola_par, Test_t_coincident){
+TEST(TestCalcolo_par, Test_t_coincident){
     Vector3d a(-2.0, 0.0, 0.0);
     Vector3d b(0.0, 0.0, 2.0);
     Vector3d c(0.0, 0.0, 0.0);
@@ -254,7 +250,7 @@ TEST(TestCalcola_par, Test_t_coincident){
 }
 
 // t è esterna alla frattura
-TEST(TestCalcola_par, Test_t_external){
+TEST(TestCalcolo_par, Test_t_external){
     Vector3d a(-2.0, 0.0, 0.0);
     Vector3d b(0.0, 0.0, 2.0);
     Vector3d c(0.0, 0.0, 0.0);
@@ -278,7 +274,7 @@ TEST(TestCalcola_par, Test_t_external){
 }
 
 // t interseca due lati della frattura
-TEST(TestCalcola_par, Test_t_intersect_2edges){
+TEST(TestCalcolo_par, Test_t_intersect_2edges){
     Vector3d a(-2.0, 0.0, 0.0);
     Vector3d b(0.0, 0.0, 2.0);
     Vector3d c(0.0, 0.0, 0.0);
@@ -302,7 +298,7 @@ TEST(TestCalcola_par, Test_t_intersect_2edges){
 }
 
 // t interseca un vertice della frattura
-TEST(TestCalcola_par, Test_t_intersect_1vertice){
+TEST(TestCalcolo_par, Test_t_intersect_1vertice){
     Vector3d a(-2.0, 0.0, 0.0);
     Vector3d b(0.0, 0.0, 2.0);
     Vector3d c(0.0, 0.0, 0.0);
@@ -325,7 +321,7 @@ TEST(TestCalcola_par, Test_t_intersect_1vertice){
     EXPECT_EQ(par, 1);
 }
 
-TEST(TestCalcola_par, Test_t_intersect_2vertices){
+TEST(TestCalcolo_par, Test_t_intersect_2vertices){
     Vector3d a(-2.0, 0.0, 0.0);
     Vector3d b(0.0, 0.0, 2.0);
     Vector3d c(0.0, 0.0, 0.0);
@@ -388,7 +384,7 @@ TEST(TestUtils, TestNormalVector)
 }
 
 
-// test sulle inline function (capire se fare test su inserimento_map in Inline.hpp)
+// test sulle inline function
 TEST(TestInline, TestEuclideanDistance)
 {
 
@@ -494,7 +490,7 @@ TEST(TestInline, Test_combinazione_convessa_no){
 // test su intersezione_piani con vettori v1, v2 (vettori normali ai piani) tra loro paralleli
 TEST(TestIntersezione_piani, TestVecParallel)
 {
-    // i vettori v1 e v2 sono linearmente dipendenti -> Non hanno un punto di intersezione unico!
+    // i vettori v1 e v2 sono linearmente dipendenti -> Non hanno un punto di intersezione unico
     Vector3d n1(1.0, 2.0, 3.0);
     Vector3d n2(2.0, 4.0, 6.0);
     array <double, 3> b1 = {0.0, 1.0, 2.0};
@@ -528,7 +524,7 @@ TEST(TestIntersezione_piani, TestCorrectSol)
     Vector3d t(1.0, 2.0, 0.0);
     Vector3d Point = {};
     bool sol = intersezione_piani(n1, n2, b1, b2, t, Point); // il sistema dovrebbe restituire 'true' perchè n1 e n2 non sono nè paralleli nè coicidenti
-    ASSERT_TRUE(sol); // verifoca che la variabile sol sia vera
+    ASSERT_TRUE(sol); // verifica che la variabile sol sia vera
 }
 
 // test su intersezione_rette con vettori t e V1-V2 paralleli
@@ -554,43 +550,6 @@ TEST(TestIntersezione_rette, TestSoluzioneIntersezione_rette_vecNotParallel)
     bool sol = intersezione_rette(t, V1, V2, Point, Punto0);
     ASSERT_TRUE(sol);
 }
-
-// // test su creo_sottopoligoni
-// TEST(TestSottopoligoni, Testcreo_sottopoligoni){
-//     unsigned int num_fracture = 0;
-//     Fractures fracture;
-
-//     unsigned int num_sottopoligono1 = 0;
-//     Polygons sottopoligono1;
-//     list<unsigned int> listaIdVertici1;
-//     listaIdVertici1.push_back(0);
-//     listaIdVertici1.push_back(4);
-//     listaIdVertici1.push_back(5);
-//     listaIdVertici1.push_back(3);
-
-
-//     unsigned int num_sottopoligono2 = 1;
-//     Polygons sottopoligono2;
-//     list<unsigned int> listaIdVertici2;
-//     listaIdVertici2.push_back(4);
-//     listaIdVertici2.push_back(1);
-//     listaIdVertici2.push_back(2);
-//     listaIdVertici2.push_back(5);
-//     // continua a crashare!
-//     Creo_sottopoligono(num_fracture, num_sottopoligono1, listaIdVertici1, sottopoligono1, fracture);
-//     Creo_sottopoligono(num_fracture, num_sottopoligono2, listaIdVertici2, sottopoligono2, fracture);
-
-//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][0], 0);
-//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][1], 1);
-//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][2], 2);
-//     EXPECT_EQ(sottopoligono1.Cell2DEdges[0][3], 3);
-
-//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][0], 4);
-//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][1], 5);
-//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][2], 6);
-//     EXPECT_EQ(sottopoligono2.Cell2DEdges[1][3], 1);
-
-// }
 
 
 /// TEST PARTE 2
@@ -700,34 +659,6 @@ TEST(TestSottopoligoni, Testcreo_sottopoligoni){
     EXPECT_EQ(poligono.Cell1DId[6], 6);
 
 }
-
-/*
-// testo che il mio codice funzioni nel modo corretto
-TEST(TestCodice, testVerificagenerale){
-    Fractures fracture;
-    string filename = "";
-    if( !ImportFR(filename, fracture) )
-        cerr << "errore nell'apertura di file" << endl;
-
-    // richiamo funzione calcola tracce
-    Traces trace;
-    CalcoloTracce(fracture, trace);
-
-    if (!exportFR1(filename, trace))
-    {
-        cerr << "errore nella scrittura del file1" << endl;
-    }
-
-    if (!secondoOutput(filename, fracture, trace))
-    {
-        cerr << "errore nella scrittura del file2" << endl;
-    }
-    // devo verificare che ciascun elemento dell'output sia corretto
-
-}
-*/
-
-
 
 
 #endif
