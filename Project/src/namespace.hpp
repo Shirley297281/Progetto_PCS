@@ -18,7 +18,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace);
 int distinzioneTipoTraccia1(/*Fractures& fracture*/ Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d& Point, Vector3d& t, unsigned int i, unsigned int j);
 
-void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, const int j );
+void Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j );
 
 
 //calculate free parameter of points

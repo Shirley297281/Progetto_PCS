@@ -880,10 +880,10 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     // se il prodotto scalare è negativo => devo prendere l'altro senso
     if(prod_scal > 0){
         reverse(id_estremi_lato.begin(), id_estremi_lato.end());
-// Invertire l'ordine all'interno di ogni coppia in id_estremi_lato
-//        for (auto& coppia : id_estremi_lato) {
-//            std::swap(coppia[0], coppia[1]);
-//        }
+        // Invertire l'ordine all'interno di ogni coppia in id_estremi_lato
+        for (auto& coppia : id_estremi_lato) {
+            std::swap(coppia[0], coppia[1]);
+        }
         reverse(id_lati.begin(), id_lati.end());
     }
 
