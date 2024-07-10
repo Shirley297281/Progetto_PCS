@@ -230,25 +230,9 @@ int main()
     }
     cout << " " <<endl;
     cout << " " <<endl;
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // RIMOZIONE 2: SOTTOPOLIGONI FORMATI DA ALTRI SOTTOPOLIGONI
-    vector<list<unsigned int>> VettSequenza_PuntoDesiderato2 = {{0, 5, 6, 7}, {1, 2, 4, 5},  {3, 4 ,6, 7}} ;
-    /*
-    // controlli con cout che tutti funzioni correttamente
-    cout << "lista degli identificativi" << endl;
-    for (const auto& lst : VettSequenza_Punto) {
-        // Iterazione attraverso ogni list
-        for (unsigned int val : lst) {
-            cout << "id " << val << ": ";
-            cout << "(" << sottoPoligono.Cell0DCoordinates[val][0] << ", " << sottoPoligono.Cell0DCoordinates[val][1] << ", " << sottoPoligono.Cell0DCoordinates[val][2] << ")" << endl;
-        }
-        cout << endl; // Nuova linea per separare le diverse liste
-    }
-
-    // FINE CONFRONTI SEQUENZE e RAGGRUPPAMENTI IN POLIGONI
 
     // INIZIO ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
-    size_t numSottopoligoni = VettSequenza_PuntoDesiderato2.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
+    size_t numSottopoligoni = VettSequenza_PuntoDesiderato1.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
     sottoPoligono.NumberCell2D = numSottopoligoni;
 
 
@@ -258,7 +242,7 @@ int main()
 
     for (unsigned int i = 0; i < numSottopoligoni; i++)
     {
-        list<unsigned int> listaIdVertici = VettSequenza_PuntoDesiderato2[i];
+        list<unsigned int> listaIdVertici = VettSequenza_PuntoDesiderato1[i];
         Creo_sottopoligono(z, i,listaIdVertici, sottoPoligono, fracture);
     }
 
@@ -271,10 +255,6 @@ int main()
     cout << "NumberCell1D: " << sottoPoligono.NumberCell1D << endl; // giusto
 
     cout << endl;
-    // verifico gli identificativi dei lati del primo sottopoligono
-    for(unsigned int i=0; i < 4; i++){
-        cout << "lato " << i << " : id "<< sottoPoligono.Cell2DEdges[1][i] << endl; // SBAGLIATO
-    }
 
     //verifico che sia giusto il riempimento di Cell2DVertices -> GIUSTO
     cout << "id degli estremi del sottopoligono 0" << endl;
@@ -285,23 +265,11 @@ int main()
     for(unsigned int i = 0; i < 4; i++){
         cout << "estremo " << i << " : " << sottoPoligono.Cell2DVertices[1][i] << endl;
     }
+    cout << "id degli estremi del sottopoligono 2" << endl;
+    for(unsigned int i = 0; i < 4; i++){
+        cout << "estremo " << i << " : " << sottoPoligono.Cell2DVertices[2][i] << endl;
+    }
 
-    // attenzione: ne viene uno in + e gli ultimi sono sballati
-    cout << "Cell1DVertices[0][0]: " << sottoPoligono.Cell1DVertices[0][0] << ", Cell1DVertices[0][1]: " << sottoPoligono.Cell1DVertices[0][1] << endl;
-    cout << "Cell1DVertices[1][0]: " << sottoPoligono.Cell1DVertices[1][0] << ", Cell1DVertices[1][1]: " << sottoPoligono.Cell1DVertices[1][1] << endl;
-    cout << "Cell1DVertices[2][0]: " << sottoPoligono.Cell1DVertices[2][0] << ", Cell1DVertices[2][1]: " << sottoPoligono.Cell1DVertices[2][1] << endl;
-    cout << "Cell1DVertices[3][0]: " << sottoPoligono.Cell1DVertices[3][0] << ", Cell1DVertices[3][1]: " << sottoPoligono.Cell1DVertices[3][1] << endl;
-    cout << "Cell1DVertices[4][0]: " << sottoPoligono.Cell1DVertices[4][0] << ", Cell1DVertices[4][1]: " << sottoPoligono.Cell1DVertices[4][1] << endl;
-    cout << "Cell1DVertices[5][0]: " << sottoPoligono.Cell1DVertices[5][0] << ", Cell1DVertices[5][1]: " << sottoPoligono.Cell1DVertices[5][1] << endl;
-    cout << "Cell1DVertices[6][0]: " << sottoPoligono.Cell1DVertices[6][0] << ", Cell1DVertices[6][1]: " << sottoPoligono.Cell1DVertices[6][1] << endl;
-    cout << endl;
-    cout << "Cell1DId[0]: " << sottoPoligono.Cell1DId[0] << endl;
-    cout << "Cell1DId[1]: " << sottoPoligono.Cell1DId[1] << endl;
-    cout << "Cell1DId[2]: " << sottoPoligono.Cell1DId[2] << endl;
-    cout << "Cell1DId[3]: " << sottoPoligono.Cell1DId[3] << endl;
-    cout << "Cell1DId[4]: " << sottoPoligono.Cell1DId[4] << endl;
-    cout << "Cell1DId[5]: " << sottoPoligono.Cell1DId[5] << endl;
-    cout << "Cell1DId[6]: " << sottoPoligono.Cell1DId[6] << endl;
     // FINE ORDINAMENTO LATI e SALVATAGGIO IN CELL2D (già fatto tutto in Creo_sottopoligono)
 
 
@@ -309,11 +277,22 @@ int main()
 
 
     ///EXPORTING PARAVIEW
+    ///
+    ///
+    ///
+
+    cout<<"\n\n--Esportazione per PARAVIEW--"<<endl;
+
+    // RIMOZIONE 2: SOTTOPOLIGONI FORMATI DA ALTRI SOTTOPOLIGONI
+        vector<list<unsigned int>> VettSequenza_PuntoDesiderato2 = {{0, 5, 6, 7}, {1, 2, 4, 5},  {3, 4 ,6, 7}} ;
+
+
+
     Gedim::UCDUtilities exporter;
     std::vector<std::vector<unsigned int>> triangles;
     Eigen::VectorXi materials;
     sottoPoligono.GedimInterface(triangles, materials);
-    cout<<"GEdimInterfaceokay"<<endl;
+    cout<<"triangolazione sottopoligoni effettuata."<<endl;
 
 
     // Check if the input vector is empty
@@ -321,73 +300,35 @@ int main()
        throw runtime_error("Cell2DVertices is empty");
     }
 
-    // Get the number of polygons and vertices per polygon
-    const int numPolygons = sottoPoligono.Cell2DVertices.size();
-    const int numVerticesPerPolygon = sottoPoligono.Cell2DVertices[0].size();
+    // Crea MatrixXd per aver una struttura compatibile con la funzione in UDCUtilities
+    MatrixXd eigenMatrix(3, sottoPoligono.NumberCell0D);
 
-    // Create an Eigen::MatrixXd to store the converted data
-    MatrixXd eigenMatrix(3, numVerticesPerPolygon*numPolygons);
-
-    // // Iterate through each polygon and copy data to the Eigen matrix
-    // for (int p = 0; p < numPolygons; ++p) {
-    //     for (int v = 0; v < numVerticesPerPolygon; ++v) {
-    //         unsigned int id_punto = sottoPoligono.Cell2DVertices[p][v];
-    //         Vector3d coord = sottoPoligono.Cell0DCoordinates[id_punto];
-    //         eigenMatrix(0, v+p*numVerticesPerPolygon) = coord[0];
-    //         eigenMatrix(1, v+p*numVerticesPerPolygon) = coord[1];
-    //         eigenMatrix(2, v+p*numVerticesPerPolygon) = coord[2];
-
-    //     }
-    // }
-
-    eigenMatrix.col(0) = sottoPoligono.Cell0DCoordinates[0];
-    eigenMatrix.col(1) = sottoPoligono.Cell0DCoordinates[5];
-    eigenMatrix.col(2) = sottoPoligono.Cell0DCoordinates[4];
-    eigenMatrix.col(3) = sottoPoligono.Cell0DCoordinates[3];
-    eigenMatrix.col(4) = sottoPoligono.Cell0DCoordinates[5];
-    eigenMatrix.col(5) = sottoPoligono.Cell0DCoordinates[1];
-    eigenMatrix.col(6) = sottoPoligono.Cell0DCoordinates[2];
-    eigenMatrix.col(7) = sottoPoligono.Cell0DCoordinates[4];
-
-    // Verifica i valori di triangles e eigenMatrix
-    for (const auto& triangle : triangles) {
-        for (const auto& vertex : triangle) {
-            std::cout << vertex << " ";
-        }
-        std::cout << std::endl;
+    for (unsigned int p = 0; p < sottoPoligono.NumberCell0D; ++p) {
+        Vector3d coord = sottoPoligono.Cell0DCoordinates[p];
+        eigenMatrix(0, p) = coord[0];
+        eigenMatrix(1, p) = coord[1];
+        eigenMatrix(2, p) = coord[2];
     }
 
-    std::cout << "Eigen Matrix: " << std::endl << eigenMatrix << std::endl;
 
     exporter.ExportPolygons("./Polygon0_FR3.inp",
                             eigenMatrix,
                             triangles,
                             {},
                             {},
-                            materials); // commentata
+                            materials);
 
-
-    // Struttura del lato (linea)
-    std::vector<std::pair<int, int>> lines_data = {
-        {0, 5},
-        {5, 4},
-        {4, 3},
-        {3, 0},
-        {1, 2},
-        {2, 4},
-        {4, 5},
-        {5, 1}
-    };
+    cout << "stampato file 'Polygon0_FR3.inp'."<<endl;
 
     // Numero di linee
-    const int numLines = lines_data.size();
+    const int numLines = sottoPoligono.NumberCell1D;
 
-    // Creazione della matrice Eigen::MatrixXi per le linee
-    Eigen::MatrixXi lines(2, numLines);
+    // Creazione della matrice MatrixXi per le linee
+    MatrixXi lines(2, numLines);
 
     for (int i = 0; i < numLines; ++i) {
-        lines(0, i) = lines_data[i].first;
-        lines(1, i) = lines_data[i].second;
+        lines(0, i) = sottoPoligono.Cell1DVertices[i][0];
+        lines(1, i) = sottoPoligono.Cell1DVertices[i][1];
     }
 
     exporter.ExportSegments("./Segments0_FR3.inp",
@@ -397,8 +338,9 @@ int main()
                             {},
                             materials);
 
+    cout << "stampato file 'Segments0_FR3.inp'."<<endl;
 
     ///fine PARAVIEW
-   */
+    ///
     return 0;
 }

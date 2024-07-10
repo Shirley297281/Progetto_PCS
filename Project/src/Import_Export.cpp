@@ -5,7 +5,6 @@
 #include "Eigen/Eigen"
 #include <iostream>
 #include <fstream>
-//#include "inline.hpp"
 
 
 namespace GeometryLibrary
@@ -45,7 +44,6 @@ bool ImportFR(const string &filename,
     fracture.numVertices.reserve(num_fractures);
     fracture.lenghtMaxEdges.reserve(num_fractures);
     fracture.baricentro.reserve(num_fractures);
-    //fracture.CoordinatesVertice.resize(num_fractures);
 
     //introduco un count per far arrestare la lettura
     int count = 0;
@@ -58,11 +56,11 @@ bool ImportFR(const string &filename,
         int id_fracture;
         istringstream ss(line);
         string token;
-        getline(ss, token, ';'); // Utilizza ss invece di file per ottenere il token dalla stringa
-        istringstream(token) >> id_fracture; // Usa istringstream per convertire il token in un intero
+        getline(ss, token, ';');
+        istringstream(token) >> id_fracture;
         fracture.IdFractures.push_back(id_fracture);
 
-        ss.ignore(1); // Ignora lo spazio dopo il separatore
+        ss.ignore(1); // ignora lo spazio dopo il separatore
         token.clear();
 
         int num_vertices;
@@ -91,7 +89,7 @@ bool ImportFR(const string &filename,
 
                 vertices(i,j)=coord;
 
-                cc.ignore(1); // Ignora lo spazio dopo il ;
+                cc.ignore(1); // ignora lo spazio dopo il ;
                 coordinate.clear();
             }
 
@@ -120,25 +118,7 @@ bool ImportFR(const string &filename,
 
 
     //controllo di quel che si ha memorizzato
-
-    // /!\ FORSE CI CONVIENE CONTROLLARE CON L'OUTPUT QUALCOSA
-    //     DI SIGNIFICATIVO SULLO STILE DEI MERKER DELL'ESERCITAZIONE 5
     cout << "Dati delle fratture memorizzati correttamente." << endl;
-    /*for (size_t i = 0; i < fracture.IdFractures.size(); ++i) {
-        cout << "--- Frattura " << fracture.IdFractures[i] << " ---" << endl;
-        cout << "Numero vertici: " << fracture.numVertices[i] << endl;
-        cout << "Coordinate vertici:" << endl;
-        cout << fracture.CoordinatesVertice[i] << endl;
-        cout << endl;
-    }
-
-    // display the vector elements using a for loop
-    for (int i = 0; i < num_fractures; i++) {
-        cout << "\nmax length of fracture[" << i << "] = " <<scientific<<setprecision(6)<< fracture.lenghtMaxEdges[i] << endl;
-        cout << "baricentro: (" << fracture.baricentro[i][0] << ", " << fracture.baricentro[i][1] << ", " << fracture.baricentro[i][2] << ")" << std::endl;
-        cout << "vettore normale: (" << fracture.vettoreNormalePiano[i][0] << ", " << fracture.vettoreNormalePiano[i][1] << ", " << fracture.vettoreNormalePiano[i][2] << ")" << endl;
-    }*/
-
 
 
     return true;
@@ -147,7 +127,6 @@ bool ImportFR(const string &filename,
 
 bool exportFR1(const string &filename, const Traces& trace)
 {
-    // #include <fstream> in main
     ofstream outFile("1TRACES_"+filename);
     if (!outFile) {
         cerr << "Errore nell'apertura del file per la scrittura." << endl;
@@ -175,7 +154,6 @@ bool exportFR1(const string &filename, const Traces& trace)
         }
         outFile<< endl;
     }
-    // Chiudere il file
     outFile.close();
     return 8;
 }
@@ -246,7 +224,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
             for (unsigned int j = 0; j < dimPass; j++)
             {
                 // printo da idLenghsPass a sto punto ordinato
-                outFile << idLengthsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLengthsPass[dimPass-j-1][1]<<endl; // CREARE VARIABILE TIPS, è specificatamente richiesto e sostituire passante con "fracture.Tips[idLengthsPass[i][0]]"
+                outFile << idLengthsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLengthsPass[dimPass-j-1][1]<<endl;
                 trace.TraceIdsPassxFracture[i][j] = idLengthsPass[dimPass-j-1][0];
             }
         }
@@ -267,14 +245,14 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
 
             for (unsigned int j = 0; j < dimNoPass; j++)
             {
-                outFile << idLengthsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLengthsNoPass[dimNoPass - j-1][1] << endl; // sostituire con fracture.Tips[idLengthsPass[i][0]]
+                outFile << idLengthsNoPass[dimNoPass - j-1][0] << "; " << tips << "; " << idLengthsNoPass[dimNoPass - j-1][1] << endl;
                 trace.TraceIdsNoPassxFracture[i][j] = idLengthsNoPass[dimNoPass-j-1][0];
             }
 
         }
     }
 
-    // Funzione per stampare il contenuto di TraceIdPassxFracture
+    // stampare il contenuto di TraceIdPassxFracture
     /*cout <<"\n\nper il check post riordinamento della TraceId%PassxFracture\n";
     cout << "TraceIdsPassxFracture contenuto:" << endl;
     for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
