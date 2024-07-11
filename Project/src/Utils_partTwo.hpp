@@ -19,7 +19,7 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
 
 
 void Creazioni_Sequenze_Passanti(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z);
-void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z, vector<Matrix<double, 3, 4>>& NuoviEstremi);
+void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPoligono, unsigned int z, vector<Matrix<double, 3, 4>>& NuoviEstremi);
 
 void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono, list<unsigned int> listaIdVertici, Polygons& poligoni, Fractures& fracture);
 

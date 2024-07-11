@@ -1,15 +1,11 @@
 #include "namespace.hpp" //contiene gli header di tutte le funzione definite come GeometryLibrary (anche Tol)
 #include "utils.hpp"
 #include "inline.hpp"
-
-
 #include <vector>
 #include "Eigen/Eigen"
 #include <cmath> // per sqrt
-
 #include <iostream>
 #include <vector>
-//#include <chrono> //for counting time <- usata solo nel controllo di quale funzione conveniva usare
 #include <stdlib.h>
 
 using namespace std;
@@ -21,7 +17,7 @@ namespace GeometryLibrary{
 
 void CalcoloTracce(Fractures& fracture, Traces& trace)
 {
-    //variabile per avere un'idea di quante possibili intersezioni venivano escluse con il metodo delle sfere
+    // quante possibili intersezioni venivano escluse con il metodo delle sfere
     // int escluse = 0;
 
 
@@ -34,13 +30,13 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     trace.IdTraces.reserve(estimatedNumTraces);
     trace.CoordinatesEstremiTraces.reserve(estimatedNumTraces);
     trace.lengthTraces.reserve(estimatedNumTraces);
-    //aggiunta da shy come prova
+
     trace.TraceIdsPassxFracture.resize(fracture.NumFractures);
     trace.TraceIdsNoPassxFracture.resize(fracture.NumFractures);
 
 
     for (unsigned int i = 0; i< fracture.NumFractures - 1 ; i++ ){
-        //aggiunta da shy come prova
+
         trace.TraceIdsPassxFracture[i].reserve(estimatedNumTraces);
         trace.TraceIdsNoPassxFracture[i].reserve(estimatedNumTraces);
 
@@ -68,14 +64,6 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
                                        t, Point);
             //tutto questo ci serve per trovare la retta di intersezione r(x) = x*t_ + Point;
 
-
-
-            ///X SHY
-            // in calcolo tracce ma allinizio bisogna:
-            // 2) inizializzare numTraces, CoordinatesEstremiTraces, lenghtTraces, vectorTips che vengono usate nel codice successivo
-            // il problema è che mi sembra complicato stimare il numero di tracce per fare un primo resize quindi potremmo pensare di partire da un numero
-            // non altissimo e di aggiustare manmano con l'operazione di raddoppio spiegata da Berrone nella prima lezione (se non ricordo male c'è proprio una
-            // funzione raddoppio nelle slide) giuro che qua la pianto con i commenti, ecco inizia il codice da inserire a riga 261
             if (!ris)
             {
                 ///cout<<" || ! ||  non c'è intersezione tra frattura "<<i<<" e "<<j<<endl;
@@ -114,10 +102,8 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
             }
 
             //Riservo spazio stimato
-
             const unsigned int estimatedSize = (fracture.NumFractures * (fracture.NumFractures - 1)) / 2;
 
-            // Reserving space for unordered_maps if applicable
             trace.TraceIdsPassxFracture.reserve(estimatedSize);
             trace.TraceIdsNoPassxFracture.reserve(estimatedSize);
 
@@ -143,34 +129,15 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
 
     } //end for i
 
-    /*
-    cout << "TraceIdsPassxFracture contenuto:" << endl;
-    for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
-        cout << "Frattura " << i << ":";
-        for (unsigned int j = 0; j < trace.TraceIdsPassxFracture[i].size(); ++j) {
-            cout << " " << trace.TraceIdsPassxFracture[i][j];
-        }
-        cout << endl;
-    }
 
-    cout << "TraceIdsNoPassxFracture contenuto:" << endl;
-    for (unsigned int i = 0; i < trace.TraceIdsNoPassxFracture.size(); ++i) {
-        cout << "Frattura " << i << ":";
-        for (unsigned int j = 0; j < trace.TraceIdsNoPassxFracture[i].size(); ++j) {
-            cout << " " << trace.TraceIdsNoPassxFracture[i][j];
-        }
-        cout << endl;
-    }
-
-
-    cout << "\nescluse in principio "<< escluse<< " possibili intersezioni! SBAM."<<endl;*/
+    //cout << "\nescluse in principio "<< escluse<< " possibili intersezioni!"<<endl;
 
 }//Calcolo tracce
 
 
 
 
-int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova tracce2*/ Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
+int distinzioneTipoTraccia1(Traces& trace, const vector<Vector3d>& vecI, const vector<Vector3d>& vecJ,
                       const Vector3d& Point, Vector3d& t, unsigned int i, unsigned int j)
 {   // i e j solo per il cout
     double freeParP1 = 0.0;
@@ -183,7 +150,7 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
     for (unsigned int s=0; s<3; s++)
     {
-        if (abs(t[s])>tolDefault){ //mi baso sul fatto che esista almeno una coordinata di t diversa da zero altrimenti non saremmo arrivati qua
+        if (abs(t[s])>tolDefault){ //ci si basa sul fatto che esista almeno una coordinata di t diversa da zero altrimenti non saremmo qua
             freeParP1=(vecI[0][s]-Point[s])/(t[s]);
             freeParP2=(vecI[1][s]-Point[s])/(t[s]);
             freeParP3=(vecJ[0][s]-Point[s])/(t[s]);
@@ -203,7 +170,7 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
     // creo un dizionario per poter riottenere le informazioni sul punto sulla retta a partire dal parametro libero
     map<double, Vector3d> dizfreeParToVec;
-    // popolo il dizionario (non mi interessa se ho una chiave che si ripete (quindi questa verrebbe sovrascritta) tanto il dizionario viene usato negli ultimi elseif)
+    // popolo il dizionario
     dizfreeParToVec[freeParP1] = vecI[0];
     dizfreeParToVec[freeParP2] = vecI[1];
     dizfreeParToVec[freeParP3] = vecJ[0];
@@ -224,11 +191,6 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
         trace.IdTraces.push_back(trace.numTraces-1);
 
 
-        // Visualizza i dati della traccia
-        /*cout << "\nTraccia " << trace.numTraces-1 << ":" << endl;
-        cout << " - Frattura 1: " << i << endl;
-        cout << " - Frattura 2: " << j << endl;*/
-
         array<unsigned int,2> vector_id_fractures = {};
         vector_id_fractures[0] = i;
         vector_id_fractures[1] = j;
@@ -243,12 +205,12 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
         if (dizfreeParToVec.find(idpar[1][1]) != dizfreeParToVec.end() &&
             dizfreeParToVec.find(idpar[2][1]) != dizfreeParToVec.end()) {
 
-            // Riempio la matrice con i punti dai valori del dizionario
+            // Riempimento della matrice con i punti dai valori del dizionario
             Estremi.col(0) = dizfreeParToVec[idpar[1][1]];
             Estremi.col(1) = dizfreeParToVec[idpar[2][1]];
         } else {
             cerr << "Chiavi non trovate nel dizionario!" << endl;
-            return false; // O gestisci l'errore in modo appropriato
+            return false;
         }
 
         trace.CoordinatesEstremiTraces.push_back(Estremi);
@@ -261,15 +223,13 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
     }
 
 
-    //controllo PASSANTi O NO?
+    //controllo TIPS
 
     // distinzioneTipoTraccia2(fracture, trace, i, j)<<endl;
 
-    ///std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
-
     int pass = 0;
 
-    //evitiamo cancellazione numerica con la sottrazione
+    //evitiamo cancellazione numerica con la sottrazione?
     if (abs(idpar[0][1]- idpar[1][1]) < tolDefault && abs(idpar[2][1]- idpar[3][1]) < tolDefault){ //passante per entrambe le fratture
 
         pass = 0;
@@ -277,13 +237,6 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
         inserimento_map(pass,idpar[1][0], trace);
 
         ///cout << "   Passante per entrambi le fratture " <<idpar[0][0]<<" "<<idpar[1][0]<< " ."<<endl;
-
-        //lascio solo il primo per ricordarci che abbiamo fatto un controllo sul tempo di esecuzione e avere un'idea sul costo computazionale
-        // poi l'abbiamo fatto per ogni condizione
-        /*std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-        double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-        cout<<"\t ------- FREEPAR elapsed time: "<<duration<<" microseconds\n" <<endl;*/
-
 
         return 3;
 
@@ -333,7 +286,6 @@ int distinzioneTipoTraccia1(/*Fractures& fracture, serviva per la funzione trova
 
 void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, const int j)
 {
-    ///auto t_begin = chrono::steady_clock::now();
     const double tolerance = tolDefault;  // Tolleranza unificata per i confronti
 
     //bool passa_i = false;
@@ -355,7 +307,7 @@ void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, co
             }
         }
     }
-    //cout << " - Passante per la frattura " << i << " : " << (passa_i ? "Sì" : "No") << endl;
+    //cout << " - Passante per la frattura " << i << " : " << passa_i << endl;
 
     // Verifica se il tracciato passa attraverso la frattura j
     for (int k = 0; k < fracture.CoordinatesVertice[j].cols(); ++k) {
@@ -373,10 +325,8 @@ void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, co
             }
         }
     }
-    //cout << " - Passante per la frattura " << j << " : " << (passa_j ? "Sì" : "No") << endl;
-    // auto t_end = chrono::steady_clock::now();
-    // double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-    // //cout << "\t ------- distinzioneTipoTraccia2 elapsed time: " << duration << " microseconds" << endl;
+    //cout << " - Passante per la frattura " << j << " : " << passa_j<< endl;
+
 
 }
 
@@ -384,18 +334,16 @@ void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, co
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& vec, Fractures& fracture)
 {
 
-    ///auto t_begin = chrono::steady_clock::now();
-
     MatrixXd matrixVertices = fracture.CoordinatesVertice[i];
     unsigned int iter = 0; //valore da resituire = numero di intersezioni trovate
     int numColonne = matrixVertices.cols();
-    vec.reserve(numColonne);//vado a salvarmi le intersezioni tra retta passante per due vertici e retta che individua l'intersezioni tra piani. In generale
-    Vector3d Punto0 = {}; // è il punto di intersezione tra la retta tangente e la retta tra due vertici V1 e V2
+    vec.reserve(numColonne);//salvare le intersezioni tra retta passante per due vertici e retta che individua l'intersezioni tra piani
+    Vector3d Punto0 = {}; // Punto0: punto di intersezione tra la retta tangente e la retta tra due vertici V1 e V2
 
     for (int z = 0; z < numColonne; z++) {
         Vector3d V1 = matrixVertices.col(z);
         Vector3d V2;
-        if (z == numColonne - 1) { // Accoppio l'ultimo vertice con il primo
+        if (z == numColonne - 1) { // nel caso di ultima posizione, si associa l'ultimo al primo
             V2 = matrixVertices.col(0);
         } else {
             V2 = matrixVertices.col(z + 1);
@@ -406,14 +354,16 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 
         if (!a) //se il sistema non ha soluzione cambio lato
         {
-            //cout << "\t sono parallele!!!"<<endl;
+            //cout << "\t sono parallele!"<<endl;
             continue;
         }else{
             //cout <<"punto intersezione tra retta int piani e retta tra due vertici: " << Punto0<<endl;
         }
 
         double freeParP0 = 0.0; // parametro libero che corrisponde al Punto0
-        for (int i=0;i<3;i++) //presupponiamo che le fratture non siano degeneri
+
+        //presupponendo che le fratture non siano degeneri
+        for (int i=0;i<3;i++)
         {
             if (abs(V2[i]-V1[i])>tolDefault)
             {
@@ -422,8 +372,8 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
             }
         }
 
-        /// valuto Punto0, V1 e V2 nella retta passante per i due vertici
-        /// (P=s*(V2-V1)+V1 ad esempio) e calcolo il valore che assume il parametro libero per ognuno
+        //valuto Punto0, V1 e V2 nella retta passante per i due vertici
+        // (P=s*(V2-V1)+V1 ad esempio) e calcolo il valore che assume il parametro libero per ognuno
 
         double freeParV1 = 0;
         double freeParV2 = 1;
@@ -442,11 +392,8 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 
     }//fine for sui vertici della frattura
 
-    //cout << " il punto di intersezione tra il lato della frattura "<<i<<" e "<<j<<" è : "<< Punto0.transpose() <<endl;
-    //cout<<"\t\tfinito il controllo tra "<<i<<" e "<<j<<endl;
-
-
     return iter;
 
 }
+
 }

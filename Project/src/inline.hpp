@@ -5,8 +5,6 @@
 #include "FracturesTracesPolygons.hpp"
 #include <iostream>
 
-// Definisci la variabile globale
-//extern double tolDefault = 100 * std::numeric_limits<double>::epsilon();
 
 using namespace std;
 using namespace Eigen;
