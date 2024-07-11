@@ -207,23 +207,23 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
         vector<array<double,2>> idLengthsNoPass = {};
 
 
-        if (dimPass != 0) //altrimenti non faccio nulla
+        if (dimPass != 0)
         {
             idLengthsPass.reserve(dimPass);
             bool tips = false; // false se passante
-            for (unsigned int j=0; j<dimPass; j++) //riempio idLengthsPass
+            for (unsigned int j=0; j<dimPass; j++) // si riempie idLengthsPass
             {
                 unsigned int tracciaIdPass = VecIdTracesPassI[j];
                 double lunghezza = trace.lengthTraces[tracciaIdPass]; //estraggo la sua lunghezza tramite la posizione
                 array<double,2> ArrayDiSupporto = {double(tracciaIdPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
                 idLengthsPass.push_back(ArrayDiSupporto);
             }
-            // uso bubble sort già creato apposta per ordinare secondo il secondo elemento (lunghezza)
+            // uso bubble sort modificato (BubbleSort_mod) già creato apposta per ordinare secondo il secondo elemento (lunghezza)
             BubbleSort_mod(idLengthsPass);
 
             for (unsigned int j = 0; j < dimPass; j++)
             {
-                // printo da idLenghsPass a sto punto ordinato
+                // print sul file idLenghsPass ordinato
                 outFile << idLengthsPass[dimPass-j-1][0] << "; "<< tips << "; "<< idLengthsPass[dimPass-j-1][1]<<endl;
                 trace.TraceIdsPassxFracture[i][j] = idLengthsPass[dimPass-j-1][0];
             }
@@ -240,7 +240,7 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
                 array<double,2> ArrayDiSupporto = {double(tracciaIdNoPass), lunghezza}; // {id, lunghezza corrispondente a quell'id}
                 idLengthsNoPass.push_back(ArrayDiSupporto);
             }
-            // uso bubble sort già creato apposta per ordinare secondo il secondo elemento
+
             BubbleSort_mod(idLengthsNoPass);
 
             for (unsigned int j = 0; j < dimNoPass; j++)
@@ -251,26 +251,6 @@ bool secondoOutput(const string &filename, const Fractures& fracture, Traces& tr
 
         }
     }
-
-    // stampare il contenuto di TraceIdPassxFracture
-    /*cout <<"\n\nper il check post riordinamento della TraceId%PassxFracture\n";
-    cout << "TraceIdsPassxFracture contenuto:" << endl;
-    for (unsigned int i = 0; i < trace.TraceIdsPassxFracture.size(); ++i) {
-        cout << "Frattura " << i << ":";
-        for (unsigned int j = 0; j < trace.TraceIdsPassxFracture[i].size(); ++j) {
-            cout << " " << trace.TraceIdsPassxFracture[i][j];
-        }
-        cout << endl;
-    }
-
-    cout << "TraceIdsNoPassxFracture contenuto:" << endl;
-    for (unsigned int i = 0; i < trace.TraceIdsNoPassxFracture.size(); ++i) {
-        cout << "Frattura " << i << ":";
-        for (unsigned int j = 0; j < trace.TraceIdsNoPassxFracture[i].size(); ++j) {
-            cout << " " << trace.TraceIdsNoPassxFracture[i][j];
-        }
-        cout << endl;
-    }*/
 
     return true;
 }

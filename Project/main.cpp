@@ -79,40 +79,44 @@ int main()
         cout << sottoPoligono.Cell0DCoordinates[i].transpose() << endl;
     }
     cout << " " <<endl;
-     cout << " " <<endl;
-    // INIZIO CREAZIONI SEQUENZE
-    Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
-    // FINE CREAZIONI SEQUENZE
+    cout << " " <<endl;
 
-    /// controllo riempimento sequenze
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    cout << " " <<endl;
-    cout << " " <<endl;
-    cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
-    cout << "numero punti con sequenze = "<< sottoPoligono.SequenzeXpunto.size() << endl;
-    for (size_t k = 0; k < sottoPoligono.SequenzeXpunto.size(); ++k) {
-        const MatrixXd& matrice = sottoPoligono.SequenzeXpunto[k];
-        int numRighe = matrice.rows();
-        int numColonne = matrice.cols();
 
-        cout << "Matrice " << k << ":" << endl;
-        cout << "Numero di righe: " << numRighe << endl;
-        cout << "Numero di colonne: " << numColonne << endl;
 
-        for (int col = 0; col < numColonne; ++col) {
-            for (int row = 0; row < numRighe; ++row) {
-                cout << matrice(row, col) << " ";
-            }
-            cout << endl; // Fine della riga (colonna della matrice)
-        }
-        cout << "Fine matrice " << k + 1 << endl << endl; // Fine della matrice
-    }
-    cout << " " <<endl;
-    cout << " " <<endl;
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // // INIZIO CREAZIONI SEQUENZE
+    // Creazioni_Sequenze_Passanti(fracture, trace, sottoPoligono, z);
+    // // FINE CREAZIONI SEQUENZE
+
+    // /// controllo riempimento sequenze
+    // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // cout << " " <<endl;
+    // cout << " " <<endl;
+    // cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
+    // cout << "numero punti con sequenze = "<< sottoPoligono.SequenzeXpunto.size() << endl;
+    // for (size_t k = 0; k < sottoPoligono.SequenzeXpunto.size(); ++k) {
+    //     const MatrixXd& matrice = sottoPoligono.SequenzeXpunto[k];
+    //     int numRighe = matrice.rows();
+    //     int numColonne = matrice.cols();
+
+    //     cout << "Matrice " << k << ":" << endl;
+    //     cout << "Numero di righe: " << numRighe << endl;
+    //     cout << "Numero di colonne: " << numColonne << endl;
+
+    //     for (int col = 0; col < numColonne; ++col) {
+    //         for (int row = 0; row < numRighe; ++row) {
+    //             cout << matrice(row, col) << " ";
+    //         }
+    //         cout << endl; // Fine della riga (colonna della matrice)
+    //     }
+    //     cout << "Fine matrice " << k + 1 << endl << endl; // Fine della matrice
+    // }
+    // cout << " " <<endl;
+    // cout << " " <<endl;
+    // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // INIZIO CREAZIONI SEQUENZA PER NON PASSANTI
-    Creazioni_Sequenze_NONPassanti(fracture, trace, sottoPoligono, z, NuoviEstremi);
+    Creazioni_Sequenze_NONPassanti(fracture, sottoPoligono, z, NuoviEstremi);
     // FINE CREAZIONI SEQUENZE PER NON PASSANTI
     // cout << "CONTROLLO CREAZIONI SEQUENZA PER PASSANTI"<<endl;
 
@@ -234,8 +238,6 @@ int main()
     // INIZIO ORDINAMENTO LATI e SALVATAGGIO IN CELL2D
     size_t numSottopoligoni = VettSequenza_PuntoDesiderato1.size(); // ogni sottopoligono è univocamente determinato da una sequenza: numSottoPol = numSequenze
     sottoPoligono.NumberCell2D = numSottopoligoni;
-
-
 
     sottoPoligono.Cell2DEdges.resize(numSottopoligoni);
     sottoPoligono.Cell2DVertices.resize(numSottopoligoni);

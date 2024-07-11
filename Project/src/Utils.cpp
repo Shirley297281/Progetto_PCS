@@ -138,6 +138,7 @@ bool intersezione_piani (Vector3d& n1,
     }
 
     /*}else{//se t[2] == 0
+
         // scelta di un altro parametro libero
         Matrix2d A;
         A << n1[0], n1[2],
@@ -147,6 +148,7 @@ bool intersezione_piani (Vector3d& n1,
 
         // risoluzione sistema
         // det(A) != 0 :
+
 
         // Verifica della possibilità di intersezione
         if (vec.dot(t) > 1e-14) {
@@ -197,28 +199,20 @@ bool intersezione_rette (Vector3d& t,
             VectorXd sol_;
             if (A_.rows() >= A_.cols()) {
 
-            std::chrono::steady_clock::time_point t_begin= chrono::steady_clock::now();
+
             sol = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(termine_noto);
-            std::chrono::steady_clock::time_point t_end= chrono::steady_clock::now();
-            double duration = chrono::duration_cast<chrono::microseconds>(t_end - t_begin).count();
-            cout<<"\tjacobisvd.solve time: "<<duration<<" microseconds\n" <<endl;
 
-
-                //chrono::steady_clock::time_point t_begin2= chrono::steady_clock::now();
                 //sol_ = (A_.transpose() * A_).ldlt().solve(A_.transpose() * termine_noto);
-                //chrono::steady_clock::time_point t_end2= chrono::steady_clock::now();
-                //double duration2 = chrono::duration_cast<chrono::microseconds>(t_end2 - t_begin2).count();
-                //cout<<"\tother time: "<<duration2<<" microseconds\n" <<endl;
-
                 //ora abbiamo trovato i coeffieiente s e aplha
 
                 // Calcola il punto di intersezione Punto0
                 //Punto0 = Point + sol_[0] * t ;
                 //return true;
-            //}
-        //}
-    //}
-    //else{ //terza componente di t != 0*/
+            }
+        }
+    }
+    else{ //terza componente di t != 0*/
+
     // si risolve un problema 2x2 escludendo la componente minima di t
     int pos = 0;
     if(abs(t[1]) < abs(t[0]) + tolDefault){
