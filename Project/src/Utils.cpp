@@ -95,15 +95,15 @@ Vector3d normal_vector(const MatrixXd& m)
 
 // funzione implementata per risolvere un sistema 3x3 per trovare l’intersezione fra piani
 bool intersezione_piani (Vector3d& n1,
-                     Vector3d& n2,
-                     array <double, 3>& b1,
-                     array <double, 3>& b2,
-                     Vector3d& t,
-                     Vector3d& Point){
+                        Vector3d& n2,
+                        array <double, 3>& b1,
+                        array <double, 3>& b2,
+                        Vector3d& t,
+                        Vector3d& Point){
     double d1 = 0.0; //termine noto piano 1
     double d2 = 0.0; //termine noto piano 2
-    //termine noto piano d'intersezione = 0 come prodotto scalare tra vettore normale
-    // al piano e punto generico della frattura (abbiamo scelto il baricentro)
+    // termine noto piano d'intersezione = 0 come prodotto scalare tra vettore normale
+    // al piano e punto generico della frattura (scelto il baricentro)
     d1 = n1[0] * b1[0] + n1[1] * b1[1]  + n1[2] * b1[2];
     d2 = n2[0] * b2[0] + n2[1] * b2[1]  + n2[2] * b2[2];
 
@@ -130,23 +130,25 @@ bool intersezione_piani (Vector3d& n1,
         Vector3d B;
         B << d1, d2,0;
         Point = A.colPivHouseholderQr().solve(B); //(x,y,t)
-
         return true;
 
     } else {
         // I piani sono paralleli o coincidenti
-
         return false;
     }
 
     /*}else{//se t[2] == 0
-         // scelta di un altro parametro libero
-         Matrix2d A;
-         A << n1[0], n1[2],
-             n2[0], n2[2];
-         //A.row(2) = t;
-         // risoluzione sistema
-         // det(A) != 0 :
+
+        // scelta di un altro parametro libero
+        Matrix2d A;
+        A << n1[0], n1[2],
+            n2[0], n2[2];
+
+        //A.row(2) = t;
+
+        // risoluzione sistema
+        // det(A) != 0 :
+
 
         // Verifica della possibilità di intersezione
         if (vec.dot(t) > 1e-14) {
@@ -169,10 +171,10 @@ bool intersezione_piani (Vector3d& n1,
 
 //troviamo il punto di intersezione tra la retta (Point, t)  e la retta di prolungamento del segmento V1V2
 bool intersezione_rette (Vector3d& t,
-                          Vector3d& V1,
-                          Vector3d& V2,
-                          Vector3d& Point,
-                          Vector3d& Punto0)
+                        Vector3d& V1,
+                        Vector3d& V2,
+                        Vector3d& Point,
+                        Vector3d& Punto0)
 {
 
     Vector3d vettoreDirezioneI = V1 - V2;
@@ -193,7 +195,6 @@ bool intersezione_rette (Vector3d& t,
 
         int rankC = Completa_.fullPivLu().rank();
 
-
         if (rankA == rankC && rankA == 2) {
             VectorXd sol_;
             if (A_.rows() >= A_.cols()) {
@@ -211,6 +212,7 @@ bool intersezione_rette (Vector3d& t,
         }
     }
     else{ //terza componente di t != 0*/
+
     // si risolve un problema 2x2 escludendo la componente minima di t
     int pos = 0;
     if(abs(t[1]) < abs(t[0]) + tolDefault){
