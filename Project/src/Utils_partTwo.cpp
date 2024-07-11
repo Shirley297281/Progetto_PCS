@@ -878,8 +878,4 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
 }
 
-
-
-
-
 }
