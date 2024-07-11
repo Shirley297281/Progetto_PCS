@@ -1,10 +1,7 @@
-//#include "src/utils.hpp"
 #include "src/FracturesTracesPolygons.hpp"
 #include "src/utils_partTwo.hpp"
-//#include <sstream>
 #include <iostream>
 #include "src/namespace.hpp"
-//#include "src/inline.hpp"
 #include "TestingParaview/Code/src/UCDUtilities.hpp" //per Paraview esportazione
 #include <set>
 
