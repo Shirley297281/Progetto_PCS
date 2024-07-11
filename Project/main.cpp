@@ -1,6 +1,6 @@
 //#include "src/utils.hpp"
 #include "src/FracturesTracesPolygons.hpp"
-#include "src/utils_partTwo.hpp"
+#include "src/Utils_partTwo.hpp"
 //#include <sstream>
 #include <iostream>
 #include "src/namespace.hpp"
@@ -16,7 +16,7 @@ using namespace GeometryLibrary;
 int main()
 {
     Fractures fracture;
-    string filename = "FR3_data.txt";
+    string filename = "FR362_data.txt";
 
     if( !ImportFR(filename, fracture) )
         return 1;

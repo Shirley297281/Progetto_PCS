@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "Utils.hpp"
 #include "FracturesTracesPolygons.hpp"
 #include "inline.hpp"
 #include "Eigen/Eigen"
@@ -702,6 +702,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
 
 }
 
+  
 // quando si chiama (nel main) è già stato fatto il controllo e sono stati trovato tutti i vertici con la stessa sequenza,
 // inoltre si è incrementato il numero di Cell2D
 void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono,list<unsigned int> listaIdVertici, Polygons& sottopoligono, Fractures& fracture){
@@ -717,7 +718,7 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
 
     // con i seleziono un vertice, con j il consecutivo (effettuo la verifica con k)
-    unsigned int num_iterazioni = 0; // all'ultima iterazione id_j deve essere uguale al primo id_i
+    unsigned int num_iterazioni = 0;
     unsigned int i = 0;
     unsigned int id_i = estremi[i];
     unsigned int id_j;
@@ -810,7 +811,8 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
 
         if(num_iterazioni <= n){
             i = j; // permette di trovare i lati in ordine
-            id_i = estremi[i]; // serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
+
+            id_i = estremi[i];// serve per andare avanti con i lati, altrimenti fa sempre riferimento al primo
         }
 
     }
@@ -825,6 +827,7 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     }
     array <double,3> bar = barycenter(vertices, n);
     Vector3d bar_vec(bar[0], bar[1], bar[2]);
+    
     // i lati sono in ordine (devo solo verificare che siano in ordine antiorario e NON orario)
     unsigned int id_0 = id_estremi_lato[0][0];
     unsigned int id_1 = id_estremi_lato[0][1];
@@ -838,7 +841,7 @@ void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligon
     double prod_scal = v1xv2.dot(vett_normale_frattura);
 
     // se il prodotto scalare è negativo => devo prendere l'altro senso
-    if(prod_scal > 0){
+    if(prod_scal < 0){
         reverse(id_estremi_lato.begin(), id_estremi_lato.end());
         // invertire l'ordine all'interno di ogni coppia in id_estremi_lato
         for (auto& coppia : id_estremi_lato) {
