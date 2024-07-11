@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
-#include "src/utils.hpp"
+#include "src/Utils.hpp"
 #include "src/FracturesTracesPolygons.hpp"
 #include <sstream>
-#include "src_test/TestFractures.hpp"
+#include "TestFractures.hpp"
 
 using namespace std;
 using namespace Eigen;
