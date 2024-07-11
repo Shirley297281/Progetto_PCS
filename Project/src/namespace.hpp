@@ -21,7 +21,7 @@ int distinzioneTipoTraccia1(Traces& trace, const vector<Vector3d>& vecI, const v
                       const Vector3d& Point, Vector3d& t, unsigned int i, unsigned int j);
 
 // Funzione per discriminare tracce passanti e non
-void Tips_Shy(Fractures& fracture, Traces& trace, const int i, const int j );
+void distinzioneTipoTraccia2(Fractures& fracture, Traces& trace, const int i, const int j );
 
 // Funzione sfruttata in Calcolo tracce per il controllo dell'intersezione tra traccia e frattura
 unsigned int Calcolo_par(Vector3d& t, Vector3d& Point,  int i, vector<Vector3d>& vec, Fractures& fracture);
