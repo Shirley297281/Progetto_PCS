@@ -8,19 +8,19 @@ using namespace std;
 using namespace Eigen;
 
 
-// compute the max eedge in fracture
+// Funzione che calcola il lato di lunghezza massimo
 double max_euclidean_distance(const MatrixXd& m, unsigned int num_vertices);
 
-// compute the barycenter of a fracture with "num_vertices" vertices
+// Funzione che calcola il baricentro
 array <double,3> barycenter(const MatrixXd& m, unsigned int num_vertices);
 
-// rough intersection control of fractures
+// Funzione che controlla se c'è possibilità che due fratture si intersechino
 bool check_sphere(const array<double,3> bar1, const array<double,3> bar2, const double l1, const double l2);
 
-// calculate the normal vector of a fracture
+// Funzione che calcola il vettore normale al piano dove giace la frattura
 Vector3d normal_vector(const MatrixXd& m);
 
-// function to implement solution of systems 3x3 to find planes intersections
+// Funzione che calcola intersezione tra piani
 bool intersezione_piani(Vector3d& n1,
                      Vector3d& n2,
                      array <double, 3>& b1,
@@ -28,7 +28,7 @@ bool intersezione_piani(Vector3d& n1,
                      Vector3d& t,
                      Vector3d& Point);
 
-// troviamo il punto di intersezione tra la retta (Point, t)  e la retta di prolungamento del segmento V1V2
+// Funzione che calcola intersezione tra rette
 bool intersezione_rette (Vector3d& t,
                           Vector3d& V1,
                           Vector3d& V2,
@@ -36,24 +36,26 @@ bool intersezione_rette (Vector3d& t,
                           Vector3d& Punto0);
 
 
+// Funzione creata a partire dall'algoritmo di ordinamento BubbleSort la quale dato un vettore di array
+// ordina il vettore in base alla seconda componente dell'array
 template<typename T>
 void BubbleSort_mod(vector<array<T,2>>& data)
 {
-    size_t rem_size = data.size();
-    size_t last_seen = rem_size;
+    size_t r_size = data.size();
+    size_t prec = r_size;
     bool swapped = true;
 
     while (swapped) {
         swapped = false;
-        for (size_t i = 1; i < rem_size; i++) {
+        for (size_t i = 1; i < r_size; i++) {
             if (data[i-1][1] > data[i][1]) {
                 swap(data[i-1], data[i]);
                 swapped = true;
-                last_seen = i;
+                prec = i;
             }
         }
 
-        rem_size = last_seen;
+        r_size = prec;
     }
 }
 

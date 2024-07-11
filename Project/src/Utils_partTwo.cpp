@@ -13,7 +13,7 @@ using namespace std;
 using namespace Eigen;
 
 namespace Vettore{
-bool operator==(const VectorXd &v1, const VectorXd &v2) // operatore per uguaglianza tra vettori in std
+bool operator==(const VectorXd &v1, const VectorXd &v2) // operatore per uguaglianza tra vettori in Eigen
 {
     if(v1.size() == 0 || v1.size()!= v2.size())
         return false;
@@ -77,7 +77,6 @@ void GeometryLibrary::Polygons::GedimInterface(vector<vector<unsigned int>>& tri
 
 
 namespace GeometryLibrary{
-
 void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z){
 
     // salvo i punti coincidenti con i vertici della frattura
@@ -95,38 +94,12 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
         unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
         sottoPoligono.NumberCell0D = NumPuntiFinora  + 1;
 
-        // push_back alloca memoria
-        sottoPoligono.Cell0DId.push_back(NumPuntiFinora); //d'ora in poi userò come id dei vertici il numero di punti salvati
+        sottoPoligono.Cell0DId.push_back(NumPuntiFinora); // d'ora in poi userò come id dei vertici il numero di punti salvati
         sottoPoligono.Cell0DCoordinates.push_back(vertice);
         MatrixXd M(0,0);
         sottoPoligono.SequenzeXpunto.push_back(M);
         markerDiz[0].push_back(NumPuntiFinora); // marker con chiave 0 se vertici
-
-        cout << "Vertice " << sottoPoligono.Cell0DId[i] << ": " << sottoPoligono.Cell0DCoordinates[i].transpose();
-        cout <<" con Marker: ";
-
-        bool foundidpunto = false;
-
-        // itera attraverso la mappa
-        for (const auto& pair : markerDiz) {
-            const unsigned int key = pair.first;
-            const list<unsigned int>& values = pair.second;
-
-            // cerca l'ID del punto nella lista dei valori
-            if (find(values.begin(), values.end(), sottoPoligono.Cell0DId[i]) != values.end()) {
-                cout << key << endl;
-                foundidpunto = true;
-                break; // esce dal ciclo una volta trovato l'ID
-            }
-        }
-
-        if (!foundidpunto) {
-            cout << "ID del punto " << sottoPoligono.Cell0DId[i] << " non trovato nella mappa." << endl;
-        }
-
-
     }
-
 
     // salvo puntiestremi di tracce passanti traccia
     /// ciclo su fratture
@@ -149,8 +122,7 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
         cout<<"aggiungo estremi di traccia "<<idTraccia<<endl;
         addAndPrintPoint(sottoPoligono, markerDiz, EstremoTraccia, 1);
 
-        }//fine for per i due estremi della traccia
-
+        }
         cout<<"\n\nmarker aggiornati dopo inserimento estremi di traccia: "<<endl;
         for (const auto& pair : markerDiz) {
             cout << "Marker " << pair.first << ": ";
@@ -176,33 +148,30 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
             Vector3d Estremo2Traccia2 = trace.CoordinatesEstremiTraces[idTraccia2].col(1); //estraggo estremo 2 della traccia j
             // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
             Vector3d Punto02 = {0, 0, 0};
-            Vector3d t = Estremo2Traccia - Estremo1Traccia; //serve dopo
+            Vector3d t = Estremo2Traccia - Estremo1Traccia;
             if (!intersezione_rette(t, Estremo1Traccia2, Estremo2Traccia2,Estremo1Traccia, Punto02))
             {
                 continue;
             }
-            // controllo se il punto è compreso tra gli estremi di almeno una delle due traccia (in teoria basta perchè i punti di una traccia per def appartengono alla frattura)
-
-            // inline per combinazione convessa
+            // controllo se il punto è compreso tra gli estremi di almeno una delle due traccia
+            //(basta perchè i punti di una traccia per definizione appartengono alla frattura)
             if (!combinazione_convessa(Estremo1Traccia, Estremo2Traccia, Punto02))
             {
                 continue;
             }
             // controllo che punto non sia già stato inserito nelle strutture (in caso di intersezioni coincidenti)
             vector<Vector3d> VettoreCoordinateIn0D = sottoPoligono.Cell0DCoordinates;
-
             if (checkInserimento(Punto02, VettoreCoordinateIn0D)) // se esiste già lo stesso punto in Cell0D (=false) non aggiungerlo
             {
                 continue;
             }
-
             cout<<"C'è intersezione tra traccia "<<idTraccia<< " e "<<idTraccia2<<" interna alla frattura. "<<endl;
-
+            // a questo punto inserisco il punto aggiornando le varie strutture dati
             addAndPrintPoint(sottoPoligono, markerDiz, Punto02, 2);
         }
 
 
-    }//fine for tracce passanti
+    }
 
     cout<<"\n\nmarker aggiornati alla fine del controllo sulle passanti: "<<endl;
     for (const auto& pair : markerDiz) {
@@ -215,27 +184,30 @@ void MemorizzaVerticiPassanti_Cell0Ds(const Fractures& fracture, const Traces& t
     cout <<endl;
 }
 
-void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z, vector<Matrix<double, 3, 4>>& NuoviEstremi){
-    // 1) calcolo tutti i punti "papabili" estremi
-    MatrixXd insiemeVerticiFrattZ = fracture.CoordinatesVertice[z];// qui aggiungo queste due variabili anche se
-    unsigned int numVerticiFrattZ = fracture.numVertices[z]; // sono comuni alle altre funzioni come MemorizzaVertici_Cello0Ds
-    unsigned int numTracceNoPassantiInZ = trace.TraceIdsNoPassxFracture[z].size(); // sostituire con struttura ordinata
+void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z, vector<Matrix<double, 3, 4>>& NuoviEstremi)
+{
+    MatrixXd insiemeVerticiFrattZ = fracture.CoordinatesVertice[z];
+    unsigned int numVerticiFrattZ = fracture.numVertices[z];
+    unsigned int numTracceNoPassantiInZ = trace.TraceIdsNoPassxFracture[z].size();
     unsigned int numTraccePassantiInZtrace = trace.TraceIdsPassxFracture[z].size();
-
-    for (unsigned int i = 0; i<numTracceNoPassantiInZ ; i++ )      /// ciclo per le tracce non passanti
+    /// ciclo per le tracce non passanti
+    for (unsigned int i = 0; i<numTracceNoPassantiInZ ; i++ )
     {
+        // 1) calcolo tutti i punti "papabili" nuovi estremi della traccia non passante
         cout << "Traccia non passante: " << i << std::endl;
         vector<Vector3d> puntiIntersPapabili = {}; //salvo i punti di intersezione tra traccia non passante i e lati/tracce
-        puntiIntersPapabili.reserve(numTraccePassantiInZtrace + numVerticiFrattZ);
+        puntiIntersPapabili.reserve(numTraccePassantiInZtrace + numVerticiFrattZ + numTracceNoPassantiInZ);
         vector<Vector3d> vettoriDirettoriRette = {}; // salvo vettori direttori rette per ogni punto in puntiIntersPapabili
         vettoriDirettoriRette.reserve(numTraccePassantiInZtrace + numVerticiFrattZ);
-        // in puntiIntersPapabili e vettoriDirettoriRette sfrutto la posizione vettore direttore di puntiIntersPapabili[j] = vettoriDirettoriRette[j]
+        // in puntiIntersPapabili e vettoriDirettoriRette sfrutto la posizione vettore direttore di
+        // puntiIntersPapabili[j] = vettoriDirettoriRette[j] evitando la creazione di dizionari
         unsigned int idTraccia = trace.TraceIdsNoPassxFracture[z][i];
         Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
         Vector3d Estremo2Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(1); //estraggo estremo 2 della traccia i
         Vector3d t = Estremo2Traccia - Estremo1Traccia;
         cout << "Estremi della traccia: (" << Estremo1Traccia.transpose() << "), (" << Estremo2Traccia.transpose() << ")" << endl;
-        for (unsigned int j = 0; j < numVerticiFrattZ ; j++) //// ciclo su vertici e determino intersezione lati-traccia non passante
+        /// ciclo su vertici e determino intersezione lati-traccia non passante i-esima
+        for (unsigned int j = 0; j < numVerticiFrattZ ; j++)
         {
             // estraggo un vertice della frattura e il successivo per individuare un lato della frattura
             Vector3d Vertice1 = insiemeVerticiFrattZ.col(j);
@@ -255,9 +227,8 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             {
                 continue;
             }
-            // controllo se il punto è compreso tra gli estremi della traccia in modo da
+            // controllo se il punto è compreso tra gli estremi del lato in modo da
             // individuare solo punti all'interno della frattura
-            // inline per combinazione convessa
             if (!combinazione_convessa(Vertice1, Vertice2, Punto0))
             {
                 continue;
@@ -267,44 +238,43 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
             vettoriDirettoriRette.push_back(vettDir);
         }
         cout << "Numero di punti di intersezione dopo i lati della frattura: " << puntiIntersPapabili.size() << endl;
-        // ciclo su tracce passanti
-        for (unsigned int j = 0; j<  numTraccePassantiInZtrace ; j++ ) //// ciclo su tracce passanti per determinare intersezione con traccia non passante
+        /// ciclo su tracce passanti e determino intersezione traccia passante - traccia non passante i -esima
+        for (unsigned int j = 0; j<  numTraccePassantiInZtrace ; j++ )
         {
             unsigned int idTraccia2 = trace.TraceIdsPassxFracture[z][j];
             Vector3d Estremo1Traccia2 = trace.CoordinatesEstremiTraces[idTraccia2].col(0); //estraggo estremo 1 della traccia j
             Vector3d Estremo2Traccia2 = trace.CoordinatesEstremiTraces[idTraccia2].col(1); //estraggo estremo 2 della traccia j
-            // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
+            // calcolo intersezione retta su cui giace la traccia non passante e retta su cui giace la traccia passante
             Vector3d Punto02 = {0, 0, 0};
             if (!intersezione_rette(t, Estremo1Traccia2, Estremo2Traccia2,Estremo1Traccia, Punto02))
             {
                 continue;
             }
-            // controllo se il punto è compreso tra gli estremi di almeno una delle due traccia (in teoria basta perchè i punti di una traccia per def appartengono alla frattura)
-
-            // inline per combinazione convessa
-            if (!combinazione_convessa(Estremo1Traccia2, Estremo2Traccia2, Punto02)) //controllo che il punto non sia fuori dalla traccia passante in questione (altrimenti sarei fuori dalla frattura)
+            // controllo se il punto è compreso tra gli estremi di almeno una delle due traccia
+            // (basta perchè gli estremi di una traccia per def appartengono alla frattura)
+            if (!combinazione_convessa(Estremo1Traccia2, Estremo2Traccia2, Punto02))
             {
                 continue;
             }
             puntiIntersPapabili.push_back(Punto02); // superati i controlli inserisco il punto di intersezione tra i papabili
             Vector3d vettDir = Estremo1Traccia2-Estremo2Traccia2;
             vettoriDirettoriRette.push_back(vettDir);
-            addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, Punto02,3);
         }
         cout << "Numero di punti di intersezione dopo il controllo con le tracce passanti: " << puntiIntersPapabili.size() << endl;
-
-        for (unsigned int j = 0; j< NuoviEstremi.size() ; j++ ) //// ciclo su tracce non passanti già iterate (quindi contenute in NuoviEstremi)
+        /// ciclo su tracce non passanti già iterate (quindi di lunghezza maggiore e contenute in NuoviEstremi)
+        for (unsigned int j = 0; j< NuoviEstremi.size() ; j++ )
         {
 
             Vector3d Estremo1Traccia3 = NuoviEstremi[j].col(0);
             Vector3d Estremo2Traccia3 = NuoviEstremi[j].col(2);
-            // calcolo intersezione retta su cui giace il lato e retta su cui giace la traccia
+            // calcolo intersezione retta su cui giace la traccia non passante e retta su cui giace la traccia non passante i-esima
             Vector3d Punto03 = {0, 0, 0};
             if (!intersezione_rette(t, Estremo1Traccia3, Estremo2Traccia3,Estremo1Traccia, Punto03))
             {
                 continue;
             }
-            if (!combinazione_convessa(Estremo2Traccia3, Estremo1Traccia3, Punto03)) // il punto di intersezione deve appartenere agli estremi della traccia non passante che sto iterando
+            // il punto di intersezione deve appartenere agli estremi della traccia non passante che sto iterando
+            if (!combinazione_convessa(Estremo2Traccia3, Estremo1Traccia3, Punto03))
             {
                 continue;
             }
@@ -315,9 +285,11 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         cout << "Numero di punti di intersezione dopo le tracce non passanti: " << puntiIntersPapabili.size() << endl;
         // 2) valutazione punti papabili
         // ora valuto tra i punti papabili quali sono i punti che mi interessano:
-        // ci saranno due punti che saranno deputati all'essere estremi della traccia non passante (quello più grande tra il minimo e il più piccolo tra il massimo se guardo i parametri liberi)
+        // ci saranno due punti che saranno deputati all'essere estremi della traccia non passante
+        // (quello più grande tra il minimo e il più piccolo tra il massimo se guardo i parametri liberi)
         // e abbiamo quindi allungato la traccia non passante.
-        // ci saranno altri punti (interni al segmento della traccia allungata che non saranno estremi ma andranno a inseriti nella mesh (in Cell0D) in quanto sono visibili.
+        // ci saranno altri punti (interni al segmento della traccia allungata che non saranno estremi
+        // ma andranno a inseriti nella mesh (in Cell0D) in quanto sono visibili.
         vector<array<double,2>> PerEstremoSinistro = {};
         vector<array<double,2>> PerEstremoDestro = {};
         PerEstremoDestro.reserve(puntiIntersPapabili.size());
@@ -325,7 +297,8 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         // osserviamo che per come defininiamo in seguito la combinazione convessa convenzionalmente avremo:
         double alphaEstTr1 = 1;
         double alphaEstTr2 = 0;
-        for (unsigned int k = 0; k <  puntiIntersPapabili.size() ; k++ ) //ciclo sui punti papabili e calcolo il parametro libero considerando come retta quella della traccia non passante
+        /// ciclo sui punti papabili e calcolo il parametro libero considerando come retta quella della traccia non passante
+        for (unsigned int k = 0; k <  puntiIntersPapabili.size() ; k++ )
         {
             Vector3d punto = puntiIntersPapabili[k];
             double alpha = 0;
@@ -339,18 +312,21 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
                 }
             }
             // fine calcolo parametro libero punto
-            if (alpha <= alphaEstTr2) //controllo se alpha è minore dell'alpha minore tra i due alpha dei due estremi
+            /// valutazione tipo punto: interno alla traccia non passante o no
+            if (alpha <= alphaEstTr2)
+            //controllo se alpha è minore dell'alpha minore tra i due alpha dei due estremi e raccolgo i papabili estremi da un lato
             {
                 array<double,2> arraino = {double(k),alpha}; //trasformo k in double per essere conforme a bubbleSort
                 PerEstremoSinistro.push_back(arraino);
             }
-            else if(alpha >= alphaEstTr1) //controllo se alpha è maggiore dell'alpha minore tra i due estremi
+            else if(alpha >= alphaEstTr1)
+            //controllo se alpha è maggiore dell'alpha maggiore tra i due alpha dei due estremi e raccolgo i papabili estremi dall'altro lato
             {
                 array<double,2> arraino = {double(k),alpha}; //trasformo k in double per essere conforme a bubbleSort
                 PerEstremoDestro.push_back(arraino);
             }
             else
-            {
+            {   /// punto di intersezione in mezzo agli estremi "vecchi" della traccia non passante va già inserito
                 if (!checkInserimento(punto, sottoPoligono.Cell0DCoordinates)) // se esiste già lo stesso punto in Cell0D non aggiungerlo
                 {
                     continue;
@@ -359,16 +335,16 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
                 addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, punto,3);
             }
         }
-        // esco dal ciclo sui punti
-        BubbleSort_mod(PerEstremoDestro); // sto ordinando in base al parametro
-        BubbleSort_mod(PerEstremoSinistro); // sto ordinando in base al parametro
-        // in caso gestire il caso in cui non diamo nulla a bubbleSort_mod
-        array<double, 2> UltimoArray = PerEstremoSinistro.back();         // devo prendere il massimo tra i parametri liberi minori = al parametro libero dell'estremo della traccia non passante
+        /// trovo i nuovi estremi della traccia non passante
+        BubbleSort_mod(PerEstremoDestro); // sto ordinando in base al parametro libero
+        BubbleSort_mod(PerEstremoSinistro); // sto ordinando in base al parametro libero
+        // sfrutto l'ordinamento per prendere il massimo e il minimo e allo stesso tempo portare dietro l'informazione su k
+        array<double, 2> UltimoArray = PerEstremoSinistro.back();
         array<double, 2> PrimoArray = PerEstremoDestro.front(); // devo prendere il minimo tra i parametri liberi maggiori = al parametro libero dell'estremo della traccia non passante
         // questo lo facciamo perchè gli estremi "nuovi" della traccia non passante devono essere i punti di intersezione più vicini agli estremi originali
         double pos1Double = UltimoArray[0]; // estraggo k in modo da riuscire a estrarre nuovamente i punti "buoni"
         double pos2Double = PrimoArray[0];
-        unsigned int pos1 = static_cast<unsigned int>(pos1Double);
+        unsigned int pos1 = static_cast<unsigned int>(pos1Double);  // pos1 e pos2 sono due interi ora
         unsigned int pos2 = static_cast<unsigned int>(pos2Double);
         // inizio salvataggio in Cell0D
         Vector3d nuovoEstremo1 = puntiIntersPapabili[pos1];
@@ -381,51 +357,38 @@ void MemorizzaVerticiNonPassanti_Cell0Ds (const Fractures& fracture, const Trace
         {
             addAndPrintPoint(sottoPoligono, sottoPoligono.Cell0DMarkers, nuovoEstremo2,3);
         }
-        // fine salvataggio in Cell0D
-        // inizio salvataggio in "NuoviEstremi"
+        /// inizio salvataggio in "NuoviEstremi"
         Matrix<double, 3, 4> matrice;
-        Vector3d primaColonna = nuovoEstremo1; // sarebbe puntiIntersPapabili[pos1];
+        Vector3d primaColonna = nuovoEstremo1;
         Vector3d secondaColonna = vettoriDirettoriRette[pos1];
         Vector3d terzaColonna = nuovoEstremo2;
         Vector3d quartaColonna = vettoriDirettoriRette[pos2];
         matrice.col(0) = primaColonna;
         matrice.col(1) = secondaColonna;
         matrice.col(2) = terzaColonna;
-        matrice.col(3) = quartaColonna; //si può compattare ma per capire cosa stiamo facendo va bene
-        // tutto ciò dovrebbe funzionare perchè il pushback in vettoriDirettoriRette e in puntiIntersPapabili è contemporaneo, quindi le posizioni dovrebbero combaciare
+        matrice.col(3) = quartaColonna;
         NuoviEstremi.push_back(matrice);
-        // fine salvataggio in "Nuovi Estremi"
-        /// parentesi fine traccia non passante salvataggio punti intersezione
+        // in precedenza ho sfruttato il fatto che i pushback in puntiIntersPapabili e vettoriDirettoriRette sono stati contemporanei
+        // ho quindi acceduto alle informazioni corrispondenti per posizione risparmiando l'utilizzo di un dizionario
     }
-
-    cout<<"\n\nmarker aggiornati alla fine del controllo sulle NON passanti: "<<endl;
-    for (const auto& pair : sottoPoligono.Cell0DMarkers) {
-        cout << "Marker " << pair.first << ": ";
-        for (const auto& id : pair.second) {
-            cout << id << " ";
-        }
-        cout << endl;
-    }
-    cout <<endl;
-
-
-}//fine memo non passanti
+}
 
 void Creazioni_Sequenze_Passanti(const Fractures& fracture, const Traces& trace, Polygons& sottoPoligono, unsigned int z)
 {
-    ///  vector<Matrix<float, Dynamic, Dynamic>> SequenzeXpunto = {};
-    /// numCol = numSequenze (=num sottopoligoni)
-    /// numRow = numTraces
-    Vector3d vecNormaleAfratt = fracture.vettoreNormalePiano[z]; //mi serve dopo
-    for (unsigned int i = 0; i<trace.TraceIdsPassxFracture[z].size() ; i++ ) //ciclo di nuovo sulle tracce passanti
+    Vector3d vecNormaleAfratt = fracture.vettoreNormalePiano[z];
+    /// ciclo su tracce passanti
+    for (unsigned int i = 0; i<trace.TraceIdsPassxFracture[z].size() ; i++ )
     {
         unsigned int idTraccia = trace.TraceIdsPassxFracture[z][i];
         Vector3d Estremo1Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(0); //estraggo estremo 1 della traccia i
         Vector3d Estremo2Traccia = trace.CoordinatesEstremiTraces[idTraccia].col(1); //estraggo estremo 2 della traccia i
-        // controllo per ogni punto se è a destra o sinistra
-        for(unsigned int j = 0; j < sottoPoligono.NumberCell0D; j++) //ciclo su tutti i punti salvati in precedenza in Cell0D
+        // controllo per ogni punto se è a "destra" o "sinistra" della retta che individua la traccia
+        /// ciclo su tutti i punti salvati in precedenza in Cell0D
+        for(unsigned int j = 0; j < sottoPoligono.NumberCell0D; j++)
         {
-            MatrixXd& M = sottoPoligono.SequenzeXpunto[j]; //estraggo la matrice riferita al punto con id = j dal vettore per riferimento: modificando M modifico quella nel vettore
+            //estraggo la matrice riferita al punto con id = j dal vettore per riferimento: modificando M modifico quella nel vettore
+            // evitando copie
+            MatrixXd& M = sottoPoligono.SequenzeXpunto[j];
             Vector3d coordinatePuntoInCell0d = sottoPoligono.Cell0DCoordinates[j];
             Vector3d vec1 = Estremo2Traccia - Estremo1Traccia;
             Vector3d vec2 = coordinatePuntoInCell0d - Estremo1Traccia;
@@ -463,7 +426,7 @@ void Creazioni_Sequenze_Passanti(const Fractures& fracture, const Traces& trace,
                 }
                 else
                 {
-                    numCols = M.cols(); //conto le colonne
+                    numCols = M.cols();
                     RowVectorXd nuovaRiga = RowVectorXd::Ones(numCols); // creo vettore riga di tutti 1
                     MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
 
@@ -484,7 +447,7 @@ void Creazioni_Sequenze_Passanti(const Fractures& fracture, const Traces& trace,
                 }
                 else
                 {
-                    numCols = M.cols(); //conto le colonne
+                    numCols = M.cols();
                     RowVectorXd nuovaRiga = RowVectorXd::Zero(numCols); // creo vettore riga di tutti 0
                     MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
 
@@ -510,7 +473,8 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
         Vector3d VettDirTraccia2= NuoviEstremi[i].col(3);
 
         // controllo per ogni punto se è a destra o sinistra
-        for(unsigned int j = 0; j < sottoPoligono.NumberCell0D; j++) //ciclo su tutti i punti salvati in precedenza in Cell0D
+        /// ciclo sui punti in Cell0D
+        for(unsigned int j = 0; j < sottoPoligono.NumberCell0D; j++)
         {
             // non riesco a spiegarla sul codice questa parte
             MatrixXd& M = sottoPoligono.SequenzeXpunto[j]; //estraggo la matrice riferita al punto con id = j dal vettore per riferimento: modificando M modifico quella nel vettore
@@ -528,14 +492,15 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
             double prodScal3 = prodVett3.dot(vecNormaleAfratt);
             double prodScal4 = prodVett4.dot(vecNormaleAfratt);
 
-            if (abs(prodScal2) < tolDefault || abs(prodScal4) < tolDefault) // ovvero se il punto appartiene a una delle due rette individuate dai vettori direttori
+            if (abs(prodScal2) < tolDefault || abs(prodScal4) < tolDefault)
+            // 1) ovvero se il punto appartiene a una delle due rette individuate dai vettori direttori
             {
-                // Caso particolare: devo sdoppiare la sequenza e assegnare 2 e 0 oppure 1 dipende dove sono rispetto alla traccia non passante
-                // solito controllo se sono a destra o a sinistra della traccia non passante
+                // L'assegnazione della sequenza dipende dalla casistica
                 Vector3d prodVett = vec1.cross(vec2);
                 double prodScal = prodVett.dot(vecNormaleAfratt);
+                //1.1) punto appartiene anche alla traccia non passante
                 if (abs(prodScal)< 1e-14) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia non passante
-                // in particolare se è un estremo della traccia non passante
+                // sarà in particolare un estremo della traccia non passante
                 {
                     // duplico le sequenze e assegno sia 0,1
                     if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
@@ -558,6 +523,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
                     }
                 }
                 else if( prodScal < 0)
+                //1.2) ovvero il punto è da un lato rispetto alla traccia non passante
                 {
                     // duplico le sequenze e assegno sia 1 che 2
                     if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
@@ -581,6 +547,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
 
                 }
                 else
+                // 1.3) ovvero il punto è dall'altro lato rispetto alla traccia non passante
                 {
                     // duplico le sequenze e assegno sia 0 che 2
                     if (M.cols() == 0)  //la matrice è ancora vuota: è la prima volta che "pesco" il punto
@@ -603,8 +570,9 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
                     }
                 }
             }
-            // fine caso particolare
-            else if (prodScal1*prodScal2<0 || prodScal3*prodScal4<0 ) // ovvero se il punto è fuori dall'area di influenza della traccia non passante
+            //2) il punto è fuori dall'area di influenza della traccia non passante
+            else if (prodScal1*prodScal2<0 || prodScal3*prodScal4<0 )
+
             {
                 // assegno 2 alla sequenza (convenzione)
                 unsigned int numCols;
@@ -614,7 +582,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
                 }
                 else
                 {
-                    numCols = M.cols(); //conto le colonne
+                    numCols = M.cols();
                     RowVectorXd nuovaRiga = RowVectorXd::Ones(numCols)*2; // creo vettore riga di tutti 2
                     MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
 
@@ -624,11 +592,10 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
                     M = MatriceDiSupporto;
                 }
             }
-            else // siamo interni all'area di influenza della traccia non passante
+            // 3) siamo interni all'area di influenza della traccia non passante
+            else
             {
                 // assegno 0 o 1 o entrambi sdoppiando come già fatto nel caso passante
-
-                ///////////////////////////////////////////////////////////////////////////////////////////
                 Vector3d prodVett = vec1.cross(vec2);
                 double prodScal = prodVett.dot(vecNormaleAfratt);
                 if (abs(prodScal)< 1e-14) //prodScal = 0 se e solo se prodVett = 0 se e solo se punto appartiene alla traccia
@@ -663,7 +630,7 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
                     }
                     else
                     {
-                        numCols = M.cols(); //conto le colonne
+                        numCols = M.cols();
                         RowVectorXd nuovaRiga = RowVectorXd::Ones(numCols); // creo vettore riga di tutti 1
                         MatrixXd MatriceDiSupporto(M.rows() + 1, numCols);
 
@@ -703,8 +670,6 @@ void Creazioni_Sequenze_NONPassanti(const Fractures& fracture, Polygons& sottoPo
 }
 
   
-// quando si chiama (nel main) è già stato fatto il controllo e sono stati trovato tutti i vertici con la stessa sequenza,
-// inoltre si è incrementato il numero di Cell2D
 void Creo_sottopoligono(unsigned int num_fracture, unsigned int num_sottopoligono,list<unsigned int> listaIdVertici, Polygons& sottopoligono, Fractures& fracture){
 
     vector<unsigned int> estremi(listaIdVertici.begin(), listaIdVertici.end()); // trasformo la lista in un vector

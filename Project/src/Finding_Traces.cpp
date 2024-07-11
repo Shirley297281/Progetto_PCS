@@ -24,7 +24,7 @@ void CalcoloTracce(Fractures& fracture, Traces& trace)
     // sovrastima ragionevole basata sul numero massimo di combinazioni di fratture = binomiale
     const unsigned int estimatedNumTraces = (fracture.NumFractures * (fracture.NumFractures - 1)) * 0.5;
     // Stima del numero di tracce: uso la sovrastima perchè riservare troppo spazio in anticipo può sprecare memoria,
-    //  ma le operazioni di inserimento saranno efficienti. se SOTTOSTIMASSI dovrei gestire riallocazioni multiple (tempo++)
+    // ma le operazioni di inserimento saranno efficienti. se SOTTOSTIMASSI dovrei gestire riallocazioni multiple (tempo++)
 
     // Riserva di spazio per migliorare l'efficienza delle allocazioni di memoria
     trace.IdTraces.reserve(estimatedNumTraces);
@@ -222,14 +222,10 @@ int distinzioneTipoTraccia1(Traces& trace, const vector<Vector3d>& vecI, const v
         return 2; //controllo se ci sono casistiche non considerate
     }
 
-
-    //controllo TIPS
-
     // distinzioneTipoTraccia2(fracture, trace, i, j)<<endl;
 
     int pass = 0;
 
-    //evitiamo cancellazione numerica con la sottrazione?
     if (abs(idpar[0][1]- idpar[1][1]) < tolDefault && abs(idpar[2][1]- idpar[3][1]) < tolDefault){ //passante per entrambe le fratture
 
         pass = 0;
@@ -362,7 +358,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
 
         double freeParP0 = 0.0; // parametro libero che corrisponde al Punto0
 
-        //presupponendo che le fratture non siano degeneri
+        // presupponendo che le fratture non siano degeneri
         for (int i=0;i<3;i++)
         {
             if (abs(V2[i]-V1[i])>tolDefault)
@@ -372,7 +368,7 @@ unsigned int Calcolo_par(Vector3d& t, Vector3d& Point, int i, vector<Vector3d>& 
             }
         }
 
-        //valuto Punto0, V1 e V2 nella retta passante per i due vertici
+        // valuto Punto0, V1 e V2 nella retta passante per i due vertici
         // (P=s*(V2-V1)+V1 ad esempio) e calcolo il valore che assume il parametro libero per ognuno
 
         double freeParV1 = 0;

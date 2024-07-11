@@ -17,11 +17,11 @@ namespace GeometryLibrary {
 struct Fractures{
     unsigned int NumFractures = 0;
     vector<unsigned int> IdFractures ; //vettore con Id fratture
-    vector<MatrixXd> CoordinatesVertice ; // matrice con coordinate dei vertici (ogni colonna individua un vertice)
-    vector<double> lenghtMaxEdges = {} ; // vettore di lunghezza massima per ogni frattura
+    vector<MatrixXd> CoordinatesVertice ; // matrice con coordinate dei vertici
+    vector<double> lenghtMaxEdges = {} ; // vettore di lato con lunghezza massima per ogni frattura
     vector<array<double, 3>> baricentro = {}; // vettore baricentro per ogni frattura
-    vector<Vector3d> vettoreNormalePiano = {}; // vettore di versori per ogni frattura (i,j,k)
-    vector<unsigned int> numVertices = {}; //numero vertici per ogni poligono
+    vector<Vector3d> vettoreNormalePiano = {}; // vettore di vettori normali al piano di giacenza per ogni frattura
+    vector<unsigned int> numVertices = {}; //numero vertici per ogni frattura
 
     Fractures() = default;
     Fractures(const vector<unsigned int> IdFractures,
@@ -41,9 +41,9 @@ struct Traces{
     //Per ogni traccia memorizzo i due id delle fratture
     vector<array<unsigned int,2>> IdsFractures;
 
-    // Per ogni frattura, elenco delle tracce passanti assegnate
+    // Per ogni frattura, elenco delle tracce passanti
     vector<vector<unsigned int>> TraceIdsPassxFracture;
-    // Per ogni frattura, elenco delle tracce non passanti assegnate
+    // Per ogni frattura, elenco delle tracce non passanti
     vector<vector<unsigned int>> TraceIdsNoPassxFracture;
 
     Traces() = default;
@@ -58,8 +58,7 @@ struct Traces{
 // 2^PARTE
 struct Polygons{
 
-    // from Cell0
-    // number of cell0D
+    /// Cell0D
     unsigned int NumberCell0D = 0;
     // Id of each point in mesh
     vector<unsigned int> Cell0DId = {};
@@ -70,35 +69,24 @@ struct Polygons{
     map<unsigned int, list<unsigned int>> Cell0DMarkers = {};
 
 
-    // from Cell1D
-    // number of cell1D
+    /// Cell1D
     unsigned int NumberCell1D = 0;
-    // Id of each edge in mesh
     vector<unsigned int> Cell1DId = {};
-    // two vertices Id of each edge (origin and end)
-    vector<Vector2i> Cell1DVertices = {};
+    vector<Vector2i> Cell1DVertices = {};  // per ogni lato coppia id vertici
 
 
-    // from Cell2D
-    // number of Cell2D
+    /// Cell2D
     unsigned int NumberCell2D= 0;
-    // Id of each polygon in mesh
     vector<unsigned int> Cell2DId = {};
-    // number of polygon's vertices
-    list<unsigned int> NumberVertices = {};
-    // vertices Id of each polygon
-    vector<vector<unsigned int>> Cell2DVertices = {};
-    // number of polygon's edges
-    list<unsigned int> NumberEdges  = {};
-    // edges Id of each polygon
-    vector<vector<unsigned int>> Cell2DEdges = {};
+    list<unsigned int> NumberVertices = {};  // numero vertici per poligono
+    vector<vector<unsigned int>> Cell2DVertices = {};       // Per ogni poligono gli id dei vertici
+    list<unsigned int> NumberEdges  = {};   // numero lati per poligono
 
-    // strutture di supporto
+    vector<vector<unsigned int>> Cell2DEdges = {};  // Per ogni poligono gli id dei lati
+
+    // strutture di supporto utilizzate nella parte 2
     vector<MatrixXd> SequenzeXpunto;
-    /// numCol = numSequenze (=num sottopoligoni)
-    /// numRow = numTraces
     vector<Vector3d> CoordinatesPunto;
-    /// servono per valutare se ogni punto è a destra o sinistra della traccia
 
 
     void GedimInterface(vector<vector<unsigned int>>& triangles,
