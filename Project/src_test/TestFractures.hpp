@@ -192,7 +192,7 @@ TEST(TestdistinzioneTipoTraccia1, Test_2coindenteExtremes) // 4^ caso
     unsigned int j = 1;
     int sol;
     sol = distinzioneTipoTraccia1( trace, vecI, vecJ, Point, t, i, j);
-    EXPECT_EQ(sol, 3); // il test fallisce probabilmente da quello che viene implementato alla riga 182 (quando entra nell'if per stabilire passanti e non le cose già non funzionano)
+    EXPECT_EQ(sol, 3);
 }
 
 TEST(TestdistinzioneTipoTraccia1, Test_2notpass) // 5^ caso

@@ -10,7 +10,7 @@ using namespace std;
 using namespace Eigen;
 
 
-// inline function to implement vectorial product
+// Funzione per implementare il prodotto vettoriale
 inline Vector3d vec_product(Vector3d& v1, Vector3d& v2){
 
     Vector3d v = {};
@@ -29,7 +29,7 @@ inline double euclidean_distance(const Vector3d& a, const Vector3d& b) {
                 (a(2) - b(2)) * (a(2) - b(2)));
 }
 
-
+// Funzione per aggiornare le strutture per le tracce
 inline void inserimento_map(int pass, unsigned int idpar, GeometryLibrary::Traces& trace) {
     if (pass == 0) {
         // Assicurati che il vettore interno esista
@@ -49,7 +49,7 @@ inline void inserimento_map(int pass, unsigned int idpar, GeometryLibrary::Trace
     }
 }
 
-// Funzione inline per calcolare che un punto sia combinazione convessa di altri due
+// Funzione controllare se un punto è combinazione convessa di altri due
 inline bool combinazione_convessa(Vector3d v1, Vector3d v2, Vector3d p){
     double alpha = 0;
     for (int i=0;i<3;i++) //presupponiamo che le fratture non siano degeneri
@@ -69,8 +69,8 @@ inline bool combinazione_convessa(Vector3d v1, Vector3d v2, Vector3d p){
 
 }
 
-// Funzione per controllare se mi serve memorizzare un punto o se è già presente (PARTE 2)
-///Controllo se Punto0 è presente in VettoreCoordianteIn0D --> retruna true se l'inserimento non è ancora avvenuto e false se è già avvenuto
+// Funzione usata per la memorizzazione di Cell0D in parte 2 per controllare se un punto è già esistente nella struttura dove si vuole memorizzare
+///Controllo se Punto0 è presente in VettoreCoordianteIn0D --> return true se l'inserimento non è ancora avvenuto e false se è già avvenuto
 inline bool checkInserimento(const Vector3d Punto0, const vector<Vector3d>& VettoreCoordinateIn0D){
     // Vettore Coordinate lo passiamo in referenza perchè potrebbe essere "grande" e quindi sarebbe oneroso fare una copia
     bool presente = false;
@@ -92,6 +92,9 @@ inline bool checkInserimento(const Vector3d Punto0, const vector<Vector3d>& Vett
     return presente;
 }
 
+// Funzione usata per l'aggiornamento di Cell0D nella memorizzazione di Cell0D in parte 2.
+// aggiorna il numero di Cell0D,aggiunge id, coordinate e marker nel dizionario dei marker
+// aggiunge una matrice matrice che corrisponde al nuovo id inserito in SequenzeXpunto
 inline void addAndPrintPoint(GeometryLibrary::Polygons& sottoPoligono, map<unsigned int, list<unsigned int>>& markerDiz, const Vector3d& coordinates, unsigned int markerKey) {
     unsigned int NumPuntiFinora = sottoPoligono.NumberCell0D;
     sottoPoligono.NumberCell0D = NumPuntiFinora + 1;
@@ -105,25 +108,6 @@ inline void addAndPrintPoint(GeometryLibrary::Polygons& sottoPoligono, map<unsig
     MatrixXd M(0, 0); // matrice vuota di dimensione
     sottoPoligono.SequenzeXpunto.push_back(M);
     markerDiz[markerKey].push_back(NumPuntiFinora); // marker con chiave markerKey
-
-    bool foundidpunto = false;
-
-    // Itera attraverso la mappa
-    for (const auto& pair : markerDiz) {
-        const unsigned int key = pair.first;
-        const list<unsigned int>& values = pair.second;
-
-        // Cerca l'ID del punto nella lista dei valori
-        if (find(values.begin(), values.end(), sottoPoligono.Cell0DId[NumPuntiFinora]) != values.end()) {
-            cout << key << endl;
-            foundidpunto = true;
-            break; // Esci dal ciclo una volta trovato l'ID
-        }
-    }
-
-    if (!foundidpunto) {
-        cout << "ID del punto " << sottoPoligono.Cell0DId[NumPuntiFinora] << " non trovato nella mappa." << endl;
-    }
 }
 
 
